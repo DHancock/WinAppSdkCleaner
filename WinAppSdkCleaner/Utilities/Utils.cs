@@ -33,12 +33,5 @@ internal static class Utils
     {
         return $"Build: {pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
     }
-
-    internal static Rect ValidateRestoreBounds(Rect restoreBounds)
-    {
-        // TODO: multi monitor support
-        
-        return restoreBounds;
-    }
 }
 
