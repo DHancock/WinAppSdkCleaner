@@ -12,7 +12,17 @@ internal abstract class PackageItemBase : ItemBase
     }
 
     public override string HeadingText => Model.IsWinAppSdkName(Package.Id) ? Package.Description : Package.DisplayName ;
-    public override string ToolTipText => string.IsNullOrEmpty(Package.Description) ? PackageFullName : Package.Description;
+    public override string ToolTipText
+    {
+        get
+        {
+            if (Model.IsWinAppSdkName(Package.Id))
+                return Package.Id.FullName;
+
+            return string.IsNullOrEmpty(Package.Description) ? PackageFullName : Package.Description;
+        }
+    }
+
     public string PackageFullName => Package.Id.FullName;
     public ImageSource Logo
     {
