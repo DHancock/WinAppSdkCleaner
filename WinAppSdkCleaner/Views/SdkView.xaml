@@ -14,6 +14,9 @@
         <local:ViewCommand x:Key="Rescan"/>
         <local:ViewCommand x:Key="Remove"/>
         <local:ViewCommand x:Key="Copy"/>
+
+        <SolidColorBrush x:Key="SelectedFocusedTextColour" Color="White"/>
+        <SolidColorBrush x:Key="SelectedUnFocusedTextColour" Color="Gray"/>
     </UserControl.Resources>
     
     <Grid>
@@ -51,8 +54,15 @@
                         </Grid>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
-                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="white"/>
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedFocusedTextColour}"/>
                             </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True"/>
+                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
+                            </MultiDataTrigger>
                         </HierarchicalDataTemplate.Triggers>
                     </HierarchicalDataTemplate>
 
@@ -60,8 +70,15 @@
                         <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,0,0"/>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
-                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="white"/>
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedFocusedTextColour}"/>
                             </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True"/>
+                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
+                            </MultiDataTrigger>
                         </HierarchicalDataTemplate.Triggers>
                     </HierarchicalDataTemplate>
                     
@@ -76,8 +93,15 @@
                         </Grid>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
-                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="white"/>
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedFocusedTextColour}"/>
                             </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True"/>
+                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
+                            </MultiDataTrigger>
                         </HierarchicalDataTemplate.Triggers>
                     </HierarchicalDataTemplate>
                 </TreeView.Resources>
