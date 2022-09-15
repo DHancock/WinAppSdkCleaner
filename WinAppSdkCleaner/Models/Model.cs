@@ -247,7 +247,7 @@ internal sealed class Model
     {
         try
         {
-            string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/versions.json";
+            string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
             return await httpClient.GetStringAsync(path);
         }
         catch (Exception ex)
