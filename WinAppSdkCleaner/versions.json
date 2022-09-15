@@ -1,0 +1,182 @@
+[
+  {
+    "Description": "1.0.0 - experimental 1",
+    "Release": {
+      "Major": 0,
+      "Minor": 218,
+      "Build": 840,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.0 - preview 1",
+    "Release": {
+      "Major": 0,
+      "Minor": 258,
+      "Build": 2116,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.0 - preview 2",
+    "Release": {
+      "Major": 0,
+      "Minor": 272,
+      "Build": 1934,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.0 - preview 3",
+    "Release": {
+      "Major": 0,
+      "Minor": 297,
+      "Build": 2018,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.0",
+    "Release": {
+      "Major": 0,
+      "Minor": 319,
+      "Build": 455,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.1",
+    "Release": {
+      "Major": 1,
+      "Minor": 440,
+      "Build": 209,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.2",
+    "Release": {
+      "Major": 2,
+      "Minor": 460,
+      "Build": 358,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.3",
+    "Release": {
+      "Major": 3,
+      "Minor": 469,
+      "Build": 1654,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.0.4",
+    "Release": {
+      "Major": 4,
+      "Minor": 528,
+      "Build": 1755,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.0 - preview 1",
+    "Release": {
+      "Major": 1000,
+      "Minor": 447,
+      "Build": 2307,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.0 - preview 2",
+    "Release": {
+      "Major": 1000,
+      "Minor": 468,
+      "Build": 658,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.0 - preview 3",
+    "Release": {
+      "Major": 1000,
+      "Minor": 485,
+      "Build": 2229,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.0",
+    "Release": {
+      "Major": 1000,
+      "Minor": 516,
+      "Build": 2156,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.1",
+    "Release": {
+      "Major": 1001,
+      "Minor": 524,
+      "Build": 1918,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.2",
+    "Release": {
+      "Major": 1002,
+      "Minor": 543,
+      "Build": 1943,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.3",
+    "Release": {
+      "Major": 1003,
+      "Minor": 565,
+      "Build": 600,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.4",
+    "Release": {
+      "Major": 1004,
+      "Minor": 584,
+      "Build": 2120,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.1.5",
+    "Release": {
+      "Major": 1005,
+      "Minor": 616,
+      "Build": 1651,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.2.220727.1 - experimental 1",
+    "Release": {
+      "Major": 2000,
+      "Minor": 572,
+      "Build": 710,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "1.2.220902.1 - preview 1",
+    "Release": {
+      "Major": 2000,
+      "Minor": 609,
+      "Build": 1413,
+      "Revision": 0
+    }
+  }
+]

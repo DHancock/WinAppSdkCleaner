@@ -1,0 +1,41 @@
+﻿<Window x:Class="WinAppSdkCleaner.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WinAppSdkCleaner.Views"
+        xmlns:vm="clr-namespace:WinAppSdkCleaner.ViewModels"
+        mc:Ignorable="d"
+        Title="Windows Application Sdk Cleaner"
+        Width="650"
+        Height="395"
+        MinWidth="600"
+        MinHeight="395"
+        FontSize="{StaticResource FontSizeNormal}"
+        ResizeMode="CanResizeWithGrip">
+    
+    <Window.DataContext>
+        <vm:ViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+        <TabControl Focusable="False">
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem">
+                    <Setter Property="Padding" Value="10,2" />
+                </Style>
+            </TabControl.ItemContainerStyle>
+
+            <TabItem Header="_Packages">
+                <local:SdkView/>
+            </TabItem>
+            <TabItem Header="_Settings">
+                <local:SettingsView/>
+            </TabItem>
+            <TabItem Header="_About">
+                <local:AboutView/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
+

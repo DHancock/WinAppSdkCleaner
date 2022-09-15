@@ -1,0 +1,125 @@
+﻿<UserControl x:Class="WinAppSdkCleaner.Views.SdkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WinAppSdkCleaner.Views"
+             xmlns:vm="clr-namespace:WinAppSdkCleaner.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             DataContext="{Binding SdkViewModel, Mode=OneTime}">
+    
+    <UserControl.Resources>
+        <local:ViewCommand x:Key="Rescan"/>
+        <local:ViewCommand x:Key="Remove"/>
+        <local:ViewCommand x:Key="Copy"/>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.RowSpan="2" Margin="20,20,20,10" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TreeView ItemsSource="{Binding SdkList, Mode=OneWay}" SelectedItemChanged="SelectedTreeViewItemChanged">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                        <Setter Property="IsEnabled" Value="{Binding IsEnabled, Mode=OneWay}"/>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type vm:SdkItem}" ItemsSource="{Binding Children, Mode=OneWay}">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" FontWeight="SemiBold" Foreground="Blue"/>
+                        </Grid>
+                        <HierarchicalDataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="white"/>
+                            </DataTrigger>
+                        </HierarchicalDataTemplate.Triggers>
+                    </HierarchicalDataTemplate>
+
+                    <HierarchicalDataTemplate DataType="{x:Type vm:DependentsItem}" ItemsSource="{Binding Children, Mode=OneWay}">
+                        <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,0,0"/>
+                        <HierarchicalDataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="white"/>
+                            </DataTrigger>
+                        </HierarchicalDataTemplate.Triggers>
+                    </HierarchicalDataTemplate>
+                    
+                    <HierarchicalDataTemplate DataType="{x:Type vm:ItemBase}" ItemsSource="{Binding Children, Mode=OneWay}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Image Height="16" Source="{Binding Logo, Mode=OneTime}"/>
+                            <TextBlock Grid.Column="1" x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,0,0"/>
+                        </Grid>
+                        <HierarchicalDataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
+                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="white"/>
+                            </DataTrigger>
+                        </HierarchicalDataTemplate.Triggers>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+
+                <TreeView.ContextMenu>
+                    <ContextMenu>
+                        <ContextMenu.InputBindings>
+                            <KeyBinding Command="{StaticResource Copy}" Modifiers="Control" Key="C"/>
+                            <KeyBinding Command="{StaticResource Remove}" Key="Delete"/>
+                        </ContextMenu.InputBindings>
+                        <MenuItem Header="Copy" Command="{StaticResource Copy}" InputGestureText="Ctrl+C">
+                            <MenuItem.Icon>
+                                <TextBlock Text="&#xE16F;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator/>
+                        <MenuItem Header="Delete" Command="{StaticResource Remove}" InputGestureText="DEL">
+                            <MenuItem.Icon>
+                                <Path Data="M3,3 L13,13 M3,13 L13,3" Stroke="Red" StrokeThickness="1.25" Width="16" Height="16"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </TreeView.ContextMenu>
+                <TreeView.InputBindings>
+                    <KeyBinding Command="{StaticResource Copy}" Modifiers="Control" Key="C"/>
+                    <KeyBinding Command="{StaticResource Remove}" Key="Delete"/>
+                </TreeView.InputBindings>
+            </TreeView>
+            <ProgressBar Grid.Row="1" Height="3" HorizontalAlignment="Stretch" x:Name="BusyIndicator" IsIndeterminate="false" Background="Transparent" BorderThickness="0"/>
+        </Grid>
+
+        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom" Margin="0,20,20,40">
+            <StackPanel.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="0,15,0,0"/>
+                </Style>
+            </StackPanel.Resources>
+
+            <Button Content="Rescan" Command="{StaticResource Rescan}"/>
+            <Button Content="Remove" Command="{StaticResource Remove}"/>
+        </StackPanel>
+
+    </Grid>
+</UserControl>
+
