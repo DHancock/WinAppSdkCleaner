@@ -34,7 +34,10 @@ public partial class MainWindow : Window
                 Width = bounds.Width;
                 Height = bounds.Height;
 
-                WindowState = Settings.Data.WindowState;
+                if (Settings.Data.WindowState == WindowState.Minimized)
+                    WindowState = WindowState.Normal;
+                else
+                    WindowState = Settings.Data.WindowState;
             }
         };
 
@@ -57,7 +60,7 @@ public partial class MainWindow : Window
             // convert to device pixels
             source.CompositionTarget.TransformToDevice.Transform(pIn);
 
-            RECT windowArea = new RECT((int)pIn[0].X, (int)pIn[0].Y, (int)pIn[1].X, (int)pIn[1].Y);
+            RECT windowArea = ConvertToRECT(pIn[0], pIn[1]);
 
             HMONITOR hMonitor = PInvoke.MonitorFromRect(windowArea, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
 
@@ -94,6 +97,19 @@ public partial class MainWindow : Window
         }
 
         return restoreBounds;
+    }
+
+    private static RECT ConvertToRECT(Point topLeft, Point bottomRight)
+    {
+        RECT outRECT = new RECT();
+
+        // avoids accumulating rounding errors
+        outRECT.top = Convert.ToInt32(topLeft.Y);
+        outRECT.left = Convert.ToInt32(topLeft.X);
+        outRECT.bottom = outRECT.top + Convert.ToInt32(bottomRight.Y - topLeft.Y);
+        outRECT.right = outRECT.left + Convert.ToInt32(bottomRight.X - topLeft.X);
+
+        return outRECT;
     }
 }
 
