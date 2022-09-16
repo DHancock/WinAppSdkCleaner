@@ -48,11 +48,7 @@ internal sealed class SdkViewModel : INotifyPropertyChanged
             if (packages.Count > 0)
             {
                 await Model.Remove(packages);
-
-                if (Settings.Data.AlwaysRescanAfterRemove)
-                    await ExecuteRescan();
-                else
-                    SdkList.Delete(packages);
+                await ExecuteRescan();
             }
         }
         catch 

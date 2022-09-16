@@ -74,43 +74,7 @@ internal class SdkList : ObservableCollection<ItemBase>
         return foundItems;
     }
 
-    private void DeleteItem(ItemBase item)
-    {
-        ItemBase? parent = item.Parent;
-
-        if (parent is not null) 
-        {
-            parent.Children.Remove(item);
-
-            if (parent.Children.Count == 0) // remove if it's an empty container
-            {
-                if (parent is DependentsItem dependentsItem)  
-                {
-                    parent = parent.Parent;
-                    Debug.Assert(parent is not null);
-                    parent.Children.Remove(dependentsItem);
-                }
-                else if (parent is SdkItem)
-                {
-                    this.Remove(parent); 
-                }
-            }
-        }
-    }
-
-    public void Delete(List<Package> packages)
-    {
-        foreach (Package package in packages)
-        {
-            foreach(ItemBase item in FindAllItems(this, package))
-            {
-                DeleteItem(item);
-            }
-        }
-    }
-
     public bool CanRemove() => GetSelectedItem(this) is not null;
-
 
     private void GetCopyData(ItemBase item, int indent, StringBuilder sb)
     {

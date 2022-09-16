@@ -119,11 +119,9 @@
         <TextBlock Text="Scan options:" Style="{StaticResource TitleStyle}"/>
         <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOn}" Content="Prefer local versions file" ToolTip="Try the local file first, fall back to the on line version"/>
         <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOff}" Content="Prefer on line versions file" ToolTip="Try the on line file first, fall back the local file"/>
-        <CheckBox IsChecked="{Binding IncludeUncategorizedVersions}" Content="Include uncategorized versions" ToolTip="Include WindowsAppSdk versions that are not in the versions file"/>
 
         <TextBlock Text="Removal options:" Style="{StaticResource TitleStyle}"/>
-        <CheckBox IsChecked="{Binding RemoveForAllUsers}" Content="Remove for all users" ToolTip="If running elevated (using &quot;Run as Administrator&quot;), remove packages for all users"/>
-        <CheckBox IsChecked="{Binding VerboseTracing}" Content="Verbose trace output" ToolTip="Trace errors when removing packages"/>
+        <CheckBox IsChecked="{Binding RemoveForAllUsers}" Content="Remove for all users (requires elevation)" ToolTip="When using &quot;Run as Administrator&quot;, remove packages for all users"/>
 
         <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
             <TextBlock Text="Time out per package:" Margin="0,10,0,10"/>
@@ -136,6 +134,5 @@
                 Value="{Binding TimeoutPerPackage}" Minimum="5" Maximum="60" 
                 SmallChange="1" LargeChange="5" TickFrequency="1"/>
 
-        <CheckBox IsChecked="{Binding AlwaysRescanAfterRemove}" Content="Always rescan after remove" ToolTip="Perform a rescan after removing packages, rather than just updating the list"/>
     </StackPanel>
 </UserControl>
