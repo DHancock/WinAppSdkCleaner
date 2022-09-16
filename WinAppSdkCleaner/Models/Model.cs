@@ -37,8 +37,7 @@ internal sealed class Model
 
         List<Package> sdkPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty).Where(p => IsWinAppSdkName(p.Id)));
 
-        if (Settings.Data.IncludeUncategorizedVersions)
-            AddUnknownSdkVersions(versions, sdkPackages);
+        AddUnknownSdkVersions(versions, sdkPackages);
 
         foreach (VersionRecord version in versions)
         {
@@ -129,6 +128,7 @@ internal sealed class Model
             startInfo.Arguments = $"Remove-AppxPackage -Package {fullName}";
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardError = true;
 
             if (allUsers)
                 startInfo.Arguments += " -AllUsers";
@@ -137,20 +137,10 @@ internal sealed class Model
 
             Process process = new Process();
 
-            if (Settings.Data.VerboseTracing)
-            {
-                startInfo.RedirectStandardError = true;
-
-                process.StartInfo = startInfo;
-                process.ErrorDataReceived += (s, e) => Trace.WriteLine(e.Data);
-                process.Start();
-                process.BeginErrorReadLine();
-            }
-            else
-            {
-                process.StartInfo = startInfo;
-                process.Start();
-            }
+            process.StartInfo = startInfo;
+            process.ErrorDataReceived += (s, e) => Trace.WriteLine(e.Data);
+            process.Start();
+            process.BeginErrorReadLine();
 
             process.WaitForExit();
         });
@@ -213,8 +203,6 @@ internal sealed class Model
 
         if (versionList.Count > 0)
             versionList.Sort(Utils.VersionRecordComparer);
-        else
-            Settings.Data.IncludeUncategorizedVersions = true;
 
         return versionList;
     }

@@ -12,12 +12,6 @@ internal class SettingsViewModel : INotifyPropertyChanged
         set => Settings.Data.RemoveForAllUsers = value;
     }
 
-    public static bool VerboseTracing
-    {
-        get => Settings.Data.VerboseTracing;
-        set => Settings.Data.VerboseTracing = value;
-    }
-
     public int TimeoutPerPackage
     {
         get => Settings.Data.TimeoutPerPackage;
@@ -26,12 +20,6 @@ internal class SettingsViewModel : INotifyPropertyChanged
             Settings.Data.TimeoutPerPackage = value;
             RaisePropertyChanged(); // to update the associated TextBlock
         }
-    }
-
-    public static bool AlwaysRescanAfterRemove
-    {
-        get => Settings.Data.AlwaysRescanAfterRemove;
-        set => Settings.Data.AlwaysRescanAfterRemove = value;
     }
 
 
@@ -47,12 +35,6 @@ internal class SettingsViewModel : INotifyPropertyChanged
     {
         get => !Settings.Data.PreferLocalVersionsFile;
         set => Settings.Data.PreferLocalVersionsFile = !value;
-    }
-
-    public static bool IncludeUncategorizedVersions
-    {
-        get => Settings.Data.IncludeUncategorizedVersions;
-        set => Settings.Data.IncludeUncategorizedVersions = value;
     }
 
 

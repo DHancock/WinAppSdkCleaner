@@ -46,14 +46,6 @@ internal class Settings : ApplicationSettingsBase
         set => Setter(value);
     }
 
-    [UserScopedSetting]
-    [DefaultSettingValue("True")]
-    public bool IncludeUncategorizedVersions
-    {
-        get => Getter<bool>();
-        set => Setter(value);
-    }
-
     // remove options
 
     [UserScopedSetting]
@@ -65,26 +57,10 @@ internal class Settings : ApplicationSettingsBase
     }
 
     [UserScopedSetting]
-    [DefaultSettingValue("False")]
-    public bool VerboseTracing
-    {
-        get => Getter<bool>();
-        set => Setter(value);
-    }
-
-    [UserScopedSetting]
     [DefaultSettingValue("10")]
     public int TimeoutPerPackage
     {
         get => Getter<int>();
-        set => Setter(value);
-    }
-
-    [UserScopedSetting]
-    [DefaultSettingValue("False")]
-    public bool AlwaysRescanAfterRemove
-    {
-        get => Getter<bool>();
         set => Setter(value);
     }
 
