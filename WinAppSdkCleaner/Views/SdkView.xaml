@@ -110,7 +110,7 @@
                     <ContextMenu>
                         <ContextMenu.InputBindings>
                             <KeyBinding Command="{StaticResource Copy}" Modifiers="Control" Key="C"/>
-                            <KeyBinding Command="{StaticResource Remove}" Key="Delete"/>
+                            <!-- remove is intensionally omitted -->
                         </ContextMenu.InputBindings>
                         <MenuItem Header="Copy" Command="{StaticResource Copy}" InputGestureText="Ctrl+C">
                             <MenuItem.Icon>
@@ -118,7 +118,7 @@
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="Delete" Command="{StaticResource Remove}" InputGestureText="DEL">
+                        <MenuItem Header="Remove" Command="{StaticResource Remove}">
                             <MenuItem.Icon>
                                 <Path Data="M3,3 L13,13 M3,13 L13,3" Stroke="Red" StrokeThickness="1.25" Width="16" Height="16"/>
                             </MenuItem.Icon>
@@ -127,7 +127,7 @@
                 </TreeView.ContextMenu>
                 <TreeView.InputBindings>
                     <KeyBinding Command="{StaticResource Copy}" Modifiers="Control" Key="C"/>
-                    <KeyBinding Command="{StaticResource Remove}" Key="Delete"/>
+                    <!-- remove is intensionally omitted -->
                 </TreeView.InputBindings>
             </TreeView>
             <ProgressBar Grid.Row="1" Height="3" HorizontalAlignment="Stretch" x:Name="BusyIndicator" IsIndeterminate="false" Background="Transparent" BorderThickness="0"/>
