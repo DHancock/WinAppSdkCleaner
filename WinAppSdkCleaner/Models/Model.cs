@@ -180,7 +180,7 @@ internal sealed class Model
             await RemovePackages(packages.Where(p => p.IsFramework).Select(p => p.Id.FullName));
             
             stopwatch.Stop();
-            Trace.WriteLine($"elapsed: {stopwatch.Elapsed.TotalSeconds}");
+            Trace.WriteLine($"elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
     }
   

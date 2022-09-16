@@ -1,13 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
-
-using System.Runtime.InteropServices;
-
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.Security;
-
-
-namespace WinAppSdkCleaner.Utilities;
+﻿namespace WinAppSdkCleaner.Utilities;
 
 internal static class IntegrityLevel
 {

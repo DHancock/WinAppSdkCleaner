@@ -71,11 +71,11 @@ public partial class SdkView : UserControl
         }
     }
 
-    private bool CanRemove(object? param) => viewModel!.CanRemove() && IsIdle;
+    private bool CanRemove(object? param) => IsIdle && viewModel!.CanRemove();
 
     private void ExecuteCopy(object? param) => viewModel!.ExecuteCopy();
 
-    private bool CanCopy(object? param) => viewModel!.CanCopy() && IsIdle;
+    private bool CanCopy(object? param) => IsIdle && viewModel!.CanCopy();
 
     private bool IsIdle
     {
