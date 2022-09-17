@@ -2,12 +2,14 @@
 
 internal sealed class ViewModel
 {
-    public SdkViewModel SdkViewModel { get; init; }
+    public SdkViewModelBase SdkViewModelUser { get; init; }
+    public SdkViewModelBase SdkViewModelProvisioned { get; init; }
     public SettingsViewModel SettingsViewModel { get; init; }
 
     public ViewModel()
     {
-        SdkViewModel = new SdkViewModel();
+        SdkViewModelUser = new SdkViewModelUser();
+        SdkViewModelProvisioned = new SdkViewModelProvisioned();
         SettingsViewModel = new SettingsViewModel();
     }
 }

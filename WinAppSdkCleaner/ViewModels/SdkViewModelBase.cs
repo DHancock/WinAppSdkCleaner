@@ -2,12 +2,19 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal sealed class SdkViewModel : INotifyPropertyChanged
+internal abstract class SdkViewModelBase : INotifyPropertyChanged
 {
     private SdkList sdkList = new SdkList();
+    private readonly Func<Task<List<SdkRecord>>> scan;
+    private readonly Func<List<Package>, Task> remove;
+    private readonly bool isEnabled;
+    public bool IsSelected { private get; set; }
 
-    public SdkViewModel()
+    public SdkViewModelBase(Func<Task<List<SdkRecord>>> scan, Func<List<Package>, Task> remove, bool isEnabled = true)
     {
+        this.scan = scan;
+        this.remove = remove;
+        this.isEnabled = isEnabled;
     }
 
     public SdkList SdkList
@@ -25,9 +32,7 @@ internal sealed class SdkViewModel : INotifyPropertyChanged
     {
         try
         {
-            IList<SdkRecord> sdks = await Model.GetPackageList();
-
-            SdkList newList = new SdkList(sdks);
+            SdkList newList = new SdkList(await scan());
             newList.RestoreState(sdkList);
 
             SdkList = newList;
@@ -39,6 +44,8 @@ internal sealed class SdkViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool CanRescan() => isEnabled && IsSelected;
+
     public async Task ExecuteRemove()
     {
         try
@@ -47,8 +54,7 @@ internal sealed class SdkViewModel : INotifyPropertyChanged
 
             if (packages.Count > 0)
             {
-                await Model.Remove(packages);
-                await ExecuteRescan();
+                await remove(packages);
             }
         }
         catch 
@@ -57,7 +63,7 @@ internal sealed class SdkViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool CanRemove() => sdkList.CanRemove();
+    public bool CanRemove() => isEnabled && IsSelected && sdkList.CanRemove();
 
     public void ExecuteCopy()
     {
@@ -67,7 +73,8 @@ internal sealed class SdkViewModel : INotifyPropertyChanged
             Clipboard.SetText(data);
     }
 
-    public bool CanCopy() => sdkList.CanCopy();
+    public bool CanCopy() => isEnabled && IsSelected && sdkList.CanCopy();
+
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
     {

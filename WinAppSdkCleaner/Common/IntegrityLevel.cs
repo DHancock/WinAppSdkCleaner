@@ -1,4 +1,4 @@
-﻿namespace WinAppSdkCleaner.Utilities;
+﻿namespace WinAppSdkCleaner.Common;
 
 internal static class IntegrityLevel
 {
@@ -15,36 +15,34 @@ internal static class IntegrityLevel
         if (handle == default)
             handle = GetCurrentThreadEffectiveToken();
 
-        SafeFileHandle tokenHandle = new SafeFileHandle(handle, ownsHandle: true); // safe for pseudo handles
+        SafeFileHandle tokenHandle = new SafeFileHandle(handle, ownsHandle: false); // safe for pseudo handles
 
         unsafe
         {
-            PInvoke.GetTokenInformation(tokenHandle, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, IntPtr.Zero.ToPointer(), 0, out uint returnLength);
+            PInvoke.GetTokenInformation(tokenHandle, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, IntPtr.Zero.ToPointer(), 0, out uint size);
 
-            if (returnLength > 0)
+            if (Marshal.GetLastWin32Error() != (int)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+
+            IntPtr param = Marshal.AllocHGlobal((int)size);
+
+            try
             {
-                IntPtr param = Marshal.AllocHGlobal((int)returnLength);
+                if (!PInvoke.GetTokenInformation(tokenHandle, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, param.ToPointer(), size, out size))
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
 
-                try
-                {
-                    if (!PInvoke.GetTokenInformation(tokenHandle, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, param.ToPointer(), returnLength, out returnLength))
-                        throw new Win32Exception(Marshal.GetLastWin32Error());
+                TOKEN_MANDATORY_LABEL tokenLabel = Marshal.PtrToStructure<TOKEN_MANDATORY_LABEL>(param);
 
-                    TOKEN_MANDATORY_LABEL tokenLabel = Marshal.PtrToStructure<TOKEN_MANDATORY_LABEL>(param);
+                Byte count = *PInvoke.GetSidSubAuthorityCount(tokenLabel.Label.Sid);
+                uint integrity = *PInvoke.GetSidSubAuthority(tokenLabel.Label.Sid, (uint)count - 1);
 
-                    Byte count = *PInvoke.GetSidSubAuthorityCount(tokenLabel.Label.Sid);
-                    uint integrity = *PInvoke.GetSidSubAuthority(tokenLabel.Label.Sid, (uint)count - 1);
-
-                    return integrity;
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(param);
-                }
+                return integrity;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(param);
             }
         }
-
-        return PInvoke.SECURITY_MANDATORY_UNTRUSTED_RID;
     }
 
 

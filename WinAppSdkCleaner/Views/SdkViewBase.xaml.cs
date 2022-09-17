@@ -5,16 +5,16 @@ namespace WinAppSdkCleaner.Views;
 /// <summary>
 /// Interaction logic for SdkView.xaml
 /// </summary>
-public partial class SdkView : UserControl
+public partial class SdkViewBase : UserControl
 {
     private readonly ViewCommand rescanCommand;
     private readonly ViewCommand removeCommand;
     private readonly ViewCommand copyCommand;
     
-    private SdkViewModel? viewModel;
+    private SdkViewModelBase? viewModel;
     private bool isIdle = true;
 
-    public SdkView()
+    public SdkViewBase()
     {
         InitializeComponent();
 
@@ -22,8 +22,17 @@ public partial class SdkView : UserControl
         removeCommand = InitialiseCommand("Remove", ExecuteRemove, CanRemove);
         copyCommand = InitialiseCommand("Copy", ExecuteCopy, CanCopy);
 
-        DataContextChanged += (s, e) => viewModel = (SdkViewModel)e.NewValue;
-        Loaded += (s, a) => ExecuteRescan(null);
+        DataContextChanged += (s, e) => viewModel = e.NewValue as SdkViewModelBase;
+
+        Loaded += (s, a) =>
+        {
+            Debug.Assert(viewModel is not null);
+
+            AdjustCommandsState();
+
+            if (CanRescan())
+                ExecuteRescan();
+        };
     }
 
     private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)
@@ -34,7 +43,7 @@ public partial class SdkView : UserControl
         return command;
     }
 
-    public async void ExecuteRescan(object? param)
+    public async void ExecuteRescan(object? param = null)
     {
         try
         {
@@ -51,7 +60,7 @@ public partial class SdkView : UserControl
         }
     }
 
-    private bool CanRescan(object? param) => IsIdle;
+    private bool CanRescan(object? param = null) => IsIdle && viewModel!.CanRescan();
 
     private async void ExecuteRemove(object? param)
     {
@@ -63,10 +72,10 @@ public partial class SdkView : UserControl
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            await viewModel!.ExecuteRescan();
         }
         finally
         {
+            await viewModel!.ExecuteRescan();
             IsIdle = true;
         }
     }

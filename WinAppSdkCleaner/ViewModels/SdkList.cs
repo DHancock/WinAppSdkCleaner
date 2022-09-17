@@ -8,7 +8,7 @@ internal class SdkList : ObservableCollection<ItemBase>
     {
     }
 
-    public SdkList(IList<SdkRecord> sdks) : base()
+    public SdkList(List<SdkRecord> sdks) : base()
     {
         foreach (SdkRecord sdk in sdks)
             Add(new SdkItem(sdk));
