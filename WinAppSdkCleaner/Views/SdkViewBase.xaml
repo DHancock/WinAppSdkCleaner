@@ -139,8 +139,8 @@
                 </Style>
             </StackPanel.Resources>
 
-            <Button Content="Rescan" Command="{StaticResource Rescan}"/>
-            <Button Content="Remove" Command="{StaticResource Remove}"/>
+            <Button Content="_Rescan" Command="{StaticResource Rescan}"/>
+            <Button Content="Remo_ve" Command="{StaticResource Remove}"/>
         </StackPanel>
 
     </Grid>
