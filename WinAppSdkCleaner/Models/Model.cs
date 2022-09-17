@@ -1,4 +1,4 @@
-﻿using WinAppSdkCleaner.Utilities;
+﻿using WinAppSdkCleaner.Common;
 
 namespace WinAppSdkCleaner.Models;
 
@@ -30,39 +30,6 @@ internal sealed class Model
         }
     }
 
-    private static IList<SdkRecord> GetPackagesForUser(List<VersionRecord> versions)
-    {
-        List<SdkRecord> sdks = new List<SdkRecord>();
-        PackageManager packageManager = new PackageManager();
-
-        List<Package> sdkPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty).Where(p => IsWinAppSdkName(p.Id)));
-
-        AddUnknownSdkVersions(versions, sdkPackages);
-
-        foreach (VersionRecord version in versions)
-        {
-            // Minor versions of the main, singleton and framework packages get replaced when updated.
-            // The ddlm packages remain, but their dependencies are updated to reference the new frameworks
-
-            List<Package> sdkVersionPackages = sdkPackages.FindAll(p => p.Id.Version == version.Release);
-
-            if (sdkVersionPackages.Count > 0)
-            {
-                List<PackageRecord> sdkPackageRecords = new List<PackageRecord>(sdkVersionPackages.Count);
-
-                foreach (Package package in sdkVersionPackages)
-                {
-                    sdkPackageRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, sdkPackages)));
-                }
-
-                sdks.Add(new SdkRecord(version, sdkPackageRecords));
-            }
-        }
-
-        return sdks;
-    }
-
-
     private static List<PackageRecord> FindPackagesDependingOn(Package source, List<Package> packages)
     {
         List<PackageRecord> dependantRecords = new List<PackageRecord>();
@@ -80,63 +47,72 @@ internal sealed class Model
         return dependantRecords;
     }
 
-    public static Task<IList<SdkRecord>> GetPackageList()
+    public static List<SdkRecord> GetPackages(List<VersionRecord> versions, bool userPackages)
     {
-        return Task.Run(async () => GetPackagesForUser(await GetVersionsList()));
-    }
-
-#if false
-
-    // should work, but occasionally the task never completes
-
-    private async static Task Remove(string packageFullName, bool allUsers)   
-    {
+        List<SdkRecord> sdks = new List<SdkRecord>();
         PackageManager packageManager = new PackageManager();
-        RemovalOptions ro = allUsers ? RemovalOptions.RemoveForAllUsers : RemovalOptions.None;
 
-        DeploymentResult dr = await packageManager.RemovePackageAsync(packageFullName, ro).AsTask();
+        List<Package> sdkPackages;
+        
+        if (userPackages)
+            sdkPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty).Where(p => IsWinAppSdkName(p.Id)));
+        else
+            sdkPackages = new List<Package>(packageManager.FindProvisionedPackages().Where(p => IsWinAppSdkName(p.Id)));
 
-        if (dr.ExtendedErrorCode is not null)
+        if (sdkPackages.Count > 0)
         {
-            Trace.WriteLine(dr.ErrorText);
+            AddUnknownSdkVersions(versions, sdkPackages);
 
-            if (dr.ExtendedErrorCode is System.Runtime.InteropServices.COMException cex)
+            foreach (VersionRecord version in versions)
             {
-                if (cex.HResult == unchecked((int)0x80073CF1))
+                List<Package> sdkVersionPackages = sdkPackages.FindAll(p => p.Id.Version == version.Release);
+
+                if (sdkVersionPackages.Count > 0)
                 {
-                    // package not found, it may have been automatically removed when  
-                    // the last package that depended on it was removed
-                    return;
+                    List<PackageRecord> sdkPackageRecords = new List<PackageRecord>(sdkVersionPackages.Count);
+
+                    foreach (Package package in sdkVersionPackages)
+                    {
+                        sdkPackageRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, sdkPackages)));
+                    }
+
+                    sdks.Add(new SdkRecord(version, sdkPackageRecords));
                 }
             }
-
-            throw new Exception(dr.ErrorText);
         }
+
+        return sdks;
     }
 
-#else
+    public static Task<List<SdkRecord>> GetUserPackages()
+    {
+        return Task.Run(async () => GetPackages(await GetVersionsList(), true));
+    }
 
-    // works well, but is the nuclear option, error handling is limited
+    public static Task<List<SdkRecord>> GetProvisionedPackages()
+    {
+        return Task.Run(async () => GetPackages(await GetVersionsList(), false));
+    }
 
-    private async static Task Remove(string fullName, bool allUsers)  
+    // Works well, but is the nuclear option, error handling is limited.
+    // PackageManager.RemovePackageAsync() occasionally never completes a valid task.
+    // Dism commands for removing provisioned packages are only available via power shell.
+    private async static Task Remove(string args)  
     {
         await Task.Run(() =>
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
+            Trace.WriteLine(args);
 
-            startInfo.FileName = "powershell.exe";
-            startInfo.Arguments = $"Remove-AppxPackage -Package {fullName}";
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardError = true;
-
-            if (allUsers)
-                startInfo.Arguments += " -AllUsers";
-
-            Trace.WriteLine(startInfo.Arguments);
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            {
+                FileName = "powershell.exe",
+                Arguments = args,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardError = true,
+            };
 
             Process process = new Process();
-
             process.StartInfo = startInfo;
             process.ErrorDataReceived += (s, e) => Trace.WriteLine(e.Data);
             process.Start();
@@ -146,9 +122,7 @@ internal sealed class Model
         });
     }
 
-#endif
-
-    private async static Task RemovePackages(IEnumerable<string> packageFullNames)
+    private async static Task RemoveUserPackages(IEnumerable<string> packageFullNames)
     {
         if (packageFullNames.Any())
         {
@@ -160,30 +134,55 @@ internal sealed class Model
 
             foreach (string fullName in packageFullNames)
             {
-                tasks.Add(Remove(fullName, allUsers));
+                if (allUsers)
+                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName} -AllUsers")); 
+                else
+                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName}"));
             }
 
             Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
 
             if (firstOut == timeOut)
-                throw new TimeoutException($"timed out after {milliSeconds / 1000} seconds");
+                throw new TimeoutException($"Removal of user packages timed out after {milliSeconds / 1000} seconds");
         }
     }
 
-    public async static Task Remove(List<Package> packages)
+    public async static Task RemoveUserPackages(List<Package> packages)
     {
         if (packages.Count > 0)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            await RemovePackages(packages.Where(p => !p.IsFramework).Select(p => p.Id.FullName));
-            await RemovePackages(packages.Where(p => p.IsFramework).Select(p => p.Id.FullName));
+            await RemoveUserPackages(packages.Where(p => !p.IsFramework).Select(p => p.Id.FullName));
+            await RemoveUserPackages(packages.Where(p => p.IsFramework).Select(p => p.Id.FullName));
             
             stopwatch.Stop();
-            Trace.WriteLine($"elapsed: {stopwatch.Elapsed.TotalSeconds}");
+            Trace.WriteLine($"user removal completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
     }
-  
+
+    public async static Task RemoveProvisionedPackages(List<Package> packages)
+    {
+        if (packages.Count > 0)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            foreach (Package package in packages)  // Dism commands are strictly one in, one out
+            {
+                Task timeOut = Task.Delay(Settings.Data.TimeoutPerPackage * 1000);
+                Task removal = Remove($"Remove-AppxProvisionedPackage -PackageName {package.Id.FullName} -Online");
+
+                Task firstOut = await Task.WhenAny(removal, timeOut);
+
+                if (firstOut == timeOut)
+                    throw new TimeoutException($"Removal of provisioned packages timed out after {Settings.Data.TimeoutPerPackage} seconds");
+            }
+
+            stopwatch.Stop();
+            Trace.WriteLine($"provisioned removal completed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        }
+    }
+
     private static async Task<List<VersionRecord>> GetVersionsList()
     {
         List<VersionRecord> versionList = new List<VersionRecord>();
@@ -229,8 +228,6 @@ internal sealed class Model
         return text;
     }
 
-
-
     private static async Task<string> ReadAllTextRemote()
     {
         try
@@ -245,7 +242,6 @@ internal sealed class Model
 
         return String.Empty;
     }
-
 
     private static async Task<string> ReadAllTextLocal()
     {

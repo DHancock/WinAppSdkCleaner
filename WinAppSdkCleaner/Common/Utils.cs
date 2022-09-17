@@ -1,6 +1,6 @@
 ﻿using WinAppSdkCleaner.Models;
 
-namespace WinAppSdkCleaner.Utilities;
+namespace WinAppSdkCleaner.Common;
 
 internal static class Utils
 {

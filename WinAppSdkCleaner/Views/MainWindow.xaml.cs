@@ -1,11 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-using WinAppSdkCleaner.Models;
-
-using Windows.ApplicationModel.Activation;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.Graphics.Gdi;
+﻿using WinAppSdkCleaner.Models;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -67,7 +60,7 @@ public partial class MainWindow : Window
             if (hMonitor != 0)
             {
                 MONITORINFO monitorInfo = new MONITORINFO();
-                monitorInfo.cbSize = (uint)Marshal.SizeOf(monitorInfo);
+                monitorInfo.cbSize = (uint)Marshal.SizeOf<MONITORINFO>();
 
                 if (PInvoke.GetMonitorInfo(hMonitor, ref monitorInfo))
                 {
