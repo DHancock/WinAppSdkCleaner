@@ -1,8 +1,4 @@
-﻿using System.Linq;
-
-using WinAppSdkCleaner.Common;
-
-using Windows.Foundation.Metadata;
+﻿using WinAppSdkCleaner.Common;
 
 namespace WinAppSdkCleaner.Models;
 
@@ -34,39 +30,31 @@ internal sealed class Model
         }
     }
 
-
-    // for each sdkpackage go through all packeages checking their dependencies to seee if the sdk is in there.
-
-    // turn it round = for ever package go through dependents and see if they are an sdk and then add to that sdk.
-    // use a dictionary for sdk package look ups
-
-    private static List<PackageRecord> FindPackagesDependingOn(Package source, List<Package> allPackages)
+    private static void AddDependents(Dictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
     {
-        List<PackageRecord> dependantRecords = new List<PackageRecord>();
+        Dictionary<string, PackageRecord> subLookUp = new Dictionary<string, PackageRecord>();
 
-        List<Package> dependants = allPackages.FindAll(p => p.Dependencies.Any(d => d.Id.FullName == source.Id.FullName));
-
-        foreach (Package package in dependants)
+        foreach (Package package in allPackages)
         {
-            dependantRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, allPackages)));
+            foreach (Package dependency in package.Dependencies)
+            {
+                if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageRecord? parentPackageRecord))
+                {
+                    PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), depth);
+                    parentPackageRecord!.PackagesDependantOnThis.Add(dependentPackage);
+
+                    if (!IsWinAppSdkName(package.Id)) // win app sdk is root
+                        subLookUp.Add(package.Id.FullName, dependentPackage);
+                }
+            }
         }
 
-        return dependantRecords;
+        if (subLookUp.Count > 0)
+            AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-
-    // if install provisioned the framework cannot be provisioned so it only installs the others
-    // the framework is added as a user package and because the provisioned packages have dependencies
-    // on it they get installed for that user too.
-    // when deleting provisioned packages should the user dependent packages also be deleted?
-    // (thats the framework package, and using For all users option?) 
     public static List<SdkRecord> GetPackages(List<VersionRecord> versions, bool userPackages)
     {
-        // build 22621 does a lot of the heavy lifting here, not released yet though
-        Debug.Assert(!ApiInformation.IsMethodPresent("Windows.ApplicationModel.Package", "FindRelatedPackages"));
-        Debug.Assert(!ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 15));
-
-
         List<SdkRecord> sdks = new List<SdkRecord>();
         PackageManager packageManager = new PackageManager();
 
@@ -83,10 +71,12 @@ internal sealed class Model
             allPackages = new List<Package>(packageManager.FindProvisionedPackages());
             sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
         }
-        
+
         if (sdkPackages.Count > 0)
         {
             AddUnknownSdkVersions(versions, sdkPackages);
+
+            Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
 
             foreach (VersionRecord version in versions)
             {
@@ -98,17 +88,21 @@ internal sealed class Model
 
                     foreach (Package package in sdkVersionPackages)
                     {
-                        sdkPackageRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, allPackages)));
+                        PackageRecord sdkPackage = new PackageRecord(package, new List<PackageRecord>());
+                        sdkPackageRecords.Add(sdkPackage);
+                        // used to find dependents
+                        sdkLookUpTable.Add(package.Id.FullName, sdkPackage);
                     }
 
                     sdks.Add(new SdkRecord(version, sdkPackageRecords));
                 }
             }
+
+            AddDependents(sdkLookUpTable, allPackages, 1);
         }
 
         return sdks;
     }
-
 
     public static Task<List<SdkRecord>> GetUserPackages()
     {
