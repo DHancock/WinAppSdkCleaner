@@ -1,4 +1,8 @@
-﻿using WinAppSdkCleaner.Common;
+﻿using System.Linq;
+
+using WinAppSdkCleaner.Common;
+
+using Windows.Foundation.Metadata;
 
 namespace WinAppSdkCleaner.Models;
 
@@ -30,35 +34,56 @@ internal sealed class Model
         }
     }
 
-    private static List<PackageRecord> FindPackagesDependingOn(Package source, List<Package> packages)
+
+    // for each sdkpackage go through all packeages checking their dependencies to seee if the sdk is in there.
+
+    // turn it round = for ever package go through dependents and see if they are an sdk and then add to that sdk.
+    // use a dictionary for sdk package look ups
+
+    private static List<PackageRecord> FindPackagesDependingOn(Package source, List<Package> allPackages)
     {
         List<PackageRecord> dependantRecords = new List<PackageRecord>();
 
-        if (source.IsFramework)  // only framework packages can have dependents
-        {
-            List<Package> dependants = packages.FindAll(p => p.Dependencies.Any(d => d.Id.FullName == source.Id.FullName));
+        List<Package> dependants = allPackages.FindAll(p => p.Dependencies.Any(d => d.Id.FullName == source.Id.FullName));
 
-            foreach (Package package in dependants)
-            {
-                dependantRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, packages)));
-            }
+        foreach (Package package in dependants)
+        {
+            dependantRecords.Add(new PackageRecord(package, new List<PackageRecord>()));// FindPackagesDependingOn(package, allPackages)));
         }
 
         return dependantRecords;
     }
 
+
+    // if install provisioned the framework cannot be provisioned so it only installs the others
+    // the framework is added as a user package and because the provisioned packages have dependencies
+    // on it they get installed for that user too.
+    // when deleting provisioned packages should the user dependent packages also be deleted?
+    // (thats the framework package, and using For all users option?) 
     public static List<SdkRecord> GetPackages(List<VersionRecord> versions, bool userPackages)
     {
+        // build 22621 does a lot of the heavy lifting here, not released yet though
+        Debug.Assert(!ApiInformation.IsMethodPresent("Windows.ApplicationModel.Package", "FindRelatedPackages"));
+        Debug.Assert(!ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 15));
+
+
         List<SdkRecord> sdks = new List<SdkRecord>();
         PackageManager packageManager = new PackageManager();
 
+        List<Package> allPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty));
         List<Package> sdkPackages;
-        
-        if (userPackages)
-            sdkPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty).Where(p => IsWinAppSdkName(p.Id)));
-        else
-            sdkPackages = new List<Package>(packageManager.FindProvisionedPackages().Where(p => IsWinAppSdkName(p.Id)));
 
+        if (userPackages)
+        {
+            allPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty));
+            sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
+        }
+        else
+        {
+            allPackages = new List<Package>(packageManager.FindProvisionedPackages());
+            sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
+        }
+        
         if (sdkPackages.Count > 0)
         {
             AddUnknownSdkVersions(versions, sdkPackages);
@@ -73,7 +98,7 @@ internal sealed class Model
 
                     foreach (Package package in sdkVersionPackages)
                     {
-                        sdkPackageRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, sdkPackages)));
+                        sdkPackageRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, allPackages)));
                     }
 
                     sdks.Add(new SdkRecord(version, sdkPackageRecords));
@@ -84,20 +109,20 @@ internal sealed class Model
         return sdks;
     }
 
+
     public static Task<List<SdkRecord>> GetUserPackages()
     {
-        return Task.Run(async () => GetPackages(await GetVersionsList(), true));
+        return Task.Run(async () => GetPackages(await GetVersionsList(), userPackages: true));
     }
 
     public static Task<List<SdkRecord>> GetProvisionedPackages()
     {
-        return Task.Run(async () => GetPackages(await GetVersionsList(), false));
+        return Task.Run(async () => GetPackages(await GetVersionsList(), userPackages: false));
     }
 
     // Works well, but is the nuclear option, error handling is limited.
     // PackageManager.RemovePackageAsync() occasionally never completes a valid task.
-    // Dism commands for removing provisioned packages are only available via power shell.
-    private async static Task Remove(string args)  
+    private async static Task Remove(string args)
     {
         await Task.Run(() =>
         {
@@ -135,7 +160,7 @@ internal sealed class Model
             foreach (string fullName in packageFullNames)
             {
                 if (allUsers)
-                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName} -AllUsers")); 
+                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName} -AllUsers"));
                 else
                     tasks.Add(Remove($"Remove-AppxPackage -Package {fullName}"));
             }
@@ -155,7 +180,7 @@ internal sealed class Model
 
             await RemoveUserPackages(packages.Where(p => !p.IsFramework).Select(p => p.Id.FullName));
             await RemoveUserPackages(packages.Where(p => p.IsFramework).Select(p => p.Id.FullName));
-            
+
             stopwatch.Stop();
             Trace.WriteLine($"user removal completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
@@ -250,7 +275,7 @@ internal sealed class Model
             string path = Path.Join(Path.GetDirectoryName(typeof(App).Assembly.Location), "versions.json");
             return await File.ReadAllTextAsync(path);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Trace.WriteLine(ex.Message);
         }
