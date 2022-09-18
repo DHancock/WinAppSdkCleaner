@@ -48,7 +48,7 @@ internal sealed class Model
 
         foreach (Package package in dependants)
         {
-            dependantRecords.Add(new PackageRecord(package, new List<PackageRecord>()));// FindPackagesDependingOn(package, allPackages)));
+            dependantRecords.Add(new PackageRecord(package, FindPackagesDependingOn(package, allPackages)));
         }
 
         return dependantRecords;
@@ -70,7 +70,7 @@ internal sealed class Model
         List<SdkRecord> sdks = new List<SdkRecord>();
         PackageManager packageManager = new PackageManager();
 
-        List<Package> allPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty));
+        List<Package> allPackages;
         List<Package> sdkPackages;
 
         if (userPackages)
