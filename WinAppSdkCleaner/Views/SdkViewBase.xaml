@@ -139,7 +139,7 @@
                 </Style>
             </StackPanel.Resources>
 
-            <Button Content="_Search" Command="{StaticResource Search}"/>
+            <Button Content="S_earch" Command="{StaticResource Search}"/>
             <Button Content="Remo_ve" Command="{StaticResource Remove}"/>
         </StackPanel>
 
