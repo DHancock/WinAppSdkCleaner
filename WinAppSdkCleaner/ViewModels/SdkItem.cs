@@ -14,6 +14,8 @@ internal sealed class SdkItem : ItemBase
 
         foreach (PackageRecord packageRecord in packageInfo.SdkPackages)
             Children.Add(new SdkPackageItem(packageRecord, this));
+
+        Children.Sort((x, y) => string.Compare(x.HeadingText, y.HeadingText, StringComparison.CurrentCulture));
     }
 
     public override string HeadingText => $"WinAppSdk {version.Description}";
