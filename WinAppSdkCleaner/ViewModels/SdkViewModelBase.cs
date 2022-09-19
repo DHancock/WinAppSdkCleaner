@@ -5,14 +5,14 @@ namespace WinAppSdkCleaner.ViewModels;
 internal abstract class SdkViewModelBase : INotifyPropertyChanged
 {
     private SdkList sdkList = new SdkList();
-    private readonly Func<Task<List<SdkRecord>>> scan;
+    private readonly Func<Task<List<SdkRecord>>> search;
     private readonly Func<List<Package>, Task> remove;
     private readonly bool isEnabled;
     public bool IsSelected { private get; set; }
 
-    public SdkViewModelBase(Func<Task<List<SdkRecord>>> scan, Func<List<Package>, Task> remove, bool isEnabled = true)
+    public SdkViewModelBase(Func<Task<List<SdkRecord>>> search, Func<List<Package>, Task> remove, bool isEnabled = true)
     {
-        this.scan = scan;
+        this.search = search;
         this.remove = remove;
         this.isEnabled = isEnabled;
     }
@@ -28,11 +28,11 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
         }
     }
 
-    public async Task ExecuteRescan()
+    public async Task ExecuteSearch()
     {
         try
         {
-            SdkList newList = new SdkList(await scan());
+            SdkList newList = new SdkList(await search());
             newList.RestoreState(sdkList);
 
             SdkList = newList;
@@ -44,7 +44,7 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
         }
     }
 
-    public bool CanRescan() => isEnabled && IsSelected;
+    public bool CanSearch() => isEnabled && IsSelected;
 
     public async Task ExecuteRemove()
     {

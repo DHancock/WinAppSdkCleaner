@@ -1,4 +1,5 @@
-﻿using WinAppSdkCleaner.ViewModels;
+﻿using WinAppSdkCleaner.Models;
+using WinAppSdkCleaner.ViewModels;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -7,7 +8,7 @@ namespace WinAppSdkCleaner.Views;
 /// </summary>
 public partial class SdkViewBase : UserControl
 {
-    private readonly ViewCommand rescanCommand;
+    private readonly ViewCommand searchCommand;
     private readonly ViewCommand removeCommand;
     private readonly ViewCommand copyCommand;
     
@@ -18,7 +19,7 @@ public partial class SdkViewBase : UserControl
     {
         InitializeComponent();
 
-        rescanCommand = InitialiseCommand("Rescan", ExecuteRescan, CanRescan);
+        searchCommand = InitialiseCommand("Search", ExecuteSearch, CanSearch);
         removeCommand = InitialiseCommand("Remove", ExecuteRemove, CanRemove);
         copyCommand = InitialiseCommand("Copy", ExecuteCopy, CanCopy);
 
@@ -30,8 +31,8 @@ public partial class SdkViewBase : UserControl
 
             AdjustCommandsState();
 
-            if (CanRescan())
-                ExecuteRescan();
+            if (Settings.Data.AutoSearchWhenSwitchingTabs && CanSearch())
+                ExecuteSearch();
         };
     }
 
@@ -43,12 +44,12 @@ public partial class SdkViewBase : UserControl
         return command;
     }
 
-    public async void ExecuteRescan(object? param = null)
+    public async void ExecuteSearch(object? param = null)
     {
         try
         {
             IsIdle = false;
-            await viewModel!.ExecuteRescan();
+            await viewModel!.ExecuteSearch();
         }
         catch (Exception ex)
         {
@@ -60,7 +61,7 @@ public partial class SdkViewBase : UserControl
         }
     }
 
-    private bool CanRescan(object? param = null) => IsIdle && viewModel!.CanRescan();
+    private bool CanSearch(object? param = null) => IsIdle && viewModel!.CanSearch();
 
     private async void ExecuteRemove(object? param)
     {
@@ -75,7 +76,7 @@ public partial class SdkViewBase : UserControl
         }
         finally
         {
-            await viewModel!.ExecuteRescan();
+            await viewModel!.ExecuteSearch();
             IsIdle = true;
         }
     }
@@ -100,7 +101,7 @@ public partial class SdkViewBase : UserControl
 
     private void AdjustCommandsState()
     {
-        rescanCommand.RaiseCanExecuteChanged();
+        searchCommand.RaiseCanExecuteChanged();
         removeCommand.RaiseCanExecuteChanged();
         copyCommand.RaiseCanExecuteChanged();
     }

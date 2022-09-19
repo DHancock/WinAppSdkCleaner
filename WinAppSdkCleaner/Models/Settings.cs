@@ -36,11 +36,19 @@ internal class Settings : ApplicationSettingsBase
         set => Setter(value);
     }
 
-    // discovery options 
+    // search options 
 
     [UserScopedSetting]
     [DefaultSettingValue("False")]
     public bool PreferLocalVersionsFile
+    {
+        get => Getter<bool>();
+        set => Setter(value);
+    }
+
+    [UserScopedSetting]
+    [DefaultSettingValue("False")]
+    public bool AutoSearchWhenSwitchingTabs
     {
         get => Getter<bool>();
         set => Setter(value);
