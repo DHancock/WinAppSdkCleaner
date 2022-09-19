@@ -11,7 +11,7 @@ internal abstract class ItemBase : INotifyPropertyChanged
         Parent = parent;
     }
 
-    public ObservableCollection<ItemBase> Children { get; } = new ObservableCollection<ItemBase>();
+    public List<ItemBase> Children { get; } = new List<ItemBase>();
     public abstract string HeadingText { get; }
     public abstract string ToolTipText { get; }
     public ItemBase? Parent { get; init; }
