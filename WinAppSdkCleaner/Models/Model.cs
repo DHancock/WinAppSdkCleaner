@@ -41,7 +41,7 @@ internal sealed class Model
                 if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageRecord? parentPackageRecord))
                 {
                     PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), depth);
-                    parentPackageRecord!.PackagesDependantOnThis.Add(dependentPackage);
+                    parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                     if (package.IsFramework)
                         subLookUp.Add(package.Id.FullName, dependentPackage);

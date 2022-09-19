@@ -6,7 +6,7 @@ internal sealed class SdkPackageItem : PackageItemBase
 {
     public SdkPackageItem(PackageRecord packageRecord, SdkItem parent) : base(packageRecord.Package, parent)
     {
-        if (packageRecord.PackagesDependantOnThis.Count > 0)
+        if (packageRecord.PackagesDependentOnThis.Count > 0)
             Children.Add(new DependentsItem(packageRecord, this));
     }
 

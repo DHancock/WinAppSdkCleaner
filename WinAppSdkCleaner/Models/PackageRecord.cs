@@ -1,3 +1,3 @@
 ﻿namespace WinAppSdkCleaner.Models;
 
-internal record class PackageRecord(Package Package, List<PackageRecord> PackagesDependantOnThis, int Depth = 0);
+internal record class PackageRecord(Package Package, List<PackageRecord> PackagesDependentOnThis, int Depth = 0);
