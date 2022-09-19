@@ -1,4 +1,5 @@
-﻿using WinAppSdkCleaner.ViewModels;
+﻿using WinAppSdkCleaner.Models;
+using WinAppSdkCleaner.ViewModels;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -30,7 +31,7 @@ public partial class SdkViewBase : UserControl
 
             AdjustCommandsState();
 
-            if (CanSearch())
+            if (Settings.Data.AutoSearchWhenSwitchingTabs && CanSearch())
                 ExecuteSearch();
         };
     }

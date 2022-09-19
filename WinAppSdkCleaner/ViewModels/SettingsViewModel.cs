@@ -37,6 +37,11 @@ internal class SettingsViewModel : INotifyPropertyChanged
         set => Settings.Data.PreferLocalVersionsFile = !value;
     }
 
+    public static bool AutoSearchWhenSwitchingTabs
+    {
+        get => Settings.Data.AutoSearchWhenSwitchingTabs;
+        set => Settings.Data.AutoSearchWhenSwitchingTabs = value;
+    }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
     {
