@@ -6,7 +6,7 @@ internal sealed class DependentsItem : ItemBase
 {
     public DependentsItem(PackageRecord packageRecord, SdkPackageItem parent) : base(parent)
     {
-        foreach (PackageRecord dependentPackage in packageRecord.PackagesDependantOnThis)
+        foreach (PackageRecord dependentPackage in packageRecord.PackagesDependentOnThis)
             Children.Add(new PackageItem(dependentPackage, this));
     }
 

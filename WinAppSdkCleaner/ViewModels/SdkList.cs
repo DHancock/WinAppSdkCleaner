@@ -2,7 +2,7 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal class SdkList : ObservableCollection<ItemBase>
+internal class SdkList : List<ItemBase>
 {
     public SdkList()
     {
@@ -14,7 +14,7 @@ internal class SdkList : ObservableCollection<ItemBase>
             Add(new SdkItem(sdk));
     }
 
-    private static ItemBase? GetSelectedItem(ObservableCollection<ItemBase> items)
+    private static ItemBase? GetSelectedItem(List<ItemBase> items)
     {
         foreach (ItemBase item in items)
         {
@@ -59,7 +59,7 @@ internal class SdkList : ObservableCollection<ItemBase>
         return false;
     }
 
-    private static List<ItemBase> FindAllItems(ObservableCollection<ItemBase> items, Package package)
+    private static List<ItemBase> FindAllItems(List<ItemBase> items, Package package)
     {
         List<ItemBase> foundItems = new List<ItemBase>();
 
@@ -103,7 +103,7 @@ internal class SdkList : ObservableCollection<ItemBase>
 
     public bool CanCopy() => GetSelectedItem(this) is not null;
 
-    private static ItemBase? FindItem(ObservableCollection<ItemBase> list, ItemBase other)
+    private static ItemBase? FindItem(List<ItemBase> list, ItemBase other)
     {
         foreach (ItemBase item in list)
         {
@@ -119,7 +119,7 @@ internal class SdkList : ObservableCollection<ItemBase>
         return null;
     }
 
-    public void RestoreState(ObservableCollection<ItemBase> otherList)
+    public void RestoreState(List<ItemBase> otherList)
     {
         foreach (ItemBase otherItem in otherList)
         {

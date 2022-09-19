@@ -6,7 +6,7 @@ internal class PackageItem : PackageItemBase
 {
     private PackageItem(PackageRecord packageRecord, ItemBase parent) : base(packageRecord.Package, parent)
     {
-        foreach (PackageRecord dependentPackage in packageRecord.PackagesDependantOnThis)
+        foreach (PackageRecord dependentPackage in packageRecord.PackagesDependentOnThis)
             Children.Add(new PackageItem(dependentPackage, this));
     }
 
