@@ -23,7 +23,7 @@ internal class SettingsViewModel : INotifyPropertyChanged
     }
 
 
-    // scan package options 
+    // search package options 
 
     public static bool PreferLocalVersionsFileOn
     {

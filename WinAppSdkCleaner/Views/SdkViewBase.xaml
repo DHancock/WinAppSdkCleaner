@@ -10,7 +10,7 @@
              d:DesignWidth="800">
     
     <UserControl.Resources>
-        <local:ViewCommand x:Key="Rescan"/>
+        <local:ViewCommand x:Key="Search"/>
         <local:ViewCommand x:Key="Remove"/>
         <local:ViewCommand x:Key="Copy"/>
 
@@ -139,7 +139,7 @@
                 </Style>
             </StackPanel.Resources>
 
-            <Button Content="_Rescan" Command="{StaticResource Rescan}"/>
+            <Button Content="_Search" Command="{StaticResource Search}"/>
             <Button Content="Remo_ve" Command="{StaticResource Remove}"/>
         </StackPanel>
 
