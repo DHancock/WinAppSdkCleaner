@@ -43,7 +43,7 @@ internal sealed class Model
                     PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), depth);
                     parentPackageRecord!.PackagesDependantOnThis.Add(dependentPackage);
 
-                    if (!IsWinAppSdkName(package.Id)) // win app sdk is root
+                    if (package.IsFramework)
                         subLookUp.Add(package.Id.FullName, dependentPackage);
                 }
             }
@@ -55,6 +55,7 @@ internal sealed class Model
 
     public static List<SdkRecord> GetPackages(List<VersionRecord> versions, bool userPackages)
     {
+        Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         PackageManager packageManager = new PackageManager();
 
@@ -90,17 +91,21 @@ internal sealed class Model
                     {
                         PackageRecord sdkPackage = new PackageRecord(package, new List<PackageRecord>());
                         sdkPackageRecords.Add(sdkPackage);
-                        // used to find dependents
-                        sdkLookUpTable.Add(package.Id.FullName, sdkPackage);
+                        
+                        if (package.IsFramework)
+                            sdkLookUpTable.Add(package.Id.FullName, sdkPackage); // used to find dependents
                     }
 
                     sdks.Add(new SdkRecord(version, sdkPackageRecords));
                 }
             }
 
-            AddDependents(sdkLookUpTable, allPackages, 1);
+            if (sdkLookUpTable.Count > 0)
+                AddDependents(sdkLookUpTable, allPackages, 1);
         }
+        stopwatch.Stop();
 
+        Trace.WriteLine($"get packages completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
@@ -259,7 +264,7 @@ internal sealed class Model
             Trace.WriteLine(ex.Message);
         }
 
-        return String.Empty;
+        return string.Empty;
     }
 
     private static async Task<string> ReadAllTextLocal()
@@ -274,7 +279,7 @@ internal sealed class Model
             Trace.WriteLine(ex.Message);
         }
 
-        return String.Empty;
+        return string.Empty;
     }
 
     private static JsonSerializerOptions GetSerializerOptions()
