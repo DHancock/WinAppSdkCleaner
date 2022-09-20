@@ -30,16 +30,16 @@ internal class SdkList : List<ItemBase>
         return null;
     }
 
-    public List<Package> GetDistinctSelectedPackages()
+    public List<PackageRecord> GetDistinctSelectedPackages()
     {
-        static List<Package> GetSelectedPackages(ItemBase? item)
+        static List<PackageRecord> GetSelectedPackages(ItemBase? item)
         {
-            List<Package> packages = new List<Package>();
+            List<PackageRecord> packages = new List<PackageRecord>();
 
             if (item is not null)
             {
                 if (item is PackageItemBase packageItem)
-                    packages.Add(packageItem.Package);
+                    packages.Add(packageItem.PackageRecord);
 
                 foreach (ItemBase child in item.Children)
                     packages.AddRange(GetSelectedPackages(child));
@@ -48,30 +48,7 @@ internal class SdkList : List<ItemBase>
             return packages;
         }
 
-        return GetSelectedPackages(GetSelectedItem(this)).DistinctBy(p => p.Id.FullName).ToList();
-    }
-
-    private static bool ItemContainsPackage(ItemBase item, Package package)
-    {
-        if (item is PackageItemBase packageItem)
-            return string.Equals(packageItem.Package.Id.FullName, package.Id.FullName, StringComparison.Ordinal);
-
-        return false;
-    }
-
-    private static List<ItemBase> FindAllItems(List<ItemBase> items, Package package)
-    {
-        List<ItemBase> foundItems = new List<ItemBase>();
-
-        foreach (ItemBase item in items)
-        {
-            if (ItemContainsPackage(item, package))
-                foundItems.Add(item);
-
-            foundItems.AddRange(FindAllItems(item.Children, package));
-        }
-
-        return foundItems;
+        return GetSelectedPackages(GetSelectedItem(this)).DistinctBy(p => p.Package.Id.FullName).ToList();
     }
 
     public bool CanRemove() => GetSelectedItem(this) is SdkItem;

@@ -1,4 +1,6 @@
-﻿using WinAppSdkCleaner.Common;
+﻿using System.Linq;
+
+using WinAppSdkCleaner.Common;
 
 namespace WinAppSdkCleaner.Models;
 
@@ -60,18 +62,13 @@ internal sealed class Model
         PackageManager packageManager = new PackageManager();
 
         List<Package> allPackages;
-        List<Package> sdkPackages;
 
         if (userPackages)
-        {
             allPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty));
-            sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
-        }
         else
-        {
             allPackages = new List<Package>(packageManager.FindProvisionedPackages());
-            sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
-        }
+
+        List<Package> sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
 
         if (sdkPackages.Count > 0)
         {
@@ -103,8 +100,8 @@ internal sealed class Model
             if (sdkLookUpTable.Count > 0)
                 AddDependents(sdkLookUpTable, allPackages, 1);
         }
-        stopwatch.Stop();
 
+        stopwatch.Stop();
         Trace.WriteLine($"get packages completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
@@ -171,30 +168,42 @@ internal sealed class Model
         }
     }
 
-    public async static Task RemoveUserPackages(List<Package> packages)
+    public async static Task RemoveUserPackages(List<PackageRecord> packagesRecords)
     {
-        if (packages.Count > 0)
+        if (packagesRecords.Count > 0)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            await RemoveUserPackages(packages.Where(p => !p.IsFramework).Select(p => p.Id.FullName));
-            await RemoveUserPackages(packages.Where(p => p.IsFramework).Select(p => p.Id.FullName));
+            await RemoveUserPackages(packagesRecords.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName));
+
+            // Now for the frameworks, this is more complicated because there may be
+            // framework packages that depend on other frameworks (assuming that's even possible).
+            List<PackageRecord> frameworks = packagesRecords.Where(p => p.Package.IsFramework).ToList();
+
+            List<int> depths = frameworks.DistinctBy(p => p.Depth).Select(p => p.Depth).ToList();
+            depths.Sort((x, y) => y - x);
+
+            foreach (int depth in depths)
+            {
+                // remove batches of framework packages in order of depth, deepest first
+                await RemoveUserPackages(frameworks.Where(p => p.Depth == depth).Select(p => p.Package.Id.FullName));
+            }
 
             stopwatch.Stop();
             Trace.WriteLine($"user removal completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
     }
 
-    public async static Task RemoveProvisionedPackages(List<Package> packages)
+    public async static Task RemoveProvisionedPackages(List<PackageRecord> packageRecords)
     {
-        if (packages.Count > 0)
+        if (packageRecords.Count > 0)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            foreach (Package package in packages)  // Dism commands are strictly one in, one out
+            foreach (PackageRecord package in packageRecords)  // Dism commands are strictly one in, one out
             {
                 Task timeOut = Task.Delay(Settings.Data.TimeoutPerPackage * 1000);
-                Task removal = Remove($"Remove-AppxProvisionedPackage -PackageName {package.Id.FullName} -Online");
+                Task removal = Remove($"Remove-AppxProvisionedPackage -PackageName {package.Package.Id.FullName} -Online");
 
                 Task firstOut = await Task.WhenAny(removal, timeOut);
 

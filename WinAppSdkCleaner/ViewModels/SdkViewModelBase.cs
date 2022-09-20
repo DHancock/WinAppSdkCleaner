@@ -6,11 +6,11 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
 {
     private SdkList sdkList = new SdkList();
     private readonly Func<Task<List<SdkRecord>>> search;
-    private readonly Func<List<Package>, Task> remove;
+    private readonly Func<List<PackageRecord>, Task> remove;
     private readonly bool isEnabled;
     public bool IsSelected { private get; set; }
 
-    public SdkViewModelBase(Func<Task<List<SdkRecord>>> search, Func<List<Package>, Task> remove, bool isEnabled = true)
+    public SdkViewModelBase(Func<Task<List<SdkRecord>>> search, Func<List<PackageRecord>, Task> remove, bool isEnabled = true)
     {
         this.search = search;
         this.remove = remove;
@@ -50,7 +50,7 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
     {
         try
         {
-            List<Package> packages = sdkList.GetDistinctSelectedPackages();
+            List<PackageRecord> packages = sdkList.GetDistinctSelectedPackages();
 
             if (packages.Count > 0)
             {
