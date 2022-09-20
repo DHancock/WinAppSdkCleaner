@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-using WinAppSdkCleaner.Common;
+﻿using WinAppSdkCleaner.Common;
 
 namespace WinAppSdkCleaner.Models;
 
@@ -233,8 +231,7 @@ internal sealed class Model
             Trace.WriteLine(ex.ToString());
         }
 
-        if (versionList.Count > 0)
-            versionList.Sort(Utils.VersionRecordComparer);
+        versionList.Sort(Utils.VersionRecordComparer);
 
         return versionList;
     }
