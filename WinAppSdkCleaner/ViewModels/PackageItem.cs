@@ -4,7 +4,7 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal class PackageItem : PackageItemBase
 {
-    private PackageItem(PackageRecord packageRecord, ItemBase parent) : base(packageRecord.Package, parent)
+    private PackageItem(PackageRecord packageRecord, ItemBase parent) : base(packageRecord, parent)
     {
         foreach (PackageRecord dependentPackage in packageRecord.PackagesDependentOnThis)
             Children.Add(new PackageItem(dependentPackage, this));

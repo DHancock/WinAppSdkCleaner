@@ -108,7 +108,7 @@
             <Setter Property="Margin" Value="30,10,10,0"/>
         </Style>
         <Style TargetType="CheckBox">
-            <Setter Property="Margin" Value="30, 10, 10, 5"/>
+            <Setter Property="Margin" Value="30, 10, 10, 0"/>
         </Style>
         <Style TargetType="TextBlock">
             <Setter Property="Margin" Value="30,10,10,10"/>

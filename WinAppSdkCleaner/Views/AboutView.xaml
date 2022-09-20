@@ -8,7 +8,7 @@
              d:DesignHeight="450" 
              d:DesignWidth="800">
 
-    <Grid Margin="0,0,0,0">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="3*"/>
@@ -23,7 +23,7 @@
                 <TextBlock x:Name="VersionTextBlock" d:Text="1.2.3.4" TextAlignment="Left"/>
             </StackPanel>
             <TextBlock>
-                <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/dhancock/winappsdkcleaner">GitHub Repository</Hyperlink>
+                <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/DHancock/WinAppSdkCleaner">GitHub Repository</Hyperlink>
             </TextBlock>
         </StackPanel>
     </Grid>

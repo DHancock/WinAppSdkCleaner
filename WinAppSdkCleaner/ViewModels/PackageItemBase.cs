@@ -4,14 +4,16 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal abstract class PackageItemBase : ItemBase
 {
-    public Package Package { get; init; }
+    public PackageRecord PackageRecord { get; init; }
+    public Package Package => PackageRecord.Package;
 
-    public PackageItemBase(Package package, ItemBase parent) : base(parent)
+    public PackageItemBase(PackageRecord packageRecord, ItemBase parent) : base(parent)
     {
-        Package = package;
+        PackageRecord = packageRecord;
     }
 
     public override string HeadingText => Model.IsWinAppSdkName(Package.Id) ? Package.Description : Package.DisplayName ;
+
     public override string ToolTipText
     {
         get
@@ -24,6 +26,7 @@ internal abstract class PackageItemBase : ItemBase
     }
 
     public string PackageFullName => Package.Id.FullName;
+
     public ImageSource Logo
     {
         get
