@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <None Remove="Resources\app_64.png" />
+    <None Remove="Resources\elevated.ico" />
     <None Remove="Resources\unknown.png" />
   </ItemGroup>
 
@@ -37,6 +38,7 @@
 	
   <ItemGroup>
     <Resource Include="Resources\app_64.png" />
+    <Resource Include="Resources\elevated.ico" />
     <Resource Include="Resources\unknown.png" />
   </ItemGroup>
 

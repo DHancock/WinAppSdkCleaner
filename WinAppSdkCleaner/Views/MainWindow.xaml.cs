@@ -1,4 +1,5 @@
-﻿using WinAppSdkCleaner.Models;
+﻿using WinAppSdkCleaner.Common;
+using WinAppSdkCleaner.Models;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -32,6 +33,12 @@ public partial class MainWindow : Window
                 else
                     WindowState = Settings.Data.WindowState;
             }
+        };
+
+        Loaded += (s, a) =>
+        {
+            if (IntegrityLevel.IsElevated())
+                Icon = BitmapFrame.Create(new Uri("pack://application:,,,/resources/elevated.ico"));
         };
 
         Closing += (s, e) =>
