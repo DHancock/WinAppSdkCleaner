@@ -12,7 +12,8 @@
         MinWidth="600"
         MinHeight="395"
         FontSize="{StaticResource FontSizeNormal}"
-        ResizeMode="CanResizeWithGrip">
+        ResizeMode="CanResizeWithGrip"
+        Icon="{Binding WindowIcon}">
 
     <Window.DataContext>
         <vm:ViewModel/>
@@ -26,11 +27,8 @@
                 </Style>
             </TabControl.ItemContainerStyle>
 
-            <TabItem Header="_User Scope" IsSelected="{Binding SdkViewModelUser.IsSelected, Mode=OneWayToSource}">
-                <local:SdkViewUser/>
-            </TabItem>
-            <TabItem Header="_Provisioned" IsSelected="{Binding SdkViewModelProvisioned.IsSelected, Mode=OneWayToSource}">
-                <local:SdkViewProvisioned/>
+            <TabItem Header="{Binding UserSdkTabHeading}">
+                <local:SdkView/>
             </TabItem>
             <TabItem Header="_Settings">
                 <local:SettingsView/>

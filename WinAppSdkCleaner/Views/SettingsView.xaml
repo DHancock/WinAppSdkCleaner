@@ -119,10 +119,8 @@
         <TextBlock Text="Search options:" Style="{StaticResource TitleStyle}"/>
         <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOn}" Content="Prefer local versions file" ToolTip="Try the local file first, fall back to the on line version"/>
         <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOff}" Content="Prefer on line versions file" ToolTip="Try the on line file first, fall back the local file"/>
-        <CheckBox IsChecked="{Binding AutoSearchWhenSwitchingTabs}" Content="Automatically search when switching tabs" ToolTip="When switching to a tab containing packages, automatically perform a new search"/>
 
         <TextBlock Text="Removal options:" Style="{StaticResource TitleStyle}"/>
-        <CheckBox IsChecked="{Binding RemoveForAllUsers}" Content="Remove user packages for all users (requires elevation)" ToolTip="When using &quot;Run as Administrator&quot;, remove packages for all users"/>
 
         <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
             <TextBlock Text="Time out per package:" Margin="0,10,0,10"/>

@@ -2,19 +2,12 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal abstract class SdkViewModelBase : INotifyPropertyChanged
+internal class SdkViewModel : INotifyPropertyChanged
 {
     private SdkList sdkList = new SdkList();
-    private readonly Func<Task<List<SdkRecord>>> search;
-    private readonly Func<List<PackageRecord>, Task> remove;
-    private readonly bool isEnabled;
-    public bool IsSelected { private get; set; }
 
-    public SdkViewModelBase(Func<Task<List<SdkRecord>>> search, Func<List<PackageRecord>, Task> remove, bool isEnabled = true)
+    public SdkViewModel()
     {
-        this.search = search;
-        this.remove = remove;
-        this.isEnabled = isEnabled;
     }
 
     public SdkList SdkList
@@ -32,7 +25,7 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
     {
         try
         {
-            SdkList newList = new SdkList(await search());
+            SdkList newList = new SdkList(await Model.GetPackages());
             newList.RestoreState(sdkList);
 
             SdkList = newList;
@@ -44,8 +37,6 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
         }
     }
 
-    public bool CanSearch() => isEnabled && IsSelected;
-
     public async Task ExecuteRemove()
     {
         try
@@ -54,7 +45,7 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
 
             if (packages.Count > 0)
             {
-                await remove(packages);
+                await Model.RemovePackages(packages);
             }
         }
         catch 
@@ -63,7 +54,7 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
         }
     }
 
-    public bool CanRemove() => isEnabled && IsSelected && sdkList.CanRemove();
+    public bool CanRemove() => sdkList.CanRemove();
 
     public void ExecuteCopy()
     {
@@ -73,7 +64,7 @@ internal abstract class SdkViewModelBase : INotifyPropertyChanged
             Clipboard.SetText(data);
     }
 
-    public bool CanCopy() => isEnabled && IsSelected && sdkList.CanCopy();
+    public bool CanCopy() => sdkList.CanCopy();
 
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")

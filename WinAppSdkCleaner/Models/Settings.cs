@@ -46,23 +46,8 @@ internal class Settings : ApplicationSettingsBase
         set => Setter(value);
     }
 
-    [UserScopedSetting]
-    [DefaultSettingValue("False")]
-    public bool AutoSearchWhenSwitchingTabs
-    {
-        get => Getter<bool>();
-        set => Setter(value);
-    }
 
     // remove options
-
-    [UserScopedSetting]
-    [DefaultSettingValue("False")]
-    public bool RemoveForAllUsers
-    {
-        get => Getter<bool>();
-        set => Setter(value);
-    }
 
     [UserScopedSetting]
     [DefaultSettingValue("10")]

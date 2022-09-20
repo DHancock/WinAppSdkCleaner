@@ -6,12 +6,6 @@ internal class SettingsViewModel : INotifyPropertyChanged
 {
     // remove packages options
 
-    public static bool RemoveForAllUsers
-    {
-        get => Settings.Data.RemoveForAllUsers;
-        set => Settings.Data.RemoveForAllUsers = value;
-    }
-
     public int TimeoutPerPackage
     {
         get => Settings.Data.TimeoutPerPackage;
@@ -35,12 +29,6 @@ internal class SettingsViewModel : INotifyPropertyChanged
     {
         get => !Settings.Data.PreferLocalVersionsFile;
         set => Settings.Data.PreferLocalVersionsFile = !value;
-    }
-
-    public static bool AutoSearchWhenSwitchingTabs
-    {
-        get => Settings.Data.AutoSearchWhenSwitchingTabs;
-        set => Settings.Data.AutoSearchWhenSwitchingTabs = value;
     }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")

@@ -35,12 +35,6 @@ public partial class MainWindow : Window
             }
         };
 
-        Loaded += (s, a) =>
-        {
-            if (IntegrityLevel.IsElevated())
-                Icon = BitmapFrame.Create(new Uri("pack://application:,,,/resources/elevated.ico"));
-        };
-
         Closing += (s, e) =>
         {
             Settings.Data.WindowState = WindowState;

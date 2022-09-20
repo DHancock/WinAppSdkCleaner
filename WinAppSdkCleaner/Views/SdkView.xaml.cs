@@ -6,16 +6,17 @@ namespace WinAppSdkCleaner.Views;
 /// <summary>
 /// Interaction logic for SdkView.xaml
 /// </summary>
-public partial class SdkViewBase : UserControl
+public partial class SdkView : UserControl
 {
     private readonly ViewCommand searchCommand;
     private readonly ViewCommand removeCommand;
     private readonly ViewCommand copyCommand;
-    
-    private SdkViewModelBase? viewModel;
+
+    private bool firstLoad = true;
+    private SdkViewModel? viewModel;
     private bool isIdle = true;
 
-    public SdkViewBase()
+    public SdkView()
     {
         InitializeComponent();
 
@@ -23,7 +24,10 @@ public partial class SdkViewBase : UserControl
         removeCommand = InitialiseCommand("Remove", ExecuteRemove, CanRemove);
         copyCommand = InitialiseCommand("Copy", ExecuteCopy, CanCopy);
 
-        DataContextChanged += (s, e) => viewModel = e.NewValue as SdkViewModelBase;
+        DataContextChanged += (s, e) =>
+        {
+            viewModel = e.NewValue as SdkViewModel;
+        };
 
         Loaded += (s, a) =>
         {
@@ -31,8 +35,11 @@ public partial class SdkViewBase : UserControl
 
             AdjustCommandsState();
 
-            if (Settings.Data.AutoSearchWhenSwitchingTabs && CanSearch())
+            if (firstLoad)
+            {
+                firstLoad = false;
                 ExecuteSearch();
+            }
         };
     }
 
@@ -61,7 +68,7 @@ public partial class SdkViewBase : UserControl
         }
     }
 
-    private bool CanSearch(object? param = null) => IsIdle && viewModel!.CanSearch();
+    private bool CanSearch(object? param = null) => IsIdle;
 
     private async void ExecuteRemove(object? param)
     {

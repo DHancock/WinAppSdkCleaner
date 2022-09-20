@@ -53,7 +53,7 @@ internal sealed class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    public static List<SdkRecord> GetPackages(List<VersionRecord> versions, bool userPackages)
+    private static List<SdkRecord> GetPackages(List<VersionRecord> versions, bool allUsers)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
@@ -61,10 +61,10 @@ internal sealed class Model
 
         List<Package> allPackages;
 
-        if (userPackages)
-            allPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty));
+        if (allUsers)
+            allPackages = new List<Package>(packageManager.FindPackages());
         else
-            allPackages = new List<Package>(packageManager.FindProvisionedPackages());
+            allPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty));
 
         List<Package> sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
 
@@ -104,15 +104,11 @@ internal sealed class Model
         return sdks;
     }
 
-    public static Task<List<SdkRecord>> GetUserPackages()
+    public static Task<List<SdkRecord>> GetPackages()
     {
-        return Task.Run(async () => GetPackages(await GetVersionsList(), userPackages: true));
+        return Task.Run(async () => GetPackages(await GetVersionsList(), allUsers: IntegrityLevel.IsElevated()));
     }
 
-    public static Task<List<SdkRecord>> GetProvisionedPackages()
-    {
-        return Task.Run(async () => GetPackages(await GetVersionsList(), userPackages: false));
-    }
 
     // Works well, but is the nuclear option, error handling is limited.
     // PackageManager.RemovePackageAsync() occasionally never completes a valid task.
@@ -141,13 +137,12 @@ internal sealed class Model
         });
     }
 
-    private async static Task RemoveUserPackages(IEnumerable<string> packageFullNames)
+    private async static Task RemovePackages(IEnumerable<string> packageFullNames, bool allUsers)
     {
         if (packageFullNames.Any())
         {
             List<Task> tasks = new List<Task>();
 
-            bool allUsers = Settings.Data.RemoveForAllUsers && IntegrityLevel.IsElevated();
             int milliSeconds = Settings.Data.TimeoutPerPackage * 1000 * packageFullNames.Count();
             Task timeOut = Task.Delay(milliSeconds);
 
@@ -166,51 +161,34 @@ internal sealed class Model
         }
     }
 
-    public async static Task RemoveUserPackages(List<PackageRecord> packagesRecords)
+    public async static Task RemovePackages(List<PackageRecord> packagesRecords)
     {
         if (packagesRecords.Count > 0)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
+            bool allUsers = IntegrityLevel.IsElevated();
 
-            await RemoveUserPackages(packagesRecords.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName));
+            // when removing for all users, any provisioned packages will also be removed
+            await RemovePackages(packagesRecords.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName), allUsers);
 
             // Now for the frameworks, this is more complicated because there may be
             // framework packages that depend on other frameworks (assuming that's even possible).
             List<PackageRecord> frameworks = packagesRecords.Where(p => p.Package.IsFramework).ToList();
 
-            List<int> depths = frameworks.DistinctBy(p => p.Depth).Select(p => p.Depth).ToList();
-            depths.Sort((x, y) => y - x);
-
-            foreach (int depth in depths)
+            if (frameworks.Count > 0)
             {
-                // remove batches of framework packages in order of depth, deepest first
-                await RemoveUserPackages(frameworks.Where(p => p.Depth == depth).Select(p => p.Package.Id.FullName));
+                List<int> depths = frameworks.DistinctBy(p => p.Depth).Select(p => p.Depth).ToList();
+                depths.Sort((x, y) => y - x);
+
+                foreach (int depth in depths)
+                {
+                    // remove batches of framework packages in order of depth, deepest first
+                    await RemovePackages(frameworks.Where(p => p.Depth == depth).Select(p => p.Package.Id.FullName), allUsers);
+                }
             }
 
             stopwatch.Stop();
-            Trace.WriteLine($"user removal completed: {stopwatch.Elapsed.TotalSeconds} seconds");
-        }
-    }
-
-    public async static Task RemoveProvisionedPackages(List<PackageRecord> packageRecords)
-    {
-        if (packageRecords.Count > 0)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            foreach (PackageRecord package in packageRecords)  // Dism commands are strictly one in, one out
-            {
-                Task timeOut = Task.Delay(Settings.Data.TimeoutPerPackage * 1000);
-                Task removal = Remove($"Remove-AppxProvisionedPackage -PackageName {package.Package.Id.FullName} -Online");
-
-                Task firstOut = await Task.WhenAny(removal, timeOut);
-
-                if (firstOut == timeOut)
-                    throw new TimeoutException($"Removal of provisioned packages timed out after {Settings.Data.TimeoutPerPackage} seconds");
-            }
-
-            stopwatch.Stop();
-            Trace.WriteLine($"provisioned removal completed: {stopwatch.Elapsed.TotalSeconds} seconds");
+            Trace.WriteLine($"remove packages completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
     }
 
