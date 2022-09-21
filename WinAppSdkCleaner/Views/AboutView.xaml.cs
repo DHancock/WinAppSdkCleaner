@@ -9,17 +9,21 @@ public partial class AboutView : UserControl
     {
         InitializeComponent();
 
-        AssemblyName name = typeof(App).Assembly.GetName()!;
+        AssemblyName assemblyName = typeof(App).Assembly.GetName();
 
-        NameTextBlock.Text = name.Name;
-        VersionTextBlock.Text = name.Version!.ToString();
+        NameTextBlock.Text = assemblyName.Name;
+
+        if (assemblyName.Version is not null)
+            VersionTextBlock.Text = assemblyName.Version.ToString();
     }
 
     private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
     {
-        ProcessStartInfo psi = new ProcessStartInfo();
-        psi.FileName = e.Uri.AbsoluteUri;
-        psi.UseShellExecute = true;
+        ProcessStartInfo psi = new ProcessStartInfo()
+        {
+            FileName = e.Uri.AbsoluteUri,
+            UseShellExecute = true,
+        };
 
         Process.Start(psi);
     }
