@@ -7,8 +7,7 @@
              xmlns:vm="clr-namespace:WinAppSdkCleaner.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450"
-             d:DesignWidth="800"
-             DataContext="{Binding SdkViewModel, Mode=OneTime}">
+             d:DesignWidth="800">
     
     <UserControl.Resources>
         <local:ViewCommand x:Key="Search"/>

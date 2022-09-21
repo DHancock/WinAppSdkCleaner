@@ -11,9 +11,9 @@ public partial class SdkView : UserControl
     private readonly ViewCommand searchCommand;
     private readonly ViewCommand removeCommand;
     private readonly ViewCommand copyCommand;
+    private readonly SdkViewModel viewModel;
 
     private bool firstLoad = true;
-    private SdkViewModel? viewModel;
     private bool isIdle = true;
 
     public SdkView()
@@ -24,15 +24,10 @@ public partial class SdkView : UserControl
         removeCommand = InitialiseCommand("Remove", ExecuteRemove, CanRemove);
         copyCommand = InitialiseCommand("Copy", ExecuteCopy, CanCopy);
 
-        DataContextChanged += (s, e) =>
-        {
-            viewModel = e.NewValue as SdkViewModel;
-        };
+        DataContext = viewModel = new SdkViewModel();
 
         Loaded += (s, a) =>
         {
-            Debug.Assert(viewModel is not null);
-
             AdjustCommandsState();
 
             if (firstLoad)
@@ -56,7 +51,7 @@ public partial class SdkView : UserControl
         try
         {
             IsIdle = false;
-            await viewModel!.ExecuteSearch();
+            await viewModel.ExecuteSearch();
         }
         catch (Exception ex)
         {
@@ -75,7 +70,7 @@ public partial class SdkView : UserControl
         try
         {
             IsIdle = false;
-            await viewModel!.ExecuteRemove();
+            await viewModel.ExecuteRemove();
         }
         catch (Exception ex)
         {
@@ -83,16 +78,16 @@ public partial class SdkView : UserControl
         }
         finally
         {
-            await viewModel!.ExecuteSearch();
+            await viewModel.ExecuteSearch();
             IsIdle = true;
         }
     }
 
-    private bool CanRemove(object? param) => IsIdle && viewModel!.CanRemove();
+    private bool CanRemove(object? param) => IsIdle && viewModel.CanRemove();
 
-    private void ExecuteCopy(object? param) => viewModel!.ExecuteCopy();
+    private void ExecuteCopy(object? param) => viewModel.ExecuteCopy();
 
-    private bool CanCopy(object? param) => IsIdle && viewModel!.CanCopy();
+    private bool CanCopy(object? param) => IsIdle && viewModel.CanCopy();
 
     private bool IsIdle
     {
