@@ -1,4 +1,6 @@
-﻿namespace WinAppSdkCleaner.Views;
+﻿using WinAppSdkCleaner.ViewModels;
+
+namespace WinAppSdkCleaner.Views;
 
 /// <summary>
 /// Interaction logic for SettingsView.xaml
@@ -8,5 +10,6 @@ public partial class SettingsView : UserControl
     public SettingsView()
     {
         InitializeComponent();
+        DataContext = new SettingsViewModel();
     }
 }

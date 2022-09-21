@@ -6,8 +6,7 @@
              xmlns:local="clr-namespace:WinAppSdkCleaner.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450"
-             d:DesignWidth="800"
-             DataContext="{Binding SettingsViewModel, Mode=OneTime}">
+             d:DesignWidth="800">
 
     <UserControl.Resources>
 
