@@ -78,8 +78,7 @@ public partial class SdkView : UserControl
         }
         finally
         {
-            await viewModel.ExecuteSearch();
-            IsIdle = true;
+            ExecuteSearch();
         }
     }
 
