@@ -5,6 +5,6 @@
  
  This is a developer only utility. The utility will list all packages that depend on a particular WinAppSdk framework package. If you remove the WinAppSdk that contains it, the code will remove all the dependent packages first. Use at your own risk.
 
- By default, the utility removes packages for the current user. To remove user scoped packages for all users, select the appropriate option in the settings and start the utility in elevated mode using "Run as administrator".
-
- To list and remove provisioned packages, the utility also requires elevation.
+ By default, the utility allows the removal of WinAppSdk packages for the current user. If you installed the WinAppSdk using that user account, removing the WinAppSdk will recover the disc space.
+ 
+ To remove a WinAppSdk that has been provisioned, you have to start the utility elevated (using "Run as administrator"). That will allow the complete removal of a WinAppSdk for all users.
