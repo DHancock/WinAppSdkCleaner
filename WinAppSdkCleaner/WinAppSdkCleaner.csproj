@@ -20,13 +20,6 @@
     <None Remove="Resources\unknown.png" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.2.46-beta">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
 	<Target Name="RemoveDuplicateAnalyzers" BeforeTargets="CoreCompile">
 		<!-- Work around https://github.com/dotnet/wpf/issues/6792 -->
 		<!-- from: https://github.com/dotnet/wpf/issues/6792#issuecomment-1183633402 -->
@@ -36,6 +29,10 @@
 			<Analyzer Include="@(FilteredAnalyzer)" />
 		</ItemGroup>
 	</Target>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\CsWin32Lib\CsWin32Lib.csproj" />
+	</ItemGroup>
 	
   <ItemGroup>
     <Resource Include="Resources\app.ico" />

@@ -1,6 +1,4 @@
-﻿global using Microsoft.Win32.SafeHandles;
-
-global using System;
+﻿global using System;
 global using System.Collections.Generic;
 global using System.ComponentModel;
 global using System.Configuration;
@@ -11,7 +9,6 @@ global using System.Linq;
 global using System.Net.Http;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
-global using System.Runtime.InteropServices;
 global using System.Text;
 global using System.Text.Json;
 global using System.Threading.Tasks;
@@ -23,7 +20,3 @@ global using System.Windows.Media.Imaging;
 
 global using Windows.ApplicationModel;
 global using Windows.Management.Deployment;
-global using Windows.Win32;
-global using Windows.Win32.Foundation;
-global using Windows.Win32.Graphics.Gdi;
-global using Windows.Win32.Security;

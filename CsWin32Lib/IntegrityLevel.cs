@@ -1,11 +1,11 @@
 ﻿namespace WinAppSdkCleaner.Common;
 
-internal static class IntegrityLevel
+public static class IntegrityLevel
 {
 
     // this function isn't available via CsWin32 see:
     // https://github.com/microsoft/win32metadata/issues/436
-    internal static HANDLE GetCurrentThreadEffectiveToken()
+    private static HANDLE GetCurrentThreadEffectiveToken()
     {
         return (HANDLE)new IntPtr(-6);
     }
@@ -21,15 +21,15 @@ internal static class IntegrityLevel
         {
             PInvoke.GetTokenInformation(tokenHandle, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, IntPtr.Zero.ToPointer(), 0, out uint size);
 
-            if (Marshal.GetLastWin32Error() != (int)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+            if (Marshal.GetLastPInvokeError() != (int)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
 
             IntPtr param = Marshal.AllocHGlobal((int)size);
 
             try
             {
                 if (!PInvoke.GetTokenInformation(tokenHandle, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, param.ToPointer(), size, out size))
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    throw new Win32Exception(Marshal.GetLastPInvokeError());
 
                 TOKEN_MANDATORY_LABEL tokenLabel = Marshal.PtrToStructure<TOKEN_MANDATORY_LABEL>(param);
 
@@ -55,9 +55,9 @@ internal static class IntegrityLevel
     // is an administrator.
     // https://microsoft.github.io/AttackSurfaceAnalyzer/api/Microsoft.CST.AttackSurfaceAnalyzer.Utils.Elevation.html#Microsoft_CST_AttackSurfaceAnalyzer_Utils_Elevation_GetProcessIntegrityLevel
 
-    internal static bool IsElevated(HANDLE handle = default)
+    public static bool IsElevated()
     {
-        uint integrityLevel = GetIntegrityLevel(handle);
+        uint integrityLevel = GetIntegrityLevel();
         return integrityLevel >= PInvoke.SECURITY_MANDATORY_HIGH_RID;
     }
 }
