@@ -7,16 +7,13 @@ public static class Monitors
     {
         HMONITOR hMonitor = PInvoke.MonitorFromRect(ConvertToRECT(windowBounds), MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
 
-        if (Marshal.GetLastPInvokeError() != (int)WIN32_ERROR.ERROR_SUCCESS)
-            throw new Win32Exception(Marshal.GetLastPInvokeError());
-
         MONITORINFO monitorInfo = new MONITORINFO();
         monitorInfo.cbSize = (uint)Unsafe.SizeOf<MONITORINFO>();
 
         if (!PInvoke.GetMonitorInfo(hMonitor, ref monitorInfo))
             throw new Win32Exception(Marshal.GetLastPInvokeError());
 
-        return new Rect(monitorInfo.rcWork.X, monitorInfo.rcWork.Y, monitorInfo.rcWork.Width, monitorInfo.rcWork.Height); ;
+        return new Rect(monitorInfo.rcWork.X, monitorInfo.rcWork.Y, monitorInfo.rcWork.Width, monitorInfo.rcWork.Height);
     }
 
     private static RECT ConvertToRECT(Rect input)
