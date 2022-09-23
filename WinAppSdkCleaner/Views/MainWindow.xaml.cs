@@ -1,4 +1,5 @@
 ﻿using WinAppSdkCleaner.Models;
+using CsWin32Lib;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -44,65 +45,48 @@ public partial class MainWindow : Window
 
     internal Rect ValidateRestoreBounds(Rect restoreBounds)
     {
-        PresentationSource? source = PresentationSource.FromVisual(this);
-
-        if (source is not null)
+        try
         {
-            Point[] pIn = new Point[] { new Point(restoreBounds.Left, restoreBounds.Top), new Point(restoreBounds.Right, restoreBounds.Bottom) };
+            PresentationSource? source = PresentationSource.FromVisual(this);
 
-            // convert to device pixels
-            source.CompositionTarget.TransformToDevice.Transform(pIn);
-
-            RECT windowArea = ConvertToRECT(pIn[0], pIn[1]);
-
-            HMONITOR hMonitor = PInvoke.MonitorFromRect(windowArea, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
-
-            if (hMonitor != 0)
+            if (source is not null)
             {
-                MONITORINFO monitorInfo = new MONITORINFO();
-                monitorInfo.cbSize = (uint)Marshal.SizeOf<MONITORINFO>();
+                Point[] pIn = new Point[] { new Point(restoreBounds.Left, restoreBounds.Top), new Point(restoreBounds.Right, restoreBounds.Bottom) };
 
-                if (PInvoke.GetMonitorInfo(hMonitor, ref monitorInfo))
-                {
-                    RECT workingArea = monitorInfo.rcWork;
-                    Point topLeft = pIn[0];
+                // convert to device pixels
+                source.CompositionTarget.TransformToDevice.Transform(pIn);
 
-                    if ((topLeft.Y + windowArea.Height) > workingArea.bottom)
-                        topLeft.Y = workingArea.bottom - windowArea.Height;
+                Rect windowArea = new Rect(pIn[0], pIn[1]);
+                Rect workingArea = Monitors.GetWorkingAreaOfClosestMonitor(windowArea);
 
-                    if (topLeft.Y < workingArea.top)
-                        topLeft.Y = workingArea.top;
+                Point topLeft = pIn[0];
 
-                    if ((topLeft.X + windowArea.Width) > workingArea.right)
-                        topLeft.X = workingArea.right - windowArea.Width;
+                if ((topLeft.Y + windowArea.Height) > workingArea.Bottom)
+                    topLeft.Y = workingArea.Bottom - windowArea.Height;
 
-                    if (topLeft.X < workingArea.left)
-                        topLeft.X = workingArea.left;
+                if (topLeft.Y < workingArea.Top)
+                    topLeft.Y = workingArea.Top;
 
-                    Point[] pOut = new Point[] { topLeft, new Point(topLeft.X + windowArea.Width, topLeft.Y + windowArea.Height) };
+                if ((topLeft.X + windowArea.Width) > workingArea.Right)
+                    topLeft.X = workingArea.Right - windowArea.Width;
 
-                    // convert back to wpf coordinates in dip's
-                    source.CompositionTarget.TransformFromDevice.Transform(pOut);
+                if (topLeft.X < workingArea.Left)
+                    topLeft.X = workingArea.Left;
 
-                    return new Rect(pOut[0], pOut[1]);
-                }
+                Point[] pOut = new Point[] { topLeft, new Point(topLeft.X + windowArea.Width, topLeft.Y + windowArea.Height) };
+
+                // convert back to wpf coordinates in dip's
+                source.CompositionTarget.TransformFromDevice.Transform(pOut);
+
+                return new Rect(pOut[0], pOut[1]);
             }
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex.ToString());
         }
 
         return restoreBounds;
-    }
-
-    private static RECT ConvertToRECT(Point topLeft, Point bottomRight)
-    {
-        RECT outRECT = new RECT();
-
-        // avoids accumulating rounding errors
-        outRECT.top = Convert.ToInt32(topLeft.Y);
-        outRECT.left = Convert.ToInt32(topLeft.X);
-        outRECT.bottom = outRECT.top + Convert.ToInt32(bottomRight.Y - topLeft.Y);
-        outRECT.right = outRECT.left + Convert.ToInt32(bottomRight.X - topLeft.X);
-
-        return outRECT;
     }
 }
 
