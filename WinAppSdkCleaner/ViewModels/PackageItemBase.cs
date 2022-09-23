@@ -44,7 +44,7 @@ internal abstract class PackageItemBase : ItemBase
             }
             catch (Exception ex)
             {
-                Debug.Fail(ex.Message);
+                Trace.WriteLine(ex.ToString());
             }
 
             return new BitmapImage(new Uri("pack://application:,,,/resources/unknown.png"));

@@ -245,7 +245,7 @@ internal sealed class Model
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.Message);
+            Trace.WriteLine(ex.ToString());
         }
 
         return string.Empty;
@@ -260,7 +260,7 @@ internal sealed class Model
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.Message);
+            Trace.WriteLine(ex.ToString());
         }
 
         return string.Empty;
