@@ -1,4 +1,4 @@
-﻿namespace WinAppSdkCleaner.Common;
+﻿namespace CsWin32Lib;
 
 public static class IntegrityLevel
 {
@@ -57,7 +57,16 @@ public static class IntegrityLevel
 
     public static bool IsElevated()
     {
-        uint integrityLevel = GetIntegrityLevel();
-        return integrityLevel >= PInvoke.SECURITY_MANDATORY_HIGH_RID;
+        try
+        {
+            uint integrityLevel = GetIntegrityLevel();
+            return integrityLevel >= PInvoke.SECURITY_MANDATORY_HIGH_RID;
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex.ToString());
+        }
+
+        return false;
     }
 }
