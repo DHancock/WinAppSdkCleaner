@@ -104,20 +104,16 @@
         </Style>
 
         <Style TargetType="RadioButton">
-            <Setter Property="Margin" Value="30,10,10,0"/>
+            <Setter Property="Margin" Value="30,10,0,0"/>
         </Style>
-        <Style TargetType="CheckBox">
-            <Setter Property="Margin" Value="30, 10, 10, 0"/>
-        </Style>
-        <Style TargetType="TextBlock">
-            <Setter Property="Margin" Value="30,10,10,10"/>
-        </Style>
+
     </UserControl.Resources>
 
     <StackPanel Orientation="Vertical">
         <TextBlock Text="Search options:" Style="{StaticResource TitleStyle}"/>
-        <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOn}" Content="Prefer local versions file" ToolTip="Try the local file first, fall back to the on line version"/>
-        <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOff}" Content="Prefer on line versions file" ToolTip="Try the on line file first, fall back the local file"/>
+
+        <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOn}" Content="Prefer _local versions.json file" ToolTip="Try the local file first, fall back to the on line version"/>
+        <RadioButton GroupName="rbg1" IsChecked="{Binding PreferLocalVersionsFileOff}" Content="Prefer _on line versions.json file" ToolTip="Try the on line file first, fall back the local file"/>
 
         <TextBlock Text="Removal options:" Style="{StaticResource TitleStyle}"/>
 
