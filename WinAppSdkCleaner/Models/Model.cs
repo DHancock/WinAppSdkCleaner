@@ -1,4 +1,5 @@
-﻿using WinAppSdkCleaner.Common;
+﻿using CsWin32Lib;
+using WinAppSdkCleaner.Common;
 
 namespace WinAppSdkCleaner.Models;
 
