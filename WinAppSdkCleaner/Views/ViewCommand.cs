@@ -12,10 +12,10 @@ internal sealed class ViewCommand : ICommand
 
     public void Execute(object? parameter)
     {
-        if (ExecuteProc is not null)
-            ExecuteProc(parameter);
-        else 
-            throw new NotImplementedException();
+        if (ExecuteProc is null)
+            throw new NotImplementedException(nameof(ExecuteProc));
+
+        ExecuteProc(parameter);
     }
 
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
