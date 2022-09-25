@@ -1,5 +1,23 @@
 [
   {
+    "Description": "0.8.0 - preview",
+    "Release": {
+      "Major": 8000,
+      "Minor": 146,
+      "Build": 628,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.0",
+    "Release": {
+      "Major": 8000,
+      "Minor": 167,
+      "Build": 1906,
+      "Revision": 0
+    }
+  },
+  {
     "Description": "1.0.0 - experimental 1",
     "Release": {
       "Major": 0,
