@@ -11,8 +11,10 @@ internal sealed class Model
     public static bool IsWinAppSdkName(PackageId id)
     {
         return id.PublisherId == "8wekyb3d8bbwe" &&
-                    (id.FamilyName.Contains("winappruntime", StringComparison.OrdinalIgnoreCase) ||
-                    id.FamilyName.Contains("windowsappruntime", StringComparison.OrdinalIgnoreCase));
+                    (id.FullName.Contains("WinAppRuntime", StringComparison.OrdinalIgnoreCase) ||
+                    id.FullName.Contains("WindowsAppRuntime", StringComparison.OrdinalIgnoreCase) ||
+                    id.FullName.StartsWith("Microsoft.WindowsAppSDK", StringComparison.Ordinal) ||  // for 1.0.0 experimental 1 only
+                    id.FullName.Contains("ProjectReunion", StringComparison.OrdinalIgnoreCase));  
     }
 
     private static void AddUnknownSdkVersions(List<VersionRecord> versions, List<Package> sdkPackages)
@@ -26,8 +28,6 @@ internal sealed class Model
                 PackageVersion pv = package.Id.Version;
                 versions.Add(new VersionRecord(Utils.ConvertToString(pv), pv));
             }
-
-            versions.Sort(Utils.VersionRecordComparer);
         }
     }
 
@@ -209,8 +209,6 @@ internal sealed class Model
         {
             Trace.WriteLine(ex.ToString());
         }
-
-        versionList.Sort(Utils.VersionRecordComparer);
 
         return versionList;
     }

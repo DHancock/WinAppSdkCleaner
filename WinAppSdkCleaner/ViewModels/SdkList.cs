@@ -12,6 +12,8 @@ internal class SdkList : List<ItemBase>
     {
         foreach (SdkRecord sdk in sdks)
             Add(new SdkItem(sdk));
+
+        Sort((x, y) => string.Compare(x.HeadingText, y.HeadingText, StringComparison.CurrentCulture));
     }
 
     private static ItemBase? GetSelectedItem(List<ItemBase> items)
