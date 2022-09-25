@@ -9,6 +9,4 @@ internal sealed class SdkPackageItem : PackageItemBase
         if (packageRecord.PackagesDependentOnThis.Count > 0)
             Children.Add(new DependentsItem(packageRecord, this));
     }
-
-    public override string ToolTipText => Package.Id.FullName;
 }

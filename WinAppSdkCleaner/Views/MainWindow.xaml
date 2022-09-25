@@ -27,7 +27,7 @@
                 </Style>
             </TabControl.ItemContainerStyle>
 
-            <TabItem Header="{Binding UserSdkTabHeading}">
+            <TabItem Header="{Binding SdkTabHeading}">
                 <local:SdkView/>
             </TabItem>
             <TabItem Header="_Settings">
