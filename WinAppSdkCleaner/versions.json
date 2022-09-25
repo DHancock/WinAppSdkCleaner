@@ -1,5 +1,68 @@
 [
   {
+    "Description": "0.1.0",
+    "Release": {
+      "Major": 0,
+      "Minor": 12012,
+      "Build": 9000,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.5.0 - prerelease",
+    "Release": {
+      "Major": 0,
+      "Minor": 52103,
+      "Build": 9000,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.5.0",
+    "Release": {
+      "Major": 0,
+      "Minor": 52103,
+      "Build": 25000,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.5.5",
+    "Release": {
+      "Major": 0,
+      "Minor": 52104,
+      "Build": 15000,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.5.6",
+    "Release": {
+      "Major": 0,
+      "Minor": 52104,
+      "Build": 23000,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.5.7",
+    "Release": {
+      "Major": 0,
+      "Minor": 52105,
+      "Build": 10000,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.5.9",
+    "Release": {
+      "Major": 0,
+      "Minor": 52107,
+      "Build": 26000,
+      "Revision": 0
+    }
+  },
+  {
     "Description": "0.8.0 - preview",
     "Release": {
       "Major": 8000,
@@ -14,6 +77,123 @@
       "Major": 8000,
       "Minor": 167,
       "Build": 1906,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.1",
+    "Release": {
+      "Major": 8001,
+      "Minor": 186,
+      "Build": 2159,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.2",
+    "Release": {
+      "Major": 8002,
+      "Minor": 222,
+      "Build": 1805,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.3",
+    "Release": {
+      "Major": 8003,
+      "Minor": 236,
+      "Build": 617,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.4",
+    "Release": {
+      "Major": 8004,
+      "Minor": 256,
+      "Build": 1745,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.5",
+    "Release": {
+      "Major": 8005,
+      "Minor": 278,
+      "Build": 2204,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.6 - preview 1",
+    "Release": {
+      "Major": 8006,
+      "Minor": 312,
+      "Build": 210,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.6",
+    "Release": {
+      "Major": 8006,
+      "Minor": 337,
+      "Build": 137,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.7 - preview 1",
+    "Release": {
+      "Major": 8007,
+      "Minor": 392,
+      "Build": 1938,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.7",
+    "Release": {
+      "Major": 8007,
+      "Minor": 444,
+      "Build": 1739,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.8",
+    "Release": {
+      "Major": 8008,
+      "Minor": 474,
+      "Build": 6,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.10",
+    "Release": {
+      "Major": 8010,
+      "Minor": 517,
+      "Build": 1632,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.11",
+    "Release": {
+      "Major": 8011,
+      "Minor": 562,
+      "Build": 1742,
+      "Revision": 0
+    }
+  },
+  {
+    "Description": "0.8.12",
+    "Release": {
+      "Major": 8012,
+      "Minor": 576,
+      "Build": 2303,
       "Revision": 0
     }
   },
