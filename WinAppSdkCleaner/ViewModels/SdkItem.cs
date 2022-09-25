@@ -1,5 +1,4 @@
-﻿using WinAppSdkCleaner.Common;
-using WinAppSdkCleaner.Models;
+﻿using WinAppSdkCleaner.Models;
 
 namespace WinAppSdkCleaner.ViewModels;
 
@@ -19,7 +18,7 @@ internal sealed class SdkItem : ItemBase
     }
 
     public override string HeadingText => $"WinAppSdk {version.Description}";
-    public override string ToolTipText => Utils.ConvertToString(version.Release);
+    public override string ToolTipText => Model.ConvertToString(version.Release);
 
     // ignores any children, it's only used to identify this tree node
     public static bool operator ==(SdkItem? x, SdkItem? y)
