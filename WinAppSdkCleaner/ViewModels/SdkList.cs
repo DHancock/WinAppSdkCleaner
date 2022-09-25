@@ -53,27 +53,28 @@ internal class SdkList : List<ItemBase>
 
     public bool CanRemove() => GetSelectedItem(this) is SdkItem;
 
-    private void GetCopyData(ItemBase item, int indent, StringBuilder sb)
-    {
-        if (indent > 0)
-            sb.Append(new string(' ', indent * 4));
 
-        if (item is PackageItemBase packageItem)
-            sb.AppendLine(packageItem.PackageFullName);
-        else
-            sb.AppendLine(item.HeadingText);
-
-        foreach (ItemBase child in item.Children)
-            GetCopyData(child, indent + 1, sb);
-    }
 
     public string GetCopyData()
     {
-        StringBuilder sb = new StringBuilder();
-        ItemBase? selectedItem = GetSelectedItem(this);
+        static void GetCopyData(ItemBase item, int indent, StringBuilder sb)
+        {
+            sb.Append(new string(' ', indent * 4));
 
-        if (selectedItem is not null)
-            GetCopyData(selectedItem, 0, sb);
+            if (item is PackageItemBase packageItem)
+                sb.AppendLine(packageItem.Package.Id.FullName);
+            else
+                sb.AppendLine(item.HeadingText);
+
+            foreach (ItemBase child in item.Children)
+                GetCopyData(child, indent + 1, sb);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        ItemBase? item = GetSelectedItem(this);
+
+        if (item is not null)
+            GetCopyData(item, 0, sb);
 
         return sb.ToString();
     }

@@ -55,7 +55,7 @@ public partial class SdkView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Search Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -74,7 +74,7 @@ public partial class SdkView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
