@@ -28,8 +28,6 @@ internal sealed class Model
                 PackageVersion pv = package.Id.Version;
                 versions.Add(new VersionRecord(Utils.ConvertToString(pv), pv));
             }
-
-            versions.Sort(Utils.VersionRecordComparer);
         }
     }
 
@@ -211,8 +209,6 @@ internal sealed class Model
         {
             Trace.WriteLine(ex.ToString());
         }
-
-        versionList.Sort(Utils.VersionRecordComparer);
 
         return versionList;
     }
