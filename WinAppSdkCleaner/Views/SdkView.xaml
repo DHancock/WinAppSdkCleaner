@@ -28,7 +28,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.RowSpan="2" Margin="20,20,20,10" >
+        <Grid Grid.RowSpan="2" Margin="20,20,20,10" SnapsToDevicePixels="true">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>

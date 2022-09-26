@@ -60,7 +60,7 @@ internal class Settings : ApplicationSettingsBase
 
     private T Getter<T>([CallerMemberName] string name = "") => (T)this[name];
 
-    private void Setter<T>(T value, [CallerMemberName] string name = "") => this[name] = value;
+    private void Setter(object value, [CallerMemberName] string name = "") => this[name] = value;
 
     public override void Save()
     {
