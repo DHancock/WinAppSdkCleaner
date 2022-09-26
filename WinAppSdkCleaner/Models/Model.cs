@@ -7,11 +7,6 @@ internal sealed class Model
     private static readonly JsonSerializerOptions jsonOptions = GetSerializerOptions();
     private static readonly HttpClient httpClient = new HttpClient();
 
-    public static string ConvertToString(PackageVersion pv)
-    {
-        return $"Build: {pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
-    }
-
     public static bool IsWinAppSdkName(PackageId id)
     {
         return id.PublisherId == "8wekyb3d8bbwe" &&
@@ -30,7 +25,7 @@ internal sealed class Model
             foreach (Package package in otherSdkPackages.DistinctBy(p => p.Id.Version))
             {
                 PackageVersion pv = package.Id.Version;
-                versions.Add(new VersionRecord(ConvertToString(pv), pv));
+                versions.Add(new VersionRecord(string.Empty, pv));
             }
         }
     }

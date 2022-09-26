@@ -17,8 +17,23 @@ internal sealed class SdkItem : ItemBase
         Children.Sort((x, y) => string.Compare(x.HeadingText, y.HeadingText, StringComparison.CurrentCulture));
     }
 
-    public override string HeadingText => $"WinAppSdk {version.Description}";
-    public override string ToolTipText => Model.ConvertToString(version.Release);
+    public override string HeadingText
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(version.Description))
+                return $"Unknown build: {ConvertToString(version.Release)}";
+
+            return version.Description;
+        } 
+    }
+
+    public override string ToolTipText => $"Build: {ConvertToString(version.Release)}";
+
+    private static string ConvertToString(PackageVersion pv)
+    {
+        return $"{pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
+    }
 
     // ignores any children, it's only used to identify this tree node
     public static bool operator ==(SdkItem? x, SdkItem? y)
