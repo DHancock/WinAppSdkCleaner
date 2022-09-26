@@ -8,3 +8,7 @@
  By default, the utility allows the removal of WinAppSdk packages for the current user. If you installed the WinAppSdk using that user account, removing the WinAppSdk will recover the disk space.
  
  To remove a WinAppSdk that has been provisioned, you have to start the utility elevated. That will allow the complete removal of a WinAppSdk for all users.
+ 
+ A typical scenario:
+
+![Capture](https://user-images.githubusercontent.com/28826959/192302176-1b20e67c-acd7-4645-9e7d-b6ef2326fae6.PNG)
