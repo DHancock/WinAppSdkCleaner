@@ -24,8 +24,7 @@ internal sealed class Model
         {
             foreach (Package package in otherSdkPackages.DistinctBy(p => p.Id.Version))
             {
-                PackageVersion pv = package.Id.Version;
-                versions.Add(new VersionRecord(string.Empty, pv));
+                versions.Add(new VersionRecord(string.Empty, package.Id.Version));
             }
         }
     }
