@@ -1,5 +1,8 @@
 ﻿using CsWin32Lib;
 
+using System.Threading;
+using Windows.Foundation;
+
 namespace WinAppSdkCleaner.Models;
 
 internal sealed class Model
@@ -108,9 +111,10 @@ internal sealed class Model
         return Task.Run(async () => GetPackages(await GetVersionsList(), allUsers: IntegrityLevel.IsElevated()));
     }
 
-
+#if USE_POWERSHELL
     // Works well, but is the nuclear option, error handling is limited.
-    // PackageManager.RemovePackageAsync() occasionally never completes a valid task.
+    // PackageManager.RemovePackageAsync().AsTask() occasionally never completes a valid operation.
+    // however using a manual reset event, as in the example code works just fine.
     private async static Task Remove(string args)
     {
         await Task.Run(() =>
@@ -136,6 +140,40 @@ internal sealed class Model
         });
     }
 
+#else
+
+    private async static Task Remove(string fullName, bool allUsers)
+    {
+        await Task.Run(() =>
+        {
+            Trace.WriteLine($"Remove package: {fullName}");
+
+            PackageManager packageManager = new PackageManager();
+            ManualResetEvent opCompletedEvent = new ManualResetEvent(false);
+            IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> deploymentOperation;
+
+            if (allUsers)
+                deploymentOperation = packageManager.RemovePackageAsync(fullName, RemovalOptions.RemoveForAllUsers);
+            else
+                deploymentOperation = packageManager.RemovePackageAsync(fullName);
+
+            deploymentOperation.Completed = (depProgress, status) => { opCompletedEvent.Set(); };
+            opCompletedEvent.WaitOne();
+            opCompletedEvent.Close();
+
+            Trace.WriteLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
+
+            if (deploymentOperation.Status == AsyncStatus.Error)
+            {
+                DeploymentResult deploymentResult = deploymentOperation.GetResults();
+                Trace.WriteLine($"Error code:{Environment.NewLine}{deploymentOperation.ErrorCode}");
+                Trace.WriteLine($"Error text:{Environment.NewLine}{deploymentResult.ErrorText}");
+            }
+        });
+    }
+
+#endif
+
     private async static Task RemovePackages(IEnumerable<string> packageFullNames, bool allUsers)
     {
         if (packageFullNames.Any())
@@ -147,10 +185,14 @@ internal sealed class Model
 
             foreach (string fullName in packageFullNames)
             {
+#if USE_POWERSHELL
                 if (allUsers)
                     tasks.Add(Remove($"Remove-AppxPackage -Package {fullName} -AllUsers"));
                 else
                     tasks.Add(Remove($"Remove-AppxPackage -Package {fullName}"));
+#else
+                tasks.Add(Remove(fullName, allUsers));
+#endif
             }
 
             Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
