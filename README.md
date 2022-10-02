@@ -10,3 +10,7 @@
  To remove a WinAppSdk that has been provisioned, you have to start the utility elevated (using "Run as administrator"). That will allow the complete removal of a WinAppSdk for all users.
  
  If you have a mix of provisioned and user installs, you should use this program elevated.
+
+ A typical scenario:
+
+![Capture](https://user-images.githubusercontent.com/28826959/192302176-1b20e67c-acd7-4645-9e7d-b6ef2326fae6.PNG)
