@@ -9,11 +9,11 @@
  
  To remove a WinAppSdk that has been provisioned, you have to start the utility elevated (using "Run as administrator"). That will allow the complete removal of a WinAppSdk for all users.
  
- If you have a mix of provisioned and user installs, you should use this program elevated[^Note].
+ If you have a mix of provisioned and user installs, you should use this program elevated[^1].
 
  
  A typical scenario:
 
 ![Capture](https://user-images.githubusercontent.com/28826959/192302176-1b20e67c-acd7-4645-9e7d-b6ef2326fae6.PNG)
 
-[^Note]:If not, you run the risk of ending up with orphaned framework packages that cannot be removed without reinstalling the WinAppSdk version that they were installed with. This occurs if you install a provisioned WinAppSdk, followed by a non provisioned WinAppSdk that only has a higher patch version e.g. WinAppSdk version 1.1.3 provisioned, followed by 1.1.4 non provisioned. This results in the provisioned packages having a dependency on the non provisioned framework packages. If you then attempt to remove the WinAppSdk 1.1.4 version using the utility running non elevated, both WinAppSdk versions will be removed for the current user. However if you then start the utility elevated, it's evident that both WinAppSdk versions still exist. If you attempt to remove the WinAppSdk version 1.1.4 for all users, the removal appears to complete with out errors. However the Package Manager will still indicate that the WinAppSdk 1.1.4 framework packages remain. Further attempts to remove them will also fail.
+[^1]:If not, you run the risk of ending up with orphaned framework packages that cannot be removed without reinstalling the WinAppSdk version that they were installed with. This occurs if you install a provisioned WinAppSdk, followed by a non provisioned WinAppSdk that only has a higher patch version e.g. WinAppSdk version 1.1.3 provisioned, followed by 1.1.4 non provisioned. This results in the provisioned packages having a dependency on the non provisioned framework packages. If you then attempt to remove the WinAppSdk 1.1.4 version using the utility running non elevated, both WinAppSdk versions will be removed for the current user. However if you then start the utility elevated, it's evident that both WinAppSdk versions still exist. If you attempt to remove the WinAppSdk version 1.1.4 for all users, the removal appears to complete with out errors. However the Package Manager will still indicate that the WinAppSdk 1.1.4 framework packages remain. Further attempts to remove them will also fail.
