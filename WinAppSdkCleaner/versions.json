@@ -385,5 +385,14 @@
       "Build": 1413,
       "Revision": 0
     }
+  },
+  {
+    "Description": "WinAppSdk 1.2.220930.4 - preview 2",
+    "Release": {
+      "Major": 2000,
+      "Minor": 638,
+      "Build": 7,
+      "Revision": 0
+    }
   }
 ]
