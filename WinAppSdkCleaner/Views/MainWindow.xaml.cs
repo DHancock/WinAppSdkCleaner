@@ -12,6 +12,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        DataContext = new ViewModels.MainWindowViewModel();
+
         SourceInitialized += (s, a) =>
         {
             if (Settings.Data.IsFirstRun)

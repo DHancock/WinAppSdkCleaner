@@ -2,12 +2,12 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal sealed class ViewModel
+internal sealed class MainWindowViewModel
 {
     public string SdkTabHeading { get; init; }
     public ImageSource WindowIcon { get; init; }
 
-    public ViewModel()
+    public MainWindowViewModel()
     {
         if (IntegrityLevel.IsElevated())
         {
@@ -17,7 +17,7 @@ internal sealed class ViewModel
         else
         {
             SdkTabHeading = "_User Scope";
-            WindowIcon = BitmapFrame.Create(new Uri("pack://application:,,,/resources/app.ico"));
+            WindowIcon = BitmapFrame.Create(new Uri("pack://application:,,,/resources/normal.ico"));
         }
     }
 }
