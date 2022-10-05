@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WinAppSdkCleaner.Views"
-        xmlns:vm="clr-namespace:WinAppSdkCleaner.ViewModels"
         mc:Ignorable="d"
         Title="Windows Application Sdk Cleaner"
         Width="650"
@@ -14,10 +13,6 @@
         FontSize="{StaticResource FontSizeNormal}"
         ResizeMode="CanResizeWithGrip"
         Icon="{Binding WindowIcon}">
-
-    <Window.DataContext>
-        <vm:ViewModel/>
-    </Window.DataContext>
 
     <Grid>
         <TabControl Focusable="False">
