@@ -102,7 +102,7 @@ internal sealed class Model
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"get packages completed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"Get packages found {sdks.Count} SDKs in {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
@@ -229,7 +229,7 @@ internal sealed class Model
             }
 
             stopwatch.Stop();
-            Trace.WriteLine($"remove packages completed: {stopwatch.Elapsed.TotalSeconds} seconds");
+            Trace.WriteLine($"Remove packages completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
     }
 
