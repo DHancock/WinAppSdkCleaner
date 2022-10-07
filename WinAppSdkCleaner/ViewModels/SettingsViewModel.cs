@@ -16,21 +16,6 @@ internal class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
-
-    // search package options 
-
-    public static bool PreferLocalVersionsFileOn
-    {
-        get => Settings.Data.PreferLocalVersionsFile;
-        set => Settings.Data.PreferLocalVersionsFile = value;
-    }
-
-    public static bool PreferLocalVersionsFileOff
-    {
-        get => !Settings.Data.PreferLocalVersionsFile;
-        set => Settings.Data.PreferLocalVersionsFile = !value;
-    }
-
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -239,47 +239,36 @@ internal sealed class Model
 
         try
         {
-            string text = await ReadAllText();
-            List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsonOptions);
+            string text = await ReadAllTextRemote();
 
-            if (versions is not null)
-                versionList = versions;
+            if (string.IsNullOrEmpty(text))
+                text = await ReadAllTextLocal();
+
+            if (!string.IsNullOrEmpty(text))
+            {
+                List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsonOptions);
+
+                if (versions is not null)
+                {
+                    Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate versions detected");
+                    versionList = versions;
+                }
+            }
         }
         catch (Exception ex)
         {
             Trace.WriteLine(ex.ToString());
         }
 
+        Trace.WriteLine($"Versions list contains {versionList.Count} entries");
         return versionList;
-    }
-
-    private static async Task<string> ReadAllText()
-    {
-        string text;
-
-        if (Settings.Data.PreferLocalVersionsFile)
-        {
-            text = await ReadAllTextLocal();
-
-            if (string.IsNullOrEmpty(text))
-                text = await ReadAllTextRemote();
-        }
-        else
-        {
-            text = await ReadAllTextRemote();
-
-            if (string.IsNullOrEmpty(text))
-                text = await ReadAllTextLocal();
-        }
-
-        return text;
     }
 
     private static async Task<string> ReadAllTextRemote()
     {
         try
         {
-            string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
+            const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
             return await httpClient.GetStringAsync(path);
         }
         catch (Exception ex)
@@ -294,8 +283,16 @@ internal sealed class Model
     {
         try
         {
-            string path = Path.Join(AppContext.BaseDirectory, "versions.json");
-            return await File.ReadAllTextAsync(path);
+            using (Stream? stream = typeof(App).Assembly.GetManifestResourceStream("WinAppSdkCleaner.versions.json"))
+            {
+                if (stream is not null)
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {

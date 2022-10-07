@@ -36,17 +36,6 @@ internal class Settings : ApplicationSettingsBase
         set => Setter(value);
     }
 
-    // search options 
-
-    [UserScopedSetting]
-    [DefaultSettingValue("False")]
-    public bool PreferLocalVersionsFile
-    {
-        get => Getter<bool>();
-        set => Setter(value);
-    }
-
-
     // remove options
 
     [UserScopedSetting]
