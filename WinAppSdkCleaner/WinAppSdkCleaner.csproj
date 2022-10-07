@@ -17,6 +17,7 @@
     <None Remove="Resources\elevated.ico" />
     <None Remove="Resources\normal.ico" />
     <None Remove="Resources\unknown.png" />
+    <None Remove="versions.json" />
   </ItemGroup>
 
 	<Target Name="RemoveDuplicateAnalyzers" BeforeTargets="CoreCompile">
@@ -30,6 +31,12 @@
 	</Target>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="versions.json">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\CsWin32Lib\CsWin32Lib.csproj" />
 	</ItemGroup>
 	
@@ -38,12 +45,6 @@
     <Resource Include="Resources\elevated.ico" />
     <Resource Include="Resources\normal.ico" />
     <Resource Include="Resources\unknown.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="versions.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

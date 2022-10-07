@@ -28,9 +28,6 @@
             <TabItem Header="_Output">
                 <local:TraceView/>
             </TabItem>
-            <TabItem Header="_Settings">
-                <local:SettingsView/>
-            </TabItem>
             <TabItem Header="_About">
                 <local:AboutView/>
             </TabItem>

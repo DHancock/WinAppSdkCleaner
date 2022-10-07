@@ -111,37 +111,6 @@ internal sealed class Model
         return Task.Run(async () => GetPackages(await GetVersionsList(), allUsers: IntegrityLevel.IsElevated()));
     }
 
-#if USE_POWERSHELL
-    // Works well, but is the nuclear option, error handling is limited.
-    // PackageManager.RemovePackageAsync().AsTask() occasionally never completes a valid operation.
-    // however using a manual reset event, as in the example code works just fine.
-    private async static Task Remove(string args)
-    {
-        await Task.Run(() =>
-        {
-            Trace.WriteLine(args);
-
-            ProcessStartInfo startInfo = new ProcessStartInfo()
-            {
-                FileName = "powershell.exe",
-                Arguments = args,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardError = true,
-            };
-
-            Process process = new Process();
-            process.StartInfo = startInfo;
-            process.ErrorDataReceived += (s, e) => Trace.WriteLine(e.Data);
-            process.Start();
-            process.BeginErrorReadLine();
-
-            process.WaitForExit();
-        });
-    }
-
-#else
-
     private async static Task Remove(string fullName, bool allUsers)
     {
         await Task.Run(() =>
@@ -172,27 +141,20 @@ internal sealed class Model
         });
     }
 
-#endif
-
     private async static Task RemovePackages(IEnumerable<string> packageFullNames, bool allUsers)
     {
+        const int cTimeoutPerPackage = 10; // seconds
+
         if (packageFullNames.Any())
         {
             List<Task> tasks = new List<Task>();
 
-            int milliSeconds = Settings.Data.TimeoutPerPackage * 1000 * packageFullNames.Count();
+            int milliSeconds = cTimeoutPerPackage * 1000 * packageFullNames.Count();
             Task timeOut = Task.Delay(milliSeconds);
 
             foreach (string fullName in packageFullNames)
             {
-#if USE_POWERSHELL
-                if (allUsers)
-                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName} -AllUsers"));
-                else
-                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName}"));
-#else
                 tasks.Add(Remove(fullName, allUsers));
-#endif
             }
 
             Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
@@ -239,47 +201,36 @@ internal sealed class Model
 
         try
         {
-            string text = await ReadAllText();
-            List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsonOptions);
+            string text = await ReadAllTextRemote();
 
-            if (versions is not null)
-                versionList = versions;
+            if (string.IsNullOrEmpty(text))
+                text = await ReadAllTextLocal();
+
+            if (!string.IsNullOrEmpty(text))
+            {
+                List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsonOptions);
+
+                if (versions is not null)
+                {
+                    Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate versions detected");
+                    versionList = versions;
+                }
+            }
         }
         catch (Exception ex)
         {
             Trace.WriteLine(ex.ToString());
         }
 
+        Trace.WriteLine($"Versions list contains {versionList.Count} entries");
         return versionList;
-    }
-
-    private static async Task<string> ReadAllText()
-    {
-        string text;
-
-        if (Settings.Data.PreferLocalVersionsFile)
-        {
-            text = await ReadAllTextLocal();
-
-            if (string.IsNullOrEmpty(text))
-                text = await ReadAllTextRemote();
-        }
-        else
-        {
-            text = await ReadAllTextRemote();
-
-            if (string.IsNullOrEmpty(text))
-                text = await ReadAllTextLocal();
-        }
-
-        return text;
     }
 
     private static async Task<string> ReadAllTextRemote()
     {
         try
         {
-            string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
+            const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
             return await httpClient.GetStringAsync(path);
         }
         catch (Exception ex)
@@ -294,8 +245,16 @@ internal sealed class Model
     {
         try
         {
-            string path = Path.Join(AppContext.BaseDirectory, "versions.json");
-            return await File.ReadAllTextAsync(path);
+            using (Stream? stream = typeof(App).Assembly.GetManifestResourceStream("WinAppSdkCleaner.versions.json"))
+            {
+                if (stream is not null)
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
