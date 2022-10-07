@@ -36,17 +36,6 @@ internal class Settings : ApplicationSettingsBase
         set => Setter(value);
     }
 
-    // remove options
-
-    [UserScopedSetting]
-    [DefaultSettingValue("10")]
-    public int TimeoutPerPackage
-    {
-        get => Getter<int>();
-        set => Setter(value);
-    }
-
-
     private T Getter<T>([CallerMemberName] string name = "") => (T)this[name];
 
     private void Setter(object value, [CallerMemberName] string name = "") => this[name] = value;

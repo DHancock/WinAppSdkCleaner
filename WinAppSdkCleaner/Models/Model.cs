@@ -111,37 +111,6 @@ internal sealed class Model
         return Task.Run(async () => GetPackages(await GetVersionsList(), allUsers: IntegrityLevel.IsElevated()));
     }
 
-#if USE_POWERSHELL
-    // Works well, but is the nuclear option, error handling is limited.
-    // PackageManager.RemovePackageAsync().AsTask() occasionally never completes a valid operation.
-    // however using a manual reset event, as in the example code works just fine.
-    private async static Task Remove(string args)
-    {
-        await Task.Run(() =>
-        {
-            Trace.WriteLine(args);
-
-            ProcessStartInfo startInfo = new ProcessStartInfo()
-            {
-                FileName = "powershell.exe",
-                Arguments = args,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardError = true,
-            };
-
-            Process process = new Process();
-            process.StartInfo = startInfo;
-            process.ErrorDataReceived += (s, e) => Trace.WriteLine(e.Data);
-            process.Start();
-            process.BeginErrorReadLine();
-
-            process.WaitForExit();
-        });
-    }
-
-#else
-
     private async static Task Remove(string fullName, bool allUsers)
     {
         await Task.Run(() =>
@@ -172,27 +141,20 @@ internal sealed class Model
         });
     }
 
-#endif
-
     private async static Task RemovePackages(IEnumerable<string> packageFullNames, bool allUsers)
     {
+        const int cTimeoutPerPackage = 10; // seconds
+
         if (packageFullNames.Any())
         {
             List<Task> tasks = new List<Task>();
 
-            int milliSeconds = Settings.Data.TimeoutPerPackage * 1000 * packageFullNames.Count();
+            int milliSeconds = cTimeoutPerPackage * 1000 * packageFullNames.Count();
             Task timeOut = Task.Delay(milliSeconds);
 
             foreach (string fullName in packageFullNames)
             {
-#if USE_POWERSHELL
-                if (allUsers)
-                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName} -AllUsers"));
-                else
-                    tasks.Add(Remove($"Remove-AppxPackage -Package {fullName}"));
-#else
                 tasks.Add(Remove(fullName, allUsers));
-#endif
             }
 
             Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
