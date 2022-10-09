@@ -28,7 +28,7 @@ internal class SdkList : List<ItemBase>
                 {
                     result = right.Version.SemanticVersion.Length - left.Version.SemanticVersion.Length;
 
-                    if (result == 0) // they are both uncatorgerized
+                    if (result == 0) // they are both uncategorized
                         result = string.Compare(left.HeadingText, right.HeadingText);
                 }
 
