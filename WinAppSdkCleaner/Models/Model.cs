@@ -54,7 +54,7 @@ internal sealed class Model
         }
     }
 
-    private static void AddDependents(ConcurrentDictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
+    private static void AddDependents(IDictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
     {
         ConcurrentDictionary<string, PackageRecord> subLookUp = new ConcurrentDictionary<string, PackageRecord>();
 
@@ -81,7 +81,7 @@ internal sealed class Model
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
-        ConcurrentDictionary<string, PackageRecord> sdkLookUpTable = new ConcurrentDictionary<string, PackageRecord>();
+        Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
 
         PackageManager packageManager = new PackageManager();
         List<Package> allPackages;
@@ -123,7 +123,7 @@ internal sealed class Model
             }
         }
 
-        if (!sdkLookUpTable.IsEmpty)
+        if (sdkLookUpTable.Count > 0)
             AddDependents(sdkLookUpTable, allPackages, 1);
 
         stopwatch.Stop();
