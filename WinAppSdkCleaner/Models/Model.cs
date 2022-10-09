@@ -1,6 +1,5 @@
 ﻿using CsWin32Lib;
 
-using System.Threading;
 using Windows.Foundation;
 
 namespace WinAppSdkCleaner.Models;
@@ -55,11 +54,11 @@ internal sealed class Model
         }
     }
 
-    private static void AddDependents(Dictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
+    private static void AddDependents(ConcurrentDictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
     {
-        Dictionary<string, PackageRecord> subLookUp = new Dictionary<string, PackageRecord>();
+        ConcurrentDictionary<string, PackageRecord> subLookUp = new ConcurrentDictionary<string, PackageRecord>();
 
-        foreach (Package package in allPackages)
+        Parallel.ForEach(allPackages, package =>
         {
             foreach (Package dependency in package.Dependencies)
             {
@@ -69,12 +68,12 @@ internal sealed class Model
                     parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                     if (package.IsFramework)
-                        subLookUp.Add(package.Id.FullName, dependentPackage);
+                        subLookUp[package.Id.FullName] = dependentPackage;
                 }
             }
-        }
+        });
 
-        if (subLookUp.Count > 0)
+        if (!subLookUp.IsEmpty)
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
@@ -82,7 +81,7 @@ internal sealed class Model
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
-        Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
+        ConcurrentDictionary<string, PackageRecord> sdkLookUpTable = new ConcurrentDictionary<string, PackageRecord>();
 
         PackageManager packageManager = new PackageManager();
         List<Package> allPackages;
@@ -115,7 +114,7 @@ internal sealed class Model
                             sdkPackageRecords.Add(sdkPackage);
 
                             if (package.IsFramework)
-                                sdkLookUpTable.Add(package.Id.FullName, sdkPackage); // used to find dependents
+                                sdkLookUpTable[package.Id.FullName] = sdkPackage; // used to find dependents
                         }
 
                         sdks.Add(new SdkRecord(version, sdkId, sdkPackageRecords));
@@ -124,7 +123,7 @@ internal sealed class Model
             }
         }
 
-        if (sdkLookUpTable.Count > 0)
+        if (!sdkLookUpTable.IsEmpty)
             AddDependents(sdkLookUpTable, allPackages, 1);
 
         stopwatch.Stop();
