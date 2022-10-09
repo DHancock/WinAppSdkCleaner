@@ -12,9 +12,11 @@ public partial class AboutView : UserControl
         AssemblyName assemblyName = typeof(App).Assembly.GetName();
 
         NameTextBlock.Text = assemblyName.Name;
-
+        
         if (assemblyName.Version is not null)
             VersionTextBlock.Text = assemblyName.Version.ToString();
+
+        Trace.WriteLine($"{NameTextBlock.Text} - {VersionTextBlock.Text}");
     }
 
     private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)

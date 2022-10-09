@@ -35,7 +35,7 @@ public partial class TraceView : UserControl
     private void TextChanged(object sender, TextChangedEventArgs e) => AdjustCommandsState();
 
 
-    internal class CustomTraceListener : TraceListener
+    private sealed class CustomTraceListener : TraceListener
     {
         private TextBox Consumer { get; init; }
 

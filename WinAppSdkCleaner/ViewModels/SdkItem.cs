@@ -4,14 +4,14 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed class SdkItem : ItemBase
 {
-    private readonly VersionRecord version;
+    private SdkRecord SdkRecord { get; init; }
 
-    public SdkItem(SdkRecord packageInfo) : base(null)
+    public SdkItem(SdkRecord sdkRecord) : base(null)
     {
         IsExpanded = true;
-        version = packageInfo.Version;
+        SdkRecord = sdkRecord;
 
-        foreach (PackageRecord packageRecord in packageInfo.SdkPackages)
+        foreach (PackageRecord packageRecord in sdkRecord.SdkPackages)
             Children.Add(new SdkPackageItem(packageRecord, this));
 
         Children.Sort((x, y) => string.Compare(x.HeadingText, y.HeadingText, StringComparison.CurrentCulture));
@@ -21,14 +21,19 @@ internal sealed class SdkItem : ItemBase
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(version.Description))
-                return $"Unknown build: {ConvertToString(version.Release)}";
+            if (SdkRecord.Version.SemanticVersion.Length == 0)
+                return $"{SdkRecord.SdkId} package version: {ConvertToString(SdkRecord.Version.Release)}";
 
-            return version.Description;
+            if (SdkRecord.Version.VersionTag.Length > 0)
+                return $"{SdkRecord.SdkId} {SdkRecord.Version.SemanticVersion} - {SdkRecord.Version.VersionTag}";
+
+            return $"{SdkRecord.SdkId} {SdkRecord.Version.SemanticVersion}";
         } 
     }
 
-    public override string ToolTipText => $"Build: {ConvertToString(version.Release)}";
+    public override string ToolTipText => $"Build: {ConvertToString(SdkRecord.Version.Release)}";
+
+    public VersionRecord Version => SdkRecord.Version;
 
     private static string ConvertToString(PackageVersion pv)
     {
@@ -44,10 +49,10 @@ internal sealed class SdkItem : ItemBase
         if ((x is null) || (y is null))
             return false;
 
-        return x.version.Release.Equals(y.version.Release);
+        return x.SdkRecord.Version.Release.Equals(y.SdkRecord.Version.Release);
     }
 
     public static bool operator !=(SdkItem? x, SdkItem? y) => !(x == y);
-    public override int GetHashCode() => version.GetHashCode();
+    public override int GetHashCode() => SdkRecord.Version.GetHashCode();
     public override bool Equals(object? obj) => this == (obj as SdkItem);
 }
