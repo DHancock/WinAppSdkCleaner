@@ -10,24 +10,47 @@ internal sealed class Model
     private static readonly JsonSerializerOptions jsonOptions = GetSerializerOptions();
     private static readonly HttpClient httpClient = new HttpClient();
 
-    public static bool IsWinAppSdkName(PackageId id)
+    private static bool IsWinAppSdkName(PackageId id)
     {
-        return id.PublisherId == "8wekyb3d8bbwe" &&
-                    (id.FullName.Contains("WinAppRuntime", StringComparison.OrdinalIgnoreCase) ||
+        return (id.FullName.Contains("WinAppRuntime", StringComparison.OrdinalIgnoreCase) ||
                     id.FullName.Contains("WindowsAppRuntime", StringComparison.OrdinalIgnoreCase) ||
-                    id.FullName.StartsWith("Microsoft.WindowsAppSDK", StringComparison.Ordinal) ||  // for 1.0.0 experimental 1 only
-                    id.FullName.Contains("ProjectReunion", StringComparison.OrdinalIgnoreCase));  
+                    id.FullName.StartsWith("Microsoft.WindowsAppSDK", StringComparison.Ordinal));  // for 1.0.0 experimental 1 only
     }
 
-    private static void AddUnknownSdkVersions(List<VersionRecord> versions, List<Package> sdkPackages)
+    private static bool IsReunionName(PackageId id)
     {
-        List<Package> otherSdkPackages = sdkPackages.FindAll(p => versions.All(v => v.Release != p.Id.Version));
+        return id.FullName.Contains("ProjectReunion", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsMicrosoftPublisher(PackageId id)
+    {
+        return string.Equals(id.PublisherId, "8wekyb3d8bbwe", StringComparison.Ordinal);
+    }
+
+    private static bool IsSdkName(PackageId id, SdkTypes sdkId)
+    {
+        if (IsMicrosoftPublisher(id))
+        {
+            switch (sdkId)
+            {
+                case SdkTypes.Reunion: return IsReunionName(id);
+                case SdkTypes.WinAppSdk: return IsWinAppSdkName(id);
+                default: throw new ArgumentOutOfRangeException(nameof(sdkId));
+            }
+        }
+
+        return false;
+    }
+
+    private static void AddUnknownSdkVersions(List<VersionRecord> sdkVersions, List<Package> sdkPackages, SdkTypes sdkId)
+    {
+        List<Package> otherSdkPackages = sdkPackages.FindAll(p => sdkVersions.All(v => v.Release != p.Id.Version));
 
         if (otherSdkPackages.Count > 0)
         {
             foreach (Package package in otherSdkPackages.DistinctBy(p => p.Id.Version))
             {
-                versions.Add(new VersionRecord(string.Empty, package.Id.Version));
+                sdkVersions.Add(new VersionRecord(string.Empty, string.Empty, string.Empty, sdkId, package.Id.Version));
             }
         }
     }
@@ -59,50 +82,53 @@ internal sealed class Model
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
-        PackageManager packageManager = new PackageManager();
+        Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
 
+        PackageManager packageManager = new PackageManager();
         List<Package> allPackages;
 
         if (allUsers)
-            allPackages = new List<Package>(packageManager.FindPackages());
+            allPackages = packageManager.FindPackages().ToList();
         else
-            allPackages = new List<Package>(packageManager.FindPackagesForUser(string.Empty));
+            allPackages = packageManager.FindPackagesForUser(string.Empty).ToList();
 
-        List<Package> sdkPackages = allPackages.FindAll(p => IsWinAppSdkName(p.Id));
-
-        if (sdkPackages.Count > 0)
+        foreach (SdkTypes sdkId in Enum.GetValues<SdkTypes>())
         {
-            AddUnknownSdkVersions(versions, sdkPackages);
+            List<Package> sdkPackages = allPackages.FindAll(p => IsSdkName(p.Id, sdkId));
 
-            Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
-
-            foreach (VersionRecord version in versions)
+            if (sdkPackages.Count > 0)
             {
-                List<Package> sdkVersionPackages = sdkPackages.FindAll(p => p.Id.Version == version.Release);
+                List<VersionRecord> sdkVersions = versions.FindAll(v => v.SdkId == sdkId);
+                AddUnknownSdkVersions(sdkVersions, sdkPackages, sdkId);
 
-                if (sdkVersionPackages.Count > 0)
+                foreach (VersionRecord version in sdkVersions)
                 {
-                    List<PackageRecord> sdkPackageRecords = new List<PackageRecord>(sdkVersionPackages.Count);
+                    List<Package> sdkVersionPackages = sdkPackages.FindAll(p => p.Id.Version == version.Release);
 
-                    foreach (Package package in sdkVersionPackages)
+                    if (sdkVersionPackages.Count > 0)
                     {
-                        PackageRecord sdkPackage = new PackageRecord(package, new List<PackageRecord>());
-                        sdkPackageRecords.Add(sdkPackage);
-                        
-                        if (package.IsFramework)
-                            sdkLookUpTable.Add(package.Id.FullName, sdkPackage); // used to find dependents
-                    }
+                        List<PackageRecord> sdkPackageRecords = new List<PackageRecord>(sdkVersionPackages.Count);
 
-                    sdks.Add(new SdkRecord(version, sdkPackageRecords));
+                        foreach (Package package in sdkVersionPackages)
+                        {
+                            PackageRecord sdkPackage = new PackageRecord(package, new List<PackageRecord>());
+                            sdkPackageRecords.Add(sdkPackage);
+
+                            if (package.IsFramework)
+                                sdkLookUpTable.Add(package.Id.FullName, sdkPackage); // used to find dependents
+                        }
+
+                        sdks.Add(new SdkRecord(version, sdkId, sdkPackageRecords));
+                    }
                 }
             }
-
-            if (sdkLookUpTable.Count > 0)
-                AddDependents(sdkLookUpTable, allPackages, 1);
         }
 
+        if (sdkLookUpTable.Count > 0)
+            AddDependents(sdkLookUpTable, allPackages, 1);
+
         stopwatch.Stop();
-        Trace.WriteLine($"Get packages found {sdks.Count} SDKs in {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"Get packages found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
@@ -118,25 +144,27 @@ internal sealed class Model
             Trace.WriteLine($"Remove package: {fullName}");
 
             PackageManager packageManager = new PackageManager();
-            ManualResetEvent opCompletedEvent = new ManualResetEvent(false);
             IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> deploymentOperation;
 
-            if (allUsers)
-                deploymentOperation = packageManager.RemovePackageAsync(fullName, RemovalOptions.RemoveForAllUsers);
-            else
-                deploymentOperation = packageManager.RemovePackageAsync(fullName);
+            using (ManualResetEvent opCompletedEvent = new ManualResetEvent(false))
+            {
+                if (allUsers)
+                    deploymentOperation = packageManager.RemovePackageAsync(fullName, RemovalOptions.RemoveForAllUsers);
+                else
+                    deploymentOperation = packageManager.RemovePackageAsync(fullName);
 
-            deploymentOperation.Completed = (depProgress, status) => { opCompletedEvent.Set(); };
-            opCompletedEvent.WaitOne();
-            opCompletedEvent.Close();
+                deploymentOperation.Completed = (depProgress, status) => { opCompletedEvent.Set(); };
+
+                opCompletedEvent.WaitOne();
+            }
 
             Trace.WriteLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
 
             if (deploymentOperation.Status == AsyncStatus.Error)
             {
                 DeploymentResult deploymentResult = deploymentOperation.GetResults();
-                Trace.WriteLine($"Error code:{Environment.NewLine}{deploymentOperation.ErrorCode}");
-                Trace.WriteLine($"Error text:{Environment.NewLine}{deploymentResult.ErrorText}");
+                Trace.WriteLine($"  {deploymentOperation.ErrorCode}");
+                Trace.WriteLine($"  {deploymentResult.ErrorText}");
             }
         });
     }
@@ -160,7 +188,7 @@ internal sealed class Model
             Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
 
             if (firstOut == timeOut)
-                throw new TimeoutException($"Removal of user packages timed out after {milliSeconds / 1000} seconds");
+                throw new TimeoutException($"Removal of sdk timed out after {milliSeconds / 1000} seconds");
         }
     }
 
@@ -202,7 +230,9 @@ internal sealed class Model
         try
         {
             string text = await ReadAllTextRemote();
-
+#if DEBUG
+            text = string.Empty;  // always use the embedded file, using the current schema         
+#endif
             if (string.IsNullOrEmpty(text))
                 text = await ReadAllTextLocal();
 
@@ -212,7 +242,7 @@ internal sealed class Model
 
                 if (versions is not null)
                 {
-                    Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate versions detected");
+                    Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
                     versionList = versions;
                 }
             }
