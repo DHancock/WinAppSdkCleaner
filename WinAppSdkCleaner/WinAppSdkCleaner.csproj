@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
 	<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-	<AssemblyVersion>1.0.0.0</AssemblyVersion>
-	<FileVersion>1.0.0.0</FileVersion>
+	<AssemblyVersion>1.1.0.0</AssemblyVersion>
+	<FileVersion>1.1.0.0</FileVersion>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
 	<ApplicationIcon>Resources\app.ico</ApplicationIcon>
   </PropertyGroup>
@@ -19,16 +19,6 @@
     <None Remove="Resources\unknown.png" />
     <None Remove="versions.json" />
   </ItemGroup>
-
-	<Target Name="RemoveDuplicateAnalyzers" BeforeTargets="CoreCompile">
-		<!-- Work around https://github.com/dotnet/wpf/issues/6792 -->
-		<!-- from: https://github.com/dotnet/wpf/issues/6792#issuecomment-1183633402 -->
-		<ItemGroup>
-			<FilteredAnalyzer Include="@(Analyzer-&gt;Distinct())" />
-			<Analyzer Remove="@(Analyzer)" />
-			<Analyzer Include="@(FilteredAnalyzer)" />
-		</ItemGroup>
-	</Target>
 
 	<ItemGroup>
 	  <EmbeddedResource Include="versions.json">
@@ -46,7 +36,5 @@
     <Resource Include="Resources\normal.ico" />
     <Resource Include="Resources\unknown.png" />
   </ItemGroup>
-
-  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>
