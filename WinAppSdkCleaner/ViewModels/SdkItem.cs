@@ -22,22 +22,32 @@ internal sealed class SdkItem : ItemBase
         get
         {
             if (SdkRecord.Version.SemanticVersion.Length == 0)
-                return $"{SdkRecord.SdkId} package version: {ConvertToString(SdkRecord.Version.Release)}";
+                return $"{ConvertToString(SdkRecord.SdkId)} package version: {ConvertToString(SdkRecord.Version.Release)}";
 
             if (SdkRecord.Version.VersionTag.Length > 0)
-                return $"{SdkRecord.SdkId} {SdkRecord.Version.SemanticVersion} - {SdkRecord.Version.VersionTag}";
+                return $"{ConvertToString(SdkRecord.SdkId)} {SdkRecord.Version.SemanticVersion} - {SdkRecord.Version.VersionTag}";
 
-            return $"{SdkRecord.SdkId} {SdkRecord.Version.SemanticVersion}";
+            return $"{ConvertToString(SdkRecord.SdkId)} {SdkRecord.Version.SemanticVersion}";
         } 
     }
 
-    public override string ToolTipText => $"Build: {ConvertToString(SdkRecord.Version.Release)}";
+    public override string ToolTipText => $"Package version: {ConvertToString(SdkRecord.Version.Release)}";
 
     public VersionRecord Version => SdkRecord.Version;
 
     private static string ConvertToString(PackageVersion pv)
     {
         return $"{pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
+    }
+
+    private static string ConvertToString(SdkTypes sdkId)
+    {
+        switch (sdkId)
+        {
+            case SdkTypes.Reunion: return "Project Reunion";
+            case SdkTypes.WinAppSdk: return "Windows App SDK";
+            default: throw new ArgumentOutOfRangeException(nameof(sdkId));
+        }
     }
 
     // ignores any children, it's only used to identify this tree node
