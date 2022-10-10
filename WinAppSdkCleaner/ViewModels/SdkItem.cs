@@ -2,7 +2,7 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal sealed class SdkItem : ItemBase
+internal sealed class SdkItem : ItemBase, IComparable<ItemBase>
 {
     private SdkRecord SdkRecord { get; init; }
 
@@ -14,7 +14,7 @@ internal sealed class SdkItem : ItemBase
         foreach (PackageRecord packageRecord in sdkRecord.SdkPackages)
             Children.Add(new SdkPackageItem(packageRecord, this));
 
-        Children.Sort((x, y) => string.Compare(x.HeadingText, y.HeadingText, StringComparison.CurrentCulture));
+        Children.Sort();
     }
 
     public override string HeadingText
@@ -65,4 +65,35 @@ internal sealed class SdkItem : ItemBase
     public static bool operator !=(SdkItem? x, SdkItem? y) => !(x == y);
     public override int GetHashCode() => SdkRecord.Version.GetHashCode();
     public override bool Equals(object? obj) => this == (obj as SdkItem);
+
+    public new int CompareTo(ItemBase? item)
+    {
+        if (item is not SdkItem other)
+            return -1;
+
+        int result = Version.SdkId - other.Version.SdkId;
+
+        if (result == 0)
+        {
+            if ((Version.SemanticVersion.Length > 0) && (other.Version.SemanticVersion.Length > 0))
+                result = string.Compare(Version.SemanticVersion, other.Version.SemanticVersion);
+            else
+            {
+                result = other.Version.SemanticVersion.Length - Version.SemanticVersion.Length;
+
+                if (result == 0) // they are both uncategorized
+                    result = string.Compare(HeadingText, other.HeadingText);
+            }
+
+            if (result == 0)
+            {
+                if ((Version.VersionTag.Length > 0) && (other.Version.VersionTag.Length > 0))
+                    result = string.Compare(Version.VersionTag, other.Version.VersionTag);
+                else
+                    result = other.Version.VersionTag.Length - Version.VersionTag.Length;
+            }
+        }
+
+        return result;
+    }
 }

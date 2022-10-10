@@ -1,6 +1,6 @@
 ﻿namespace WinAppSdkCleaner.ViewModels;
 
-internal abstract class ItemBase
+internal abstract class ItemBase : IComparable<ItemBase>
 {
     public ItemBase(ItemBase? parent)
     {
@@ -14,5 +14,13 @@ internal abstract class ItemBase
     public abstract string HeadingText { get; }
     public abstract string ToolTipText { get; }
     public ItemBase? Parent { get; init; }
+
+    public int CompareTo(ItemBase? other)
+    {
+        if (other is null)
+            return -1;
+
+        return string.Compare(HeadingText, other.HeadingText, StringComparison.CurrentCulture);
+    }
 }
 
