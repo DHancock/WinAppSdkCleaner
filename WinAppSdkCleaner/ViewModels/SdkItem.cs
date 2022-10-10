@@ -59,7 +59,8 @@ internal sealed class SdkItem : ItemBase, IComparable<ItemBase>
         if ((x is null) || (y is null))
             return false;
 
-        return x.SdkRecord.Version.Release.Equals(y.SdkRecord.Version.Release);
+        return (x.SdkRecord.Version.SdkId == y.SdkRecord.Version.SdkId) &&
+                x.SdkRecord.Version.Release.Equals(y.SdkRecord.Version.Release);
     }
 
     public static bool operator !=(SdkItem? x, SdkItem? y) => !(x == y);
