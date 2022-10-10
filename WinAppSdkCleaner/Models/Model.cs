@@ -54,9 +54,10 @@ internal sealed class Model
         }
     }
 
-    private static void AddDependents(IDictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
+    private static void AddDependents(IReadOnlyDictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
     {
-        ConcurrentDictionary<string, PackageRecord> subLookUp = new ConcurrentDictionary<string, PackageRecord>();
+        object lockObject = new object();
+        Dictionary<string, PackageRecord> subLookUp = new Dictionary<string, PackageRecord>();
 
         Parallel.ForEach(allPackages, package =>
         {
@@ -64,16 +65,19 @@ internal sealed class Model
             {
                 if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageRecord? parentPackageRecord))
                 {
-                    PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), depth);
-                    parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
+                    lock (lockObject)
+                    {
+                        PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), depth);
+                        parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
-                    if (package.IsFramework)
-                        subLookUp[package.Id.FullName] = dependentPackage;
+                        if (package.IsFramework)
+                            subLookUp[package.Id.FullName] = dependentPackage;
+                    }
                 }
             }
         });
 
-        if (!subLookUp.IsEmpty)
+        if (subLookUp.Count > 0)
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
