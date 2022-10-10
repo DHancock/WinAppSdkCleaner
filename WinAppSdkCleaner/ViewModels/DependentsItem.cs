@@ -9,7 +9,7 @@ internal sealed class DependentsItem : ItemBase
         foreach (PackageRecord dependentPackage in packageRecord.PackagesDependentOnThis)
             Children.Add(new PackageItem(dependentPackage, this));
 
-        Children.Sort((x, y) => string.Compare(x.HeadingText, y.HeadingText, StringComparison.CurrentCulture));
+        Children.Sort();
     }
 
     public override string HeadingText => "Dependent packages";

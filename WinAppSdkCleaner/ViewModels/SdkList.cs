@@ -13,36 +13,7 @@ internal class SdkList : List<ItemBase>
         foreach (SdkRecord sdk in sdks)
             Add(new SdkItem(sdk));
 
-        Sort((x, y) => 
-        {
-            SdkItem left = (SdkItem)x;
-            SdkItem right = (SdkItem)y;
-
-            int result = left.Version.SdkId - right.Version.SdkId;
-
-            if (result == 0)
-            {
-                if ((left.Version.SemanticVersion.Length > 0) && (right.Version.SemanticVersion.Length > 0))
-                    result = string.Compare(left.Version.SemanticVersion, right.Version.SemanticVersion);
-                else
-                {
-                    result = right.Version.SemanticVersion.Length - left.Version.SemanticVersion.Length;
-
-                    if (result == 0) // they are both uncategorized
-                        result = string.Compare(left.HeadingText, right.HeadingText);
-                }
-
-                if (result == 0)
-                {
-                    if ((left.Version.VersionTag.Length > 0) && (right.Version.VersionTag.Length > 0))
-                        result = string.Compare(left.Version.VersionTag, right.Version.VersionTag);
-                    else
-                        result = right.Version.VersionTag.Length - left.Version.VersionTag.Length;
-                }
-            }
-
-            return result;
-        });
+        Sort();
     }
 
     private static ItemBase? GetSelectedItem(List<ItemBase> items)
