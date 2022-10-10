@@ -20,16 +20,6 @@
     <None Remove="versions.json" />
   </ItemGroup>
 
-	<Target Name="RemoveDuplicateAnalyzers" BeforeTargets="CoreCompile">
-		<!-- Work around https://github.com/dotnet/wpf/issues/6792 -->
-		<!-- from: https://github.com/dotnet/wpf/issues/6792#issuecomment-1183633402 -->
-		<ItemGroup>
-			<FilteredAnalyzer Include="@(Analyzer-&gt;Distinct())" />
-			<Analyzer Remove="@(Analyzer)" />
-			<Analyzer Include="@(FilteredAnalyzer)" />
-		</ItemGroup>
-	</Target>
-
 	<ItemGroup>
 	  <EmbeddedResource Include="versions.json">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -46,7 +36,5 @@
     <Resource Include="Resources\normal.ico" />
     <Resource Include="Resources\unknown.png" />
   </ItemGroup>
-
-  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>
