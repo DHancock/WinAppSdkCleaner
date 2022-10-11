@@ -1,13 +1,13 @@
 ﻿using CsWin32Lib;
 
+// for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
 using Windows.Foundation;
 
 namespace WinAppSdkCleaner.Models;
 
 internal sealed class Model
 {
-    private static readonly JsonSerializerOptions jsonOptions = GetSerializerOptions();
-    private static readonly HttpClient httpClient = new HttpClient();
+    private static List<VersionRecord> sVersionList = new List<VersionRecord>();
 
     private static bool IsWinAppSdkName(PackageId id)
     {
@@ -63,6 +63,7 @@ internal sealed class Model
         {
             foreach (Package dependency in package.Dependencies)
             {
+                // TryGetValue() is thread safe if the dictionary isn't modified by another thread
                 if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageRecord? parentPackageRecord))
                 {
                     lock (lockObject)
@@ -228,35 +229,39 @@ internal sealed class Model
 
     private static async Task<List<VersionRecord>> GetVersionsList()
     {
-        List<VersionRecord> versionList = new List<VersionRecord>();
+        const int cMinValidVersions = 44;
 
-        try
+        if (sVersionList.Count > 0)
+            return sVersionList;
+
+        for (int i = 0; i < 2; i++)
         {
-            string text = await ReadAllTextRemote();
-#if DEBUG
-            text = string.Empty;  // always use the embedded file, using the current schema         
-#endif
-            if (string.IsNullOrEmpty(text))
-                text = await ReadAllTextLocal();
-
-            if (!string.IsNullOrEmpty(text))
+            try
             {
-                List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsonOptions);
+                string text = (i == 0) ? await ReadAllTextRemote() : await ReadAllTextLocal();
 
-                if (versions is not null)
+                if (!string.IsNullOrEmpty(text))
                 {
-                    Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
-                    versionList = versions;
+                    JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true, };
+
+                    List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsOptions);
+
+                    if ((versions is not null) && (versions.Count >= cMinValidVersions))
+                    {
+                        Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
+                        sVersionList = versions;
+                        break;
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine(ex.ToString());
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.ToString());
+            }
         }
 
-        Trace.WriteLine($"Versions list contains {versionList.Count} entries");
-        return versionList;
+        Trace.WriteLine($"Versions list contains {sVersionList.Count} entries");
+        return sVersionList;
     }
 
     private static async Task<string> ReadAllTextRemote()
@@ -264,7 +269,7 @@ internal sealed class Model
         try
         {
             const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
-            return await httpClient.GetStringAsync(path);
+            return await new HttpClient().GetStringAsync(path);
         }
         catch (Exception ex)
         {
@@ -295,14 +300,5 @@ internal sealed class Model
         }
 
         return string.Empty;
-    }
-
-    private static JsonSerializerOptions GetSerializerOptions()
-    {
-        return new JsonSerializerOptions()
-        {
-            WriteIndented = true,
-            IncludeFields = true,
-        };
     }
 }
