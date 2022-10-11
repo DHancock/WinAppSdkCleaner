@@ -25,7 +25,7 @@ internal class SdkViewModel : INotifyPropertyChanged
     {
         try
         {
-            SdkList newList = new SdkList(await Model.GetPackages());
+            SdkList newList = new SdkList(await Model.GetSDKs());
             newList.RestoreState(sdkList);
 
             SdkList = newList;

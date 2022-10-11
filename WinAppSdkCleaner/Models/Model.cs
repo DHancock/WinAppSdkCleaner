@@ -41,20 +41,17 @@ internal sealed class Model
         return false;
     }
 
-    private static void AddUnknownSdkVersions(List<VersionRecord> sdkVersions, List<Package> sdkPackages, SdkTypes sdkId)
+    private static VersionRecord CategorizePackageVersion(PackageVersion version, SdkTypes sdkId, List<VersionRecord> sdkVersions)
     {
-        List<Package> otherSdkPackages = sdkPackages.FindAll(p => sdkVersions.All(v => v.Release != p.Id.Version));
+        VersionRecord? versionRecord = sdkVersions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == version);
 
-        if (otherSdkPackages.Count > 0)
-        {
-            foreach (Package package in otherSdkPackages.DistinctBy(p => p.Id.Version))
-            {
-                sdkVersions.Add(new VersionRecord(string.Empty, string.Empty, string.Empty, sdkId, package.Id.Version));
-            }
-        }
+        if (versionRecord is null)
+            return new VersionRecord(string.Empty, string.Empty, string.Empty, sdkId, version);
+
+        return versionRecord;
     }
 
-    private static void AddDependents(IReadOnlyDictionary<string, PackageRecord> lookUpTable, List<Package> allPackages, int depth)
+    private static void AddDependents(IReadOnlyDictionary<string, PackageRecord> lookUpTable, IEnumerable<Package> allPackages, int depth)
     {
         object lockObject = new object();
         Dictionary<string, PackageRecord> subLookUp = new Dictionary<string, PackageRecord>();
@@ -82,49 +79,39 @@ internal sealed class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    private static List<SdkRecord> GetPackages(List<VersionRecord> versions, bool allUsers)
+    private static List<SdkRecord> GetSDKs(List<VersionRecord> versions, bool allUsers)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
 
         PackageManager packageManager = new PackageManager();
-        List<Package> allPackages;
+        IEnumerable<Package> allPackages;
 
         if (allUsers)
-            allPackages = packageManager.FindPackages().ToList();
+            allPackages = packageManager.FindPackages();
         else
-            allPackages = packageManager.FindPackagesForUser(string.Empty).ToList();
+            allPackages = packageManager.FindPackagesForUser(string.Empty);
 
         foreach (SdkTypes sdkId in Enum.GetValues<SdkTypes>())
         {
-            List<Package> sdkPackages = allPackages.FindAll(p => IsSdkName(p.Id, sdkId));
+            IEnumerable<Package> sdkPackages = allPackages.Where(p => IsSdkName(p.Id, sdkId));
 
-            if (sdkPackages.Count > 0)
+            foreach (Package package in sdkPackages.DistinctBy(p => p.Id.Version))
             {
-                List<VersionRecord> sdkVersions = versions.FindAll(v => v.SdkId == sdkId);
-                AddUnknownSdkVersions(sdkVersions, sdkPackages, sdkId);
+                List<PackageRecord> sdkPackageRecords = new List<PackageRecord>();
+                VersionRecord sdkVersion = CategorizePackageVersion(package.Id.Version, sdkId, versions);
 
-                foreach (VersionRecord version in sdkVersions)
+                foreach (Package sdkPackage in sdkPackages.Where(p => p.Id.Version == package.Id.Version))
                 {
-                    List<Package> sdkVersionPackages = sdkPackages.FindAll(p => p.Id.Version == version.Release);
+                    PackageRecord sdkPackageRecord = new PackageRecord(sdkPackage, new List<PackageRecord>(), 0);
+                    sdkPackageRecords.Add(sdkPackageRecord);
 
-                    if (sdkVersionPackages.Count > 0)
-                    {
-                        List<PackageRecord> sdkPackageRecords = new List<PackageRecord>(sdkVersionPackages.Count);
-
-                        foreach (Package package in sdkVersionPackages)
-                        {
-                            PackageRecord sdkPackage = new PackageRecord(package, new List<PackageRecord>());
-                            sdkPackageRecords.Add(sdkPackage);
-
-                            if (package.IsFramework)
-                                sdkLookUpTable[package.Id.FullName] = sdkPackage; // used to find dependents
-                        }
-
-                        sdks.Add(new SdkRecord(version, sdkId, sdkPackageRecords));
-                    }
+                    if (sdkPackage.IsFramework)
+                        sdkLookUpTable[sdkPackage.Id.FullName] = sdkPackageRecord; // used to find dependents
                 }
+
+                sdks.Add(new SdkRecord(sdkVersion, sdkId, sdkPackageRecords));
             }
         }
 
@@ -132,13 +119,13 @@ internal sealed class Model
             AddDependents(sdkLookUpTable, allPackages, 1);
 
         stopwatch.Stop();
-        Trace.WriteLine($"Get packages found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"GetSdks found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
-    public static Task<List<SdkRecord>> GetPackages()
+    public static Task<List<SdkRecord>> GetSDKs()
     {
-        return Task.Run(async () => GetPackages(await GetVersionsList(), allUsers: IntegrityLevel.IsElevated()));
+        return Task.Run(async () => GetSDKs(await GetVersionsList(), allUsers: IntegrityLevel.IsElevated()));
     }
 
     private async static Task Remove(string fullName, bool allUsers)
@@ -268,8 +255,11 @@ internal sealed class Model
     {
         try
         {
-            const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
-            return await new HttpClient().GetStringAsync(path);
+            using (HttpClient httpClient = new HttpClient())
+            {
+                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
+                return await httpClient.GetStringAsync(path);
+            }
         }
         catch (Exception ex)
         {
