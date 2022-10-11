@@ -81,6 +81,7 @@ internal sealed class Model
 
     private static List<SdkRecord> GetSDKs(List<VersionRecord> versions, bool allUsers)
     {
+        Trace.WriteLine($"GetSDKs allUsers: {allUsers}");
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
@@ -119,7 +120,7 @@ internal sealed class Model
             AddDependents(sdkLookUpTable, allPackages, 1);
 
         stopwatch.Stop();
-        Trace.WriteLine($"GetSdks found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"GetSDKs found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
@@ -132,7 +133,7 @@ internal sealed class Model
     {
         await Task.Run(() =>
         {
-            Trace.WriteLine($"Remove package: {fullName}");
+            Trace.WriteLine($"Remove package: {fullName}, allUsers: {allUsers}");
 
             PackageManager packageManager = new PackageManager();
             IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> deploymentOperation;
