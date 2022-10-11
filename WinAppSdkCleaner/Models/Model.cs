@@ -7,7 +7,8 @@ namespace WinAppSdkCleaner.Models;
 
 internal sealed class Model
 {
-    private static List<VersionRecord> sVersionList = new List<VersionRecord>();
+    private static readonly AsyncLazy<IReadOnlyList<VersionRecord>> sVersionListProvider = 
+        new AsyncLazy<IReadOnlyList<VersionRecord>>(async () => await GetVersionsList());
 
     private static bool IsWinAppSdkName(PackageId id)
     {
@@ -41,7 +42,7 @@ internal sealed class Model
         return false;
     }
 
-    private static VersionRecord CategorizePackageVersion(PackageVersion version, SdkTypes sdkId, List<VersionRecord> sdkVersions)
+    private static VersionRecord CategorizePackageVersion(PackageVersion version, SdkTypes sdkId, IReadOnlyList<VersionRecord> sdkVersions)
     {
         VersionRecord? versionRecord = sdkVersions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == version);
 
@@ -79,7 +80,7 @@ internal sealed class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    private static List<SdkRecord> GetSDKs(List<VersionRecord> versions, bool allUsers)
+    private static List<SdkRecord> GetSDKs(IReadOnlyList<VersionRecord> versions, bool allUsers)
     {
         Trace.WriteLine($"GetSDKs allUsers: {allUsers}");
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -126,7 +127,7 @@ internal sealed class Model
 
     public static Task<List<SdkRecord>> GetSDKs()
     {
-        return Task.Run(async () => GetSDKs(await GetVersionsList(), allUsers: IntegrityLevel.IsElevated()));
+        return Task.Run(async () => GetSDKs(await sVersionListProvider, allUsers: IntegrityLevel.IsElevated()));
     }
 
     private async static Task Remove(string fullName, bool allUsers)
@@ -184,7 +185,7 @@ internal sealed class Model
         }
     }
 
-    public async static Task RemovePackages(List<PackageRecord> packagesRecords)
+    public async static Task RemovePackages(IReadOnlyList<PackageRecord> packagesRecords)
     {
         if (packagesRecords.Count > 0)
         {
@@ -215,12 +216,11 @@ internal sealed class Model
         }
     }
 
-    private static async Task<List<VersionRecord>> GetVersionsList()
+    private static async Task<IReadOnlyList<VersionRecord>> GetVersionsList()
     {
         const int cMinValidVersions = 44;
 
-        if (sVersionList.Count > 0)
-            return sVersionList;
+        List<VersionRecord> versionsList = new List<VersionRecord>();
 
         for (int i = 0; i < 2; i++)
         {
@@ -237,7 +237,7 @@ internal sealed class Model
                     if ((versions is not null) && (versions.Count >= cMinValidVersions))
                     {
                         Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
-                        sVersionList = versions;
+                        versionsList = versions;
                         break;
                     }
                 }
@@ -248,8 +248,8 @@ internal sealed class Model
             }
         }
 
-        Trace.WriteLine($"Versions list contains {sVersionList.Count} entries");
-        return sVersionList;
+        Trace.WriteLine($"Versions list contains {versionsList.Count} entries");
+        return versionsList;
     }
 
     private static async Task<string> ReadAllTextRemote()
@@ -291,5 +291,24 @@ internal sealed class Model
         }
 
         return string.Empty;
+    }
+
+
+    // Thread safe asynchronous lazy initialization 
+    // based on the following:
+    // https://devblogs.microsoft.com/pfxteam/asynclazyt/?WT.mc_id=DT-MVP-5000058
+    // https://blog.stephencleary.com/2012/08/asynchronous-lazy-initialization.html
+
+    private sealed class AsyncLazy<T> : Lazy<Task<T>>
+    {
+        public AsyncLazy(Func<T> valueFactory) : base(() => Task.Run(valueFactory))
+        {
+        }
+
+        public AsyncLazy(Func<Task<T>> taskFactory) : base(() => Task.Run(taskFactory))
+        {
+        }
+
+        public TaskAwaiter<T> GetAwaiter() => Value.GetAwaiter(); 
     }
 }
