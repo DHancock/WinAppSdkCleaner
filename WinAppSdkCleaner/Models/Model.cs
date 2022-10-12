@@ -42,9 +42,9 @@ internal sealed class Model
         return false;
     }
 
-    private static VersionRecord CategorizePackageVersion(PackageVersion version, SdkTypes sdkId, IReadOnlyList<VersionRecord> sdkVersions)
+    private static VersionRecord CategorizePackageVersion(PackageVersion version, SdkTypes sdkId, IReadOnlyList<VersionRecord> versions)
     {
-        VersionRecord? versionRecord = sdkVersions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == version);
+        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == version);
 
         if (versionRecord is null)
             return new VersionRecord(string.Empty, string.Empty, string.Empty, sdkId, version);
@@ -82,7 +82,7 @@ internal sealed class Model
 
     private static List<SdkRecord> GetSDKs(IReadOnlyList<VersionRecord> versions, bool allUsers)
     {
-        Trace.WriteLine($"GetSDKs allUsers: {allUsers}");
+        Trace.WriteLine($"GetSDKs entry, allUsers: {allUsers}");
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
@@ -134,7 +134,7 @@ internal sealed class Model
     {
         await Task.Run(() =>
         {
-            Trace.WriteLine($"Remove package: {fullName}, allUsers: {allUsers}");
+            Trace.WriteLine($"Remove package: {fullName}");
 
             PackageManager packageManager = new PackageManager();
             IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> deploymentOperation;
@@ -187,40 +187,41 @@ internal sealed class Model
 
     public async static Task RemovePackages(IReadOnlyList<PackageRecord> packagesRecords)
     {
-        if (packagesRecords.Count > 0)
+        Trace.WriteLine($"RemovePackages entry, allUsers: {IntegrityLevel.IsElevated()}");
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        bool allUsers = IntegrityLevel.IsElevated();
+
+        // when removing for all users, any provisioned packages will also be removed
+        await RemovePackages(packagesRecords.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName), allUsers);
+
+        // Now for the frameworks, this is more complicated because there may be
+        // framework packages that depend on other frameworks (assuming that's even possible).
+        List<PackageRecord> frameworks = packagesRecords.Where(p => p.Package.IsFramework).ToList();
+
+        if (frameworks.Count > 0)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            bool allUsers = IntegrityLevel.IsElevated();
+            List<int> depths = frameworks.DistinctBy(p => p.Depth).Select(p => p.Depth).ToList();
+            depths.Sort((x, y) => y - x);
 
-            // when removing for all users, any provisioned packages will also be removed
-            await RemovePackages(packagesRecords.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName), allUsers);
-
-            // Now for the frameworks, this is more complicated because there may be
-            // framework packages that depend on other frameworks (assuming that's even possible).
-            List<PackageRecord> frameworks = packagesRecords.Where(p => p.Package.IsFramework).ToList();
-
-            if (frameworks.Count > 0)
+            foreach (int depth in depths)
             {
-                List<int> depths = frameworks.DistinctBy(p => p.Depth).Select(p => p.Depth).ToList();
-                depths.Sort((x, y) => y - x);
-
-                foreach (int depth in depths)
-                {
-                    // remove batches of framework packages in order of depth, deepest first
-                    await RemovePackages(frameworks.Where(p => p.Depth == depth).Select(p => p.Package.Id.FullName), allUsers);
-                }
+                // remove batches of framework packages in order of depth, deepest first
+                await RemovePackages(frameworks.Where(p => p.Depth == depth).Select(p => p.Package.Id.FullName), allUsers);
             }
-
-            stopwatch.Stop();
-            Trace.WriteLine($"Remove packages completed: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
+
+        stopwatch.Stop();
+        Trace.WriteLine($"RemovePackages, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
     private static async Task<IReadOnlyList<VersionRecord>> GetVersionsList()
     {
-        const int cMinValidVersions = 44;
+        Trace.WriteLine("GetVersionsList entry");
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
+        const int cMinValidVersions = 44;
         List<VersionRecord> versionsList = new List<VersionRecord>();
+        JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true, };
 
         for (int i = 0; i < 2; i++)
         {
@@ -230,8 +231,6 @@ internal sealed class Model
 
                 if (!string.IsNullOrEmpty(text))
                 {
-                    JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true, };
-
                     List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsOptions);
 
                     if ((versions is not null) && (versions.Count >= cMinValidVersions))
@@ -248,7 +247,8 @@ internal sealed class Model
             }
         }
 
-        Trace.WriteLine($"Versions list contains {versionsList.Count} entries");
+        stopwatch.Stop();
+        Trace.WriteLine($"GetVersionsList found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return versionsList;
     }
 
