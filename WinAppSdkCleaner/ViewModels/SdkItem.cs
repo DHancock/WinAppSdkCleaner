@@ -2,7 +2,7 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal sealed class SdkItem : ItemBase, IComparable<ItemBase>
+internal sealed class SdkItem : ItemBase
 {
     private SdkRecord SdkRecord { get; init; }
 
@@ -67,7 +67,7 @@ internal sealed class SdkItem : ItemBase, IComparable<ItemBase>
     public override int GetHashCode() => SdkRecord.Version.GetHashCode();
     public override bool Equals(object? obj) => this == (obj as SdkItem);
 
-    public new int CompareTo(ItemBase? item)
+    public override int CompareTo(ItemBase? item)
     {
         if (item is not SdkItem other)
             return -1;
