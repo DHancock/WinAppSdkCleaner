@@ -15,7 +15,7 @@ internal abstract class ItemBase : IComparable<ItemBase>
     public abstract string ToolTipText { get; }
     public ItemBase? Parent { get; init; }
 
-    public int CompareTo(ItemBase? other)
+    public virtual int CompareTo(ItemBase? other)
     {
         if (other is null)
             return -1;
