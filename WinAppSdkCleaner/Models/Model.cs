@@ -5,10 +5,10 @@ using Windows.Foundation;
 
 namespace WinAppSdkCleaner.Models;
 
-internal sealed class Model
+internal static class Model
 {
-    private static readonly AsyncLazy<IReadOnlyList<VersionRecord>> sVersionListProvider = 
-        new AsyncLazy<IReadOnlyList<VersionRecord>>(async () => await GetVersionsList());
+    private static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
+        new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsList());
 
     private static bool IsWinAppSdkName(PackageId id)
     {
@@ -42,12 +42,12 @@ internal sealed class Model
         return false;
     }
 
-    private static VersionRecord CategorizePackageVersion(PackageVersion version, SdkTypes sdkId, IReadOnlyList<VersionRecord> versions)
+    private static VersionRecord CategorizePackageVersion(PackageVersion packageVersion, SdkTypes sdkId, IEnumerable<VersionRecord> versions)
     {
-        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == version);
+        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
 
         if (versionRecord is null)
-            return new VersionRecord(string.Empty, string.Empty, string.Empty, sdkId, version);
+            return new VersionRecord(string.Empty, string.Empty, string.Empty, sdkId, packageVersion);
 
         return versionRecord;
     }
@@ -61,7 +61,7 @@ internal sealed class Model
         {
             foreach (Package dependency in package.Dependencies)
             {
-                // TryGetValue() is thread safe if the dictionary isn't modified by another thread
+                // TryGetValue() is thread safe as long as the dictionary isn't modified by another thread
                 if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageRecord? parentPackageRecord))
                 {
                     lock (lockObject)
@@ -80,12 +80,12 @@ internal sealed class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    private static List<SdkRecord> GetSDKs(IReadOnlyList<VersionRecord> versions, bool allUsers)
+    private static IEnumerable<SdkRecord> GetSDKs(IEnumerable<VersionRecord> versions, bool allUsers)
     {
         Trace.WriteLine($"GetSDKs entry, allUsers: {allUsers}");
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
-        Dictionary<string, PackageRecord> sdkLookUpTable = new Dictionary<string, PackageRecord>();
+        Dictionary<string, PackageRecord> lookUpTable = new Dictionary<string, PackageRecord>();
 
         PackageManager packageManager = new PackageManager();
         IEnumerable<Package> allPackages;
@@ -103,33 +103,33 @@ internal sealed class Model
 
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
-                List<PackageRecord> sdkPackageRecords = new List<PackageRecord>();
+                List<PackageRecord> packageRecords = new List<PackageRecord>();
                 VersionRecord sdkVersion = CategorizePackageVersion(group.Key, sdkId, versions);
 
                 foreach (Package package in group)
                 {
-                    PackageRecord sdkPackageRecord = new PackageRecord(package, new List<PackageRecord>(), 0);
-                    sdkPackageRecords.Add(sdkPackageRecord);
+                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), 0);
+                    packageRecords.Add(packageRecord);
 
                     if (package.IsFramework)
-                        sdkLookUpTable[package.Id.FullName] = sdkPackageRecord; // used to find dependents
+                        lookUpTable[package.Id.FullName] = packageRecord; // used to find dependents
                 }
 
-                sdks.Add(new SdkRecord(sdkVersion, sdkId, sdkPackageRecords));
+                sdks.Add(new SdkRecord(sdkVersion, sdkId, packageRecords));
             }
         }
 
-        if (sdkLookUpTable.Count > 0)
-            AddDependents(sdkLookUpTable, allPackages, 1);
+        if (lookUpTable.Count > 0)
+            AddDependents(lookUpTable, allPackages, 1);
 
         stopwatch.Stop();
         Trace.WriteLine($"GetSDKs found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
-    public static Task<List<SdkRecord>> GetSDKs()
+    public static Task<IEnumerable<SdkRecord>> GetSDKs()
     {
-        return Task.Run(async () => GetSDKs(await sVersionListProvider, allUsers: IntegrityLevel.IsElevated()));
+        return Task.Run(async () => GetSDKs(await sVersionsProvider, allUsers: IntegrityLevel.IsElevated()));
     }
 
     private async static Task Remove(string fullName, bool allUsers)
@@ -214,7 +214,7 @@ internal sealed class Model
         Trace.WriteLine($"RemovePackages, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
-    private static async Task<IReadOnlyList<VersionRecord>> GetVersionsList()
+    private static async Task<IEnumerable<VersionRecord>> GetVersionsList()
     {
         Trace.WriteLine("GetVersionsList entry");
         Stopwatch stopwatch = Stopwatch.StartNew();

@@ -8,7 +8,7 @@ internal class SdkList : List<ItemBase>
     {
     }
 
-    public SdkList(List<SdkRecord> sdks) : base()
+    public SdkList(IEnumerable<SdkRecord> sdks) : base()
     {
         foreach (SdkRecord sdk in sdks)
             Add(new SdkItem(sdk));
@@ -50,6 +50,7 @@ internal class SdkList : List<ItemBase>
             return packages;
         }
 
+        // take a snap shot of the current selection, it may change before deferred evaluation occurs
         return GetSelectedPackages(GetSelectedItem(this)).DistinctBy(p => p.Package.Id.FullName).ToList();
     }
 
