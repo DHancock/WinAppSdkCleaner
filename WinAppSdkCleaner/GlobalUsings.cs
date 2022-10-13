@@ -1,5 +1,4 @@
 ﻿global using System;
-global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.ComponentModel;
 global using System.Configuration;
@@ -19,6 +18,7 @@ global using System.Windows.Controls;
 global using System.Windows.Input;
 global using System.Windows.Media;
 global using System.Windows.Media.Imaging;
+global using System.Windows.Threading;
 
 global using Windows.ApplicationModel;
 global using Windows.Management.Deployment;
