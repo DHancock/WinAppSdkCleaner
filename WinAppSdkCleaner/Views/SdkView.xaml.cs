@@ -64,7 +64,7 @@ public partial class SdkView : UserControl
         }
     }
 
-    private bool CanSearch(object? param = null) => IsIdle;
+    private bool CanSearch(object? param) => IsIdle;
 
     private async void ExecuteRemove(object? param)
     {

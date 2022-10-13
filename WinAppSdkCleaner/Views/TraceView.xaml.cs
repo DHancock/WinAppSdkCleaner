@@ -13,7 +13,7 @@ public partial class TraceView : UserControl
 
         clearCommand = InitialiseCommand("Clear", ExecuteClear, CanClear);
 
-        Trace.Listeners.Add(new CustomTraceListener(TraceTextBox));
+        ViewTraceListener.Instance.RegisterConsumer(TraceTextBox);
 
         Loaded += (s, a) => AdjustCommandsState();
     }
@@ -26,44 +26,12 @@ public partial class TraceView : UserControl
         return command;
     }
 
-    public void ExecuteClear(object? param = null) => TraceTextBox.Clear();
+    public void ExecuteClear(object? param) => TraceTextBox.Clear();
 
-    private bool CanClear(object? param = null) => TraceTextBox.Text.Length > 0;
+    private bool CanClear(object? param) => TraceTextBox.Text.Length > 0;
 
     private void AdjustCommandsState() => clearCommand.RaiseCanExecuteChanged();
 
     private void TextChanged(object sender, TextChangedEventArgs e) => AdjustCommandsState();
-
-
-    private sealed class CustomTraceListener : TraceListener
-    {
-        private TextBox Consumer { get; init; }
-
-        public CustomTraceListener(TextBox consumer)
-        {
-            Consumer = consumer;
-        }
-
-        public override void Write(string? message)
-        {
-            if (message is not null)
-            {
-                Consumer.Dispatcher.Invoke(() =>
-                {
-                    int selectionStart = Consumer.SelectionStart;
-                    int selectionLength = Consumer.SelectionLength;
-                    
-                    Consumer.Text += message;
-
-                    if (selectionLength > 0)
-                        Consumer.Select(selectionStart, selectionLength);
-                    else
-                        Consumer.CaretIndex = Consumer.Text.Length;
-                });
-            }
-        }
-
-        public override void WriteLine(string? message) => Write(message + Environment.NewLine);
-    }
 }
 
