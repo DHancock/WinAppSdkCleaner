@@ -16,7 +16,7 @@ internal class SdkList : List<ItemBase>
         Sort();
     }
 
-    private static ItemBase? GetSelectedItem(List<ItemBase> items)
+    private static ItemBase? GetSelectedItem(IEnumerable<ItemBase> items)
     {
         foreach (ItemBase item in items)
         {
@@ -32,7 +32,7 @@ internal class SdkList : List<ItemBase>
         return null;
     }
 
-    public List<PackageRecord> GetDistinctSelectedPackages()
+    public IEnumerable<PackageRecord> GetDistinctSelectedPackages()
     {
         static List<PackageRecord> GetSelectedPackages(ItemBase? item)
         {
@@ -50,13 +50,10 @@ internal class SdkList : List<ItemBase>
             return packages;
         }
 
-        // take a snap shot of the current selection, it may change before deferred evaluation occurs
-        return GetSelectedPackages(GetSelectedItem(this)).DistinctBy(p => p.Package.Id.FullName).ToList();
+        return GetSelectedPackages(GetSelectedItem(this)).DistinctBy(p => p.Package.Id.FullName);
     }
 
     public bool CanRemove() => GetSelectedItem(this) is SdkItem;
-
-
 
     public string GetCopyData()
     {
@@ -84,7 +81,7 @@ internal class SdkList : List<ItemBase>
 
     public bool CanCopy() => GetSelectedItem(this) is not null;
 
-    private static ItemBase? FindItem(List<ItemBase> list, ItemBase other)
+    private static ItemBase? FindItem(IEnumerable<ItemBase> list, ItemBase other)
     {
         foreach (ItemBase item in list)
         {
@@ -100,7 +97,7 @@ internal class SdkList : List<ItemBase>
         return null;
     }
 
-    public void RestoreState(List<ItemBase> otherList)
+    public void RestoreState(IEnumerable<ItemBase> otherList)
     {
         foreach (ItemBase otherItem in otherList)
         {

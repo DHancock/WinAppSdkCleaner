@@ -41,9 +41,9 @@ internal class SdkViewModel : INotifyPropertyChanged
     {
         try
         {
-            List<PackageRecord> packages = sdkList.GetDistinctSelectedPackages();
+            IEnumerable<PackageRecord> packages = sdkList.GetDistinctSelectedPackages();
 
-            if (packages.Count > 0)
+            if (packages.Any())
             {
                 await Model.RemovePackages(packages);
             }
