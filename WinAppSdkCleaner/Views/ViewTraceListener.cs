@@ -3,7 +3,7 @@
 internal class ViewTraceListener : TraceListener
 {
     private readonly object lockObject = new object(); 
-    private string store = string.Empty;
+    private StringBuilder? store = null;
     private TextBox? Consumer { get; set; }
 
     public ViewTraceListener() : base(nameof(ViewTraceListener))
@@ -18,10 +18,10 @@ internal class ViewTraceListener : TraceListener
         {
             Consumer = textBox;
 
-            if (!string.IsNullOrEmpty(store))
+            if (store is not null && store.Length > 0)
             {
-                WriteInternal(store);
-                store = string.Empty;
+                WriteInternal(store.ToString());
+                store = null;
             }
         }
     }
@@ -30,17 +30,19 @@ internal class ViewTraceListener : TraceListener
 
     private void WriteInternal(string message)
     {
+        const int cMaxStoreLength = 1024 * 10;
+
         try
         {
-            int margin = IndentLevel * Math.Min(IndentSize, 4);
-
-            if (margin > 0)
-                message = new string(' ', margin) + message;
-
             if (Consumer is null)
             {
-                store += message;
-                Debug.Assert(store.Length < 10240);
+                if (store is null)
+                    store = new StringBuilder();
+
+                store.Append(message);
+
+                if (store.Length > cMaxStoreLength)
+                    store.Remove(0, cMaxStoreLength / 2);
             }
             else
             {
@@ -59,9 +61,8 @@ internal class ViewTraceListener : TraceListener
                 DispatcherPriority.Background);
             }
         }
-        catch (Exception ex)
+        catch 
         {
-            Debug.Fail(ex.ToString());
         }
     }
 

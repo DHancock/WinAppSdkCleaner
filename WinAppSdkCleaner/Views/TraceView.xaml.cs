@@ -13,17 +13,28 @@ public partial class TraceView : UserControl
 
         clearCommand = InitialiseCommand("Clear", ExecuteClear, CanClear);
 
-        foreach (TraceListener listener in Trace.Listeners)
-        {
-            if (listener is ViewTraceListener viewTraceListener)
-            {
-                viewTraceListener.RegisterConsumer(TraceTextBox);
-                break;
-            }
-        }
+        ViewTraceListener? viewTraceListener = FindViewTraceListener();
+
+        if (viewTraceListener is not null)
+            viewTraceListener.RegisterConsumer(TraceTextBox);
+        else
+            TraceTextBox.Text = $"Trace.Listeners doesn't contain {nameof(ViewTraceListener)}";
 
         Loaded += (s, a) => AdjustCommandsState();
     }
+
+
+    private static ViewTraceListener? FindViewTraceListener()
+    {
+        foreach (TraceListener listener in Trace.Listeners)
+        {
+            if (listener is ViewTraceListener viewTraceListener)
+                return viewTraceListener;
+        }
+
+        return null;
+    }
+
 
     private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)
     {
