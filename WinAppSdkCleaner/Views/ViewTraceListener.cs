@@ -6,19 +6,17 @@ internal class ViewTraceListener : TraceListener
     private string store = string.Empty;
     private TextBox? Consumer { get; set; }
 
-    public static ViewTraceListener Instance = new ViewTraceListener();
-
-    private ViewTraceListener()
+    public ViewTraceListener() : base(nameof(ViewTraceListener))
     {
     }
 
-    public void RegisterConsumer(TextBox consumer)
+    public void RegisterConsumer(TextBox textBox)
     {
-        Debug.Assert((Consumer is null) && consumer.IsInitialized);
+        Debug.Assert((Consumer is null) && textBox.IsInitialized);
 
         lock (lockObject)
         {
-            Consumer = consumer;
+            Consumer = textBox;
 
             if (!string.IsNullOrEmpty(store))
             {
@@ -32,6 +30,11 @@ internal class ViewTraceListener : TraceListener
 
     private void WriteInternal(string message)
     {
+        int margin = IndentLevel * IndentSize;
+
+        if (margin > 0)
+            message = new string(' ', margin) + message;
+
         if (Consumer is null)
         {
             store += message;
@@ -39,7 +42,7 @@ internal class ViewTraceListener : TraceListener
         }
         else
         {
-            Consumer.Dispatcher.BeginInvoke(() =>
+            Consumer.Dispatcher.BeginInvoke(() => 
             {
                 int selectionStart = Consumer.SelectionStart;
                 int selectionLength = Consumer.SelectionLength;

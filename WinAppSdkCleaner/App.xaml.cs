@@ -7,15 +7,17 @@ namespace WinAppSdkCleaner;
 /// </summary>
 public partial class App : Application
 {
+    private readonly ViewTraceListener traceListener = new ViewTraceListener();
+
     protected override void OnStartup(StartupEventArgs e)
     {
-        Trace.Listeners.Add(ViewTraceListener.Instance);
+        Trace.Listeners.Add(traceListener);
         base.OnStartup(e);
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
         base.OnExit(e);
-        Trace.Listeners.Remove(ViewTraceListener.Instance);
+        Trace.Listeners.Remove(traceListener);
     }
 }
