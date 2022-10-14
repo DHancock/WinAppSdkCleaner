@@ -30,31 +30,38 @@ internal class ViewTraceListener : TraceListener
 
     private void WriteInternal(string message)
     {
-        int margin = IndentLevel * IndentSize;
-
-        if (margin > 0)
-            message = new string(' ', margin) + message;
-
-        if (Consumer is null)
+        try
         {
-            store += message;
-            Debug.Assert(store.Length < 10240);
-        }
-        else
-        {
-            Consumer.Dispatcher.BeginInvoke(() => 
+            int margin = IndentLevel * Math.Min(IndentSize, 4);
+
+            if (margin > 0)
+                message = new string(' ', margin) + message;
+
+            if (Consumer is null)
             {
-                int selectionStart = Consumer.SelectionStart;
-                int selectionLength = Consumer.SelectionLength;
+                store += message;
+                Debug.Assert(store.Length < 10240);
+            }
+            else
+            {
+                Consumer.Dispatcher.BeginInvoke(() =>
+                {
+                    int selectionStart = Consumer.SelectionStart;
+                    int selectionLength = Consumer.SelectionLength;
 
-                Consumer.Text += message;
+                    Consumer.Text += message;
 
-                if (selectionLength > 0)
-                    Consumer.Select(selectionStart, selectionLength);
-                else
-                    Consumer.CaretIndex = Consumer.Text.Length;
-            }, 
-            DispatcherPriority.Render);
+                    if (selectionLength > 0)
+                        Consumer.Select(selectionStart, selectionLength);
+                    else
+                        Consumer.CaretIndex = Consumer.Text.Length;
+                },
+                DispatcherPriority.Background);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Fail(ex.ToString());
         }
     }
 
