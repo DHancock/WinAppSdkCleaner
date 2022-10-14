@@ -158,8 +158,10 @@ internal static class Model
             if (deploymentOperation.Status == AsyncStatus.Error)
             {
                 DeploymentResult deploymentResult = deploymentOperation.GetResults();
-                Trace.WriteLine($"  {deploymentOperation.ErrorCode}");
-                Trace.WriteLine($"  {deploymentResult.ErrorText}");
+                Trace.Indent();
+                Trace.WriteLine(deploymentOperation.ErrorCode.ToString());
+                Trace.WriteLine(deploymentResult.ErrorText);
+                Trace.Unindent();
             }
         });
     }

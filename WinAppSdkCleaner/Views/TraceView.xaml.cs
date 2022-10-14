@@ -13,7 +13,14 @@ public partial class TraceView : UserControl
 
         clearCommand = InitialiseCommand("Clear", ExecuteClear, CanClear);
 
-        ViewTraceListener.Instance.RegisterConsumer(TraceTextBox);
+        foreach (TraceListener listener in Trace.Listeners)
+        {
+            if (listener is ViewTraceListener viewTraceListener)
+            {
+                viewTraceListener.RegisterConsumer(TraceTextBox);
+                break;
+            }
+        }
 
         Loaded += (s, a) => AdjustCommandsState();
     }
