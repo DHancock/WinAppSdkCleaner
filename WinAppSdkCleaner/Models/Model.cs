@@ -1,7 +1,5 @@
 ﻿using CsWin32Lib;
 
-using System.Windows.Documents.Serialization;
-
 // for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
 using Windows.Foundation;
 
@@ -134,7 +132,7 @@ internal static class Model
         return Task.Run(async () => GetSDKs(await sVersionsProvider, allUsers: IntegrityLevel.IsElevated()));
     }
 
-    private async static Task Remove(string fullName, bool allUsers, CancellationToken ct)
+    private async static Task Remove(string fullName, bool allUsers, CancellationToken cancellationToken)
     {
         await Task.Run(() =>
         {
@@ -142,7 +140,6 @@ internal static class Model
 
             PackageManager packageManager = new PackageManager();
             IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> deploymentOperation;
-            bool isCancelled = false;
 
             using (ManualResetEventSlim opCompletedEvent = new ManualResetEventSlim(false))
             {
@@ -155,28 +152,25 @@ internal static class Model
 
                 try
                 {
-                    opCompletedEvent.Wait(ct);
+                    opCompletedEvent.Wait(cancellationToken);
                 }
-                catch (OperationCanceledException oce)
+                catch (OperationCanceledException)
                 {
                     Trace.WriteLine($"Removal of {fullName}, status: canceled due to time out");
-                    Trace.WriteLine(oce.ToString());
-                    isCancelled = true;
+                    return;
                 }
             }
 
-            if (!isCancelled)
+            Trace.WriteLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
+
+            if (deploymentOperation.Status == AsyncStatus.Error)
             {
-                Trace.WriteLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
-
-                if (deploymentOperation.Status == AsyncStatus.Error)
-                {
-                    DeploymentResult deploymentResult = deploymentOperation.GetResults();
-                    Trace.WriteLine($"  {deploymentOperation.ErrorCode}");
-                    Trace.WriteLine($"  {deploymentResult.ErrorText}");
-                }
+                DeploymentResult deploymentResult = deploymentOperation.GetResults();
+                Trace.WriteLine($"  {deploymentOperation.ErrorCode}");
+                Trace.WriteLine($"  {deploymentResult.ErrorText}");
             }
-        });
+        },
+        CancellationToken.None);
     }
 
     
