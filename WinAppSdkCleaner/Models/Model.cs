@@ -159,6 +159,7 @@ internal static class Model
                 }
                 catch (OperationCanceledException oce)
                 {
+                    Trace.WriteLine($"Removal of {fullName}, status: canceled due to time out");
                     Trace.WriteLine(oce.ToString());
                     isCancelled = true;
                 }
