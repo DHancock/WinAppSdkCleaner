@@ -1,5 +1,7 @@
 ﻿using CsWin32Lib;
 
+using System.Windows.Documents.Serialization;
+
 // for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
 using Windows.Foundation;
 
@@ -132,7 +134,7 @@ internal static class Model
         return Task.Run(async () => GetSDKs(await sVersionsProvider, allUsers: IntegrityLevel.IsElevated()));
     }
 
-    private async static Task Remove(string fullName, bool allUsers)
+    private async static Task Remove(string fullName, bool allUsers, CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -140,8 +142,9 @@ internal static class Model
 
             PackageManager packageManager = new PackageManager();
             IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> deploymentOperation;
+            bool isCancelled = false;
 
-            using (ManualResetEvent opCompletedEvent = new ManualResetEvent(false))
+            using (ManualResetEventSlim opCompletedEvent = new ManualResetEventSlim(false))
             {
                 if (allUsers)
                     deploymentOperation = packageManager.RemovePackageAsync(fullName, RemovalOptions.RemoveForAllUsers);
@@ -150,19 +153,33 @@ internal static class Model
 
                 deploymentOperation.Completed = (depProgress, status) => { opCompletedEvent.Set(); };
 
-                opCompletedEvent.WaitOne();
+                try
+                {
+                    opCompletedEvent.Wait(ct);
+                }
+                catch (OperationCanceledException oce)
+                {
+                    Trace.WriteLine(oce.ToString());
+                    isCancelled = true;
+                }
             }
 
-            Trace.WriteLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
-
-            if (deploymentOperation.Status == AsyncStatus.Error)
+            if (!isCancelled)
             {
-                DeploymentResult deploymentResult = deploymentOperation.GetResults();
-                Trace.WriteLine($"  {deploymentOperation.ErrorCode}");
-                Trace.WriteLine($"  {deploymentResult.ErrorText}");
+                Trace.WriteLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
+
+                if (deploymentOperation.Status == AsyncStatus.Error)
+                {
+                    DeploymentResult deploymentResult = deploymentOperation.GetResults();
+                    Trace.WriteLine($"  {deploymentOperation.ErrorCode}");
+                    Trace.WriteLine($"  {deploymentResult.ErrorText}");
+                }
             }
         });
     }
+
+    
+
 
     private async static Task RemovePackages(IEnumerable<PackageRecord> packageRecords, bool allUsers)
     {
@@ -171,11 +188,12 @@ internal static class Model
         if (packageRecords.Any())
         {
             int milliSeconds = 0;
+            CancellationTokenSource cts = new CancellationTokenSource();
             List<Task> tasks = new List<Task>();
 
             foreach (PackageRecord packageRecord in packageRecords)
             {
-                tasks.Add(Remove(packageRecord.Package.Id.FullName, allUsers));
+                tasks.Add(Remove(packageRecord.Package.Id.FullName, allUsers, cts.Token));
                 milliSeconds += cTimeoutPerPackage;
             }
 
@@ -184,7 +202,10 @@ internal static class Model
             Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
 
             if (firstOut == timeOut)
+            {
+                cts.Cancel();
                 throw new TimeoutException($"Removal of sdk timed out after {milliSeconds / 1000} seconds");
+            }
         }
     }
 
