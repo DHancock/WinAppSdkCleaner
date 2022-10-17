@@ -16,6 +16,15 @@
 
         <SolidColorBrush x:Key="SelectedFocusedTextColour" Color="White"/>
         <SolidColorBrush x:Key="SelectedUnFocusedTextColour" Color="Gray"/>
+
+        <Style x:Key="EnabledPathStyle" TargetType="Path">
+            <Setter Property="Opacity" Value="1.0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEnabled, RelativeSource={x:Static RelativeSource.Self}}" Value="false">
+                    <Setter Property="Opacity" Value="0.3"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid SnapsToDevicePixels="true" Margin="20,20,20,17">
@@ -113,7 +122,7 @@
                         <Separator/>
                         <MenuItem Header="Remove" Command="{StaticResource Remove}">
                             <MenuItem.Icon>
-                                <Path Data="M3,3 L13,13 M3,13 L13,3" Stroke="Red" StrokeThickness="1.25" Width="16" Height="16"/>
+                                <Path Data="M3,3 L13,13 M3,13 L13,3" Stroke="Red" StrokeThickness="1.25" Width="16" Height="16" Style="{StaticResource EnabledPathStyle}"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </ContextMenu>
