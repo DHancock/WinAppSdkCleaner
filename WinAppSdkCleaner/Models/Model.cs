@@ -148,7 +148,10 @@ internal static class Model
                 else
                     deploymentOperation = packageManager.RemovePackageAsync(fullName);
 
-                deploymentOperation.Completed = (depProgress, status) => { opCompletedEvent.Set(); };
+                deploymentOperation.Completed = (depProgress, status) => 
+                { 
+                    opCompletedEvent.Set(); 
+                };
 
                 try
                 {
@@ -156,7 +159,7 @@ internal static class Model
                 }
                 catch (OperationCanceledException)
                 {
-                    Trace.WriteLine($"Removal of {fullName}, status: canceled due to time out");
+                    Trace.WriteLine($"Removal of {fullName}, status: Wait() canceled due to time out");
                     return;
                 }
             }
