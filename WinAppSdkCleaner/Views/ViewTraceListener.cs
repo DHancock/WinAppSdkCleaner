@@ -12,15 +12,17 @@ internal class ViewTraceListener : TraceListener
 
     public void RegisterConsumer(TextBox textBox)
     {
-        Debug.Assert((Consumer is null) && textBox.IsInitialized);
-
         lock (lockObject)
         {
+            Debug.Assert(Consumer is null && textBox.IsInitialized);
+
             Consumer = textBox;
 
-            if (store is not null && store.Length > 0)
+            if (store is not null)
             {
-                WriteInternal(store.ToString());
+                if (store.Length > 0)
+                    WriteInternal(store.ToString());
+
                 store = null;
             }
         }
