@@ -14,9 +14,9 @@ public partial class AboutView : UserControl
         NameTextBlock.Text = assemblyName.Name;
         
         if (assemblyName.Version is not null)
-            VersionTextBlock.Text = assemblyName.Version.ToString();
+            VersionTextBlock.Text = ConvertToString(assemblyName.Version);
 
-        Trace.WriteLine($"{NameTextBlock.Text} - {VersionTextBlock.Text}");
+        Trace.WriteLine($"{NameTextBlock.Text} version: {VersionTextBlock.Text}");
     }
 
     private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
@@ -28,5 +28,10 @@ public partial class AboutView : UserControl
         };
 
         Process.Start(psi);
+    }
+
+    private static string ConvertToString(Version version)
+    {
+        return $"{version.Major}.{version.Minor}.{version.Build}";
     }
 }
