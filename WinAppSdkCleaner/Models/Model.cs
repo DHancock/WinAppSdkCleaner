@@ -40,8 +40,9 @@ internal static class Model
         return false;
     }
 
-    private static VersionRecord CategorizePackageVersion(PackageVersion packageVersion, SdkTypes sdkId, IEnumerable<VersionRecord> versions)
+    private static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, SdkTypes sdkId)
     {
+        IEnumerable<VersionRecord> versions = await sVersionsProvider;
         VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
 
         if (versionRecord is null)
@@ -78,7 +79,7 @@ internal static class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    private static IEnumerable<SdkRecord> GetSDKs(IEnumerable<VersionRecord> versions)
+    public static async Task<IEnumerable<SdkRecord>> GetSDKsAsync()
     {
         Trace.WriteLine($"GetSDKs entry, allUsers: {IntegrityLevel.IsElevated}");
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -102,7 +103,7 @@ internal static class Model
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
                 List<PackageRecord> packageRecords = new List<PackageRecord>();
-                VersionRecord sdkVersion = CategorizePackageVersion(group.Key, sdkId, versions);
+                VersionRecord sdkVersion = await CategorizePackageVersionAsync(group.Key, sdkId);
 
                 foreach (Package package in group)
                 {
@@ -123,11 +124,6 @@ internal static class Model
         stopwatch.Stop();
         Trace.WriteLine($"GetSDKs found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
-    }
-
-    public static Task<IEnumerable<SdkRecord>> GetSDKsAsync()
-    {
-        return Task.Run(async () => GetSDKs(await sVersionsProvider));
     }
 
     private async static Task RemoveAsync(string fullName, CancellationToken cancellationToken)
