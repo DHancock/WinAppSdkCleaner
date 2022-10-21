@@ -81,7 +81,7 @@ internal static class Model
 
     public static async Task<IEnumerable<SdkRecord>> GetSDKsAsync()
     {
-        Trace.WriteLine($"GetSDKs entry, allUsers: {IntegrityLevel.IsElevated}");
+        Trace.WriteLine($"{nameof(GetSDKsAsync)} entry, allUsers: {IntegrityLevel.IsElevated}");
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         Dictionary<string, PackageRecord> lookUpTable = new Dictionary<string, PackageRecord>();
@@ -122,7 +122,7 @@ internal static class Model
             AddDependents(lookUpTable, allPackages, 1);
 
         stopwatch.Stop();
-        Trace.WriteLine($"GetSDKs found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"{nameof(GetSDKsAsync)} found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
@@ -203,7 +203,7 @@ internal static class Model
 
     public async static Task RemovePackagesAsync(IEnumerable<PackageRecord> packageRecords)
     {
-        Trace.WriteLine("RemovePackages entry");
+        Trace.WriteLine($"{nameof(RemovePackagesAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
         
         // when removing for all users, any provisioned packages will also be removed
@@ -223,12 +223,12 @@ internal static class Model
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"RemovePackages, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"{nameof(RemovePackagesAsync)}, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
     private static async Task<IEnumerable<VersionRecord>> GetVersionsListAsync()
     {
-        Trace.WriteLine("GetVersionsList entry");
+        Trace.WriteLine($"{nameof(GetVersionsListAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         const int cMinValidVersions = 44;
@@ -260,7 +260,7 @@ internal static class Model
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"GetVersionsList found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"{nameof(GetVersionsListAsync)} found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return versionsList;
     }
 
