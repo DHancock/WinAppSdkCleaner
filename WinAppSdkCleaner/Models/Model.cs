@@ -1,6 +1,4 @@
-﻿using CsWin32Lib;
-
-// for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
+﻿// for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
 using Windows.Foundation;
 
 namespace WinAppSdkCleaner.Models;
@@ -80,9 +78,9 @@ internal static class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    private static IEnumerable<SdkRecord> GetSDKs(IEnumerable<VersionRecord> versions, bool allUsers)
+    private static IEnumerable<SdkRecord> GetSDKs(IEnumerable<VersionRecord> versions)
     {
-        Trace.WriteLine($"GetSDKs entry, allUsers: {allUsers}");
+        Trace.WriteLine($"GetSDKs entry, allUsers: {IntegrityLevel.IsElevated}");
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         Dictionary<string, PackageRecord> lookUpTable = new Dictionary<string, PackageRecord>();
@@ -90,7 +88,7 @@ internal static class Model
         PackageManager packageManager = new PackageManager();
         IEnumerable<Package> allPackages;
 
-        if (allUsers)
+        if (IntegrityLevel.IsElevated)
             allPackages = packageManager.FindPackages();
         else
             allPackages = packageManager.FindPackagesForUser(string.Empty);
@@ -129,10 +127,10 @@ internal static class Model
 
     public static Task<IEnumerable<SdkRecord>> GetSDKs()
     {
-        return Task.Run(async () => GetSDKs(await sVersionsProvider, allUsers: IntegrityLevel.IsElevated()));
+        return Task.Run(async () => GetSDKs(await sVersionsProvider));
     }
 
-    private async static Task Remove(string fullName, bool allUsers, CancellationToken cancellationToken)
+    private async static Task RemoveAsync(string fullName, CancellationToken cancellationToken)
     {
         await Task.Run(() =>
         {
@@ -143,7 +141,7 @@ internal static class Model
 
             using (ManualResetEventSlim opCompletedEvent = new ManualResetEventSlim(false))
             {
-                if (allUsers)
+                if (IntegrityLevel.IsElevated)
                     deploymentOperation = packageManager.RemovePackageAsync(fullName, RemovalOptions.RemoveForAllUsers);
                 else
                     deploymentOperation = packageManager.RemovePackageAsync(fullName);
@@ -179,7 +177,7 @@ internal static class Model
     
 
 
-    private async static Task RemovePackages(IEnumerable<PackageRecord> packageRecords, bool allUsers)
+    private async static Task RemoveBatchAsync(IEnumerable<PackageRecord> packageRecords)
     {
         const int cTimeoutPerPackage = 10 * 1000; // milliseconds
 
@@ -191,7 +189,7 @@ internal static class Model
 
             foreach (PackageRecord packageRecord in packageRecords)
             {
-                tasks.Add(Remove(packageRecord.Package.Id.FullName, allUsers, cts.Token));
+                tasks.Add(RemoveAsync(packageRecord.Package.Id.FullName, cts.Token));
                 milliSeconds += cTimeoutPerPackage;
             }
 
@@ -211,10 +209,9 @@ internal static class Model
     {
         Trace.WriteLine("RemovePackages entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        bool allUsers = IntegrityLevel.IsElevated();
         
         // when removing for all users, any provisioned packages will also be removed
-        await RemovePackages(packageRecords.Where(p => !p.Package.IsFramework), allUsers);
+        await RemoveBatchAsync(packageRecords.Where(p => !p.Package.IsFramework));
 
         // now for the frameworks, this is more complicated because there may be
         // framework packages that depend on other frameworks (assuming that's even possible).
@@ -226,7 +223,7 @@ internal static class Model
         foreach (IGrouping<int, PackageRecord> batch in query)
         {
             // remove batches of framework packages in order of depth, deepest first
-            await RemovePackages(batch, allUsers);
+            await RemoveBatchAsync(batch);
         }
 
         stopwatch.Stop();
@@ -311,7 +308,6 @@ internal static class Model
 
         return string.Empty;
     }
-
 
     // Thread safe asynchronous lazy initialization 
     // based on the following:
