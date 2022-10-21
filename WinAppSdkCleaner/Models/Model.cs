@@ -6,7 +6,7 @@ namespace WinAppSdkCleaner.Models;
 internal static class Model
 {
     private static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
-        new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsList());
+        new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsListAsync());
 
     private static bool IsWinAppSdkName(PackageId id)
     {
@@ -125,7 +125,7 @@ internal static class Model
         return sdks;
     }
 
-    public static Task<IEnumerable<SdkRecord>> GetSDKs()
+    public static Task<IEnumerable<SdkRecord>> GetSDKsAsync()
     {
         return Task.Run(async () => GetSDKs(await sVersionsProvider));
     }
@@ -205,7 +205,7 @@ internal static class Model
         }
     }
 
-    public async static Task RemovePackages(IEnumerable<PackageRecord> packageRecords)
+    public async static Task RemovePackagesAsync(IEnumerable<PackageRecord> packageRecords)
     {
         Trace.WriteLine("RemovePackages entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -230,7 +230,7 @@ internal static class Model
         Trace.WriteLine($"RemovePackages, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
-    private static async Task<IEnumerable<VersionRecord>> GetVersionsList()
+    private static async Task<IEnumerable<VersionRecord>> GetVersionsListAsync()
     {
         Trace.WriteLine("GetVersionsList entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -243,7 +243,7 @@ internal static class Model
         {
             try
             {
-                string text = (i == 0) ? await ReadAllTextRemote() : await ReadAllTextLocal();
+                string text = (i == 0) ? await ReadAllTextRemoteAsync() : await ReadAllTextLocalAsync();
 
                 if (!string.IsNullOrEmpty(text))
                 {
@@ -268,7 +268,7 @@ internal static class Model
         return versionsList;
     }
 
-    private static async Task<string> ReadAllTextRemote()
+    private static async Task<string> ReadAllTextRemoteAsync()
     {
         try
         {
@@ -286,7 +286,7 @@ internal static class Model
         return string.Empty;
     }
 
-    private static async Task<string> ReadAllTextLocal()
+    private static async Task<string> ReadAllTextLocalAsync()
     {
         try
         {
