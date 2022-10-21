@@ -25,7 +25,7 @@ internal class SdkViewModel : INotifyPropertyChanged
     {
         try
         {
-            SdkList newList = new SdkList(await Model.GetSDKs());
+            SdkList newList = new SdkList(await Model.GetSDKsAsync());
             newList.RestoreState(sdkList);
 
             SdkList = newList;
@@ -45,7 +45,7 @@ internal class SdkViewModel : INotifyPropertyChanged
 
             if (packages.Any())
             {
-                await Model.RemovePackages(packages);
+                await Model.RemovePackagesAsync(packages);
             }
         }
         catch 

@@ -1,6 +1,4 @@
-﻿using CsWin32Lib;
-
-// for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
+﻿// for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
 using Windows.Foundation;
 
 namespace WinAppSdkCleaner.Models;
@@ -8,7 +6,7 @@ namespace WinAppSdkCleaner.Models;
 internal static class Model
 {
     private static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
-        new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsList());
+        new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsListAsync());
 
     private static bool IsWinAppSdkName(PackageId id)
     {
@@ -42,8 +40,9 @@ internal static class Model
         return false;
     }
 
-    private static VersionRecord CategorizePackageVersion(PackageVersion packageVersion, SdkTypes sdkId, IEnumerable<VersionRecord> versions)
+    private static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, SdkTypes sdkId)
     {
+        IEnumerable<VersionRecord> versions = await sVersionsProvider;
         VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
 
         if (versionRecord is null)
@@ -80,9 +79,9 @@ internal static class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    private static IEnumerable<SdkRecord> GetSDKs(IEnumerable<VersionRecord> versions, bool allUsers)
+    public static async Task<IEnumerable<SdkRecord>> GetSDKsAsync()
     {
-        Trace.WriteLine($"GetSDKs entry, allUsers: {allUsers}");
+        Trace.WriteLine($"{nameof(GetSDKsAsync)} entry, allUsers: {IntegrityLevel.IsElevated}");
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         Dictionary<string, PackageRecord> lookUpTable = new Dictionary<string, PackageRecord>();
@@ -90,7 +89,7 @@ internal static class Model
         PackageManager packageManager = new PackageManager();
         IEnumerable<Package> allPackages;
 
-        if (allUsers)
+        if (IntegrityLevel.IsElevated)
             allPackages = packageManager.FindPackages();
         else
             allPackages = packageManager.FindPackagesForUser(string.Empty);
@@ -104,7 +103,7 @@ internal static class Model
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
                 List<PackageRecord> packageRecords = new List<PackageRecord>();
-                VersionRecord sdkVersion = CategorizePackageVersion(group.Key, sdkId, versions);
+                VersionRecord sdkVersion = await CategorizePackageVersionAsync(group.Key, sdkId);
 
                 foreach (Package package in group)
                 {
@@ -123,16 +122,11 @@ internal static class Model
             AddDependents(lookUpTable, allPackages, 1);
 
         stopwatch.Stop();
-        Trace.WriteLine($"GetSDKs found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"{nameof(GetSDKsAsync)} found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
     }
 
-    public static Task<IEnumerable<SdkRecord>> GetSDKs()
-    {
-        return Task.Run(async () => GetSDKs(await sVersionsProvider, allUsers: IntegrityLevel.IsElevated()));
-    }
-
-    private async static Task Remove(string fullName, bool allUsers, CancellationToken cancellationToken)
+    private async static Task RemoveAsync(string fullName, CancellationToken cancellationToken)
     {
         await Task.Run(() =>
         {
@@ -143,7 +137,7 @@ internal static class Model
 
             using (ManualResetEventSlim opCompletedEvent = new ManualResetEventSlim(false))
             {
-                if (allUsers)
+                if (IntegrityLevel.IsElevated)
                     deploymentOperation = packageManager.RemovePackageAsync(fullName, RemovalOptions.RemoveForAllUsers);
                 else
                     deploymentOperation = packageManager.RemovePackageAsync(fullName);
@@ -179,7 +173,7 @@ internal static class Model
     
 
 
-    private async static Task RemovePackages(IEnumerable<PackageRecord> packageRecords, bool allUsers)
+    private async static Task RemoveBatchAsync(IEnumerable<PackageRecord> packageRecords)
     {
         const int cTimeoutPerPackage = 10 * 1000; // milliseconds
 
@@ -191,7 +185,7 @@ internal static class Model
 
             foreach (PackageRecord packageRecord in packageRecords)
             {
-                tasks.Add(Remove(packageRecord.Package.Id.FullName, allUsers, cts.Token));
+                tasks.Add(RemoveAsync(packageRecord.Package.Id.FullName, cts.Token));
                 milliSeconds += cTimeoutPerPackage;
             }
 
@@ -207,14 +201,13 @@ internal static class Model
         }
     }
 
-    public async static Task RemovePackages(IEnumerable<PackageRecord> packageRecords)
+    public async static Task RemovePackagesAsync(IEnumerable<PackageRecord> packageRecords)
     {
-        Trace.WriteLine("RemovePackages entry");
+        Trace.WriteLine($"{nameof(RemovePackagesAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        bool allUsers = IntegrityLevel.IsElevated();
         
         // when removing for all users, any provisioned packages will also be removed
-        await RemovePackages(packageRecords.Where(p => !p.Package.IsFramework), allUsers);
+        await RemoveBatchAsync(packageRecords.Where(p => !p.Package.IsFramework));
 
         // now for the frameworks, this is more complicated because there may be
         // framework packages that depend on other frameworks (assuming that's even possible).
@@ -226,16 +219,16 @@ internal static class Model
         foreach (IGrouping<int, PackageRecord> batch in query)
         {
             // remove batches of framework packages in order of depth, deepest first
-            await RemovePackages(batch, allUsers);
+            await RemoveBatchAsync(batch);
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"RemovePackages, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"{nameof(RemovePackagesAsync)}, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
-    private static async Task<IEnumerable<VersionRecord>> GetVersionsList()
+    private static async Task<IEnumerable<VersionRecord>> GetVersionsListAsync()
     {
-        Trace.WriteLine("GetVersionsList entry");
+        Trace.WriteLine($"{nameof(GetVersionsListAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         const int cMinValidVersions = 44;
@@ -246,7 +239,7 @@ internal static class Model
         {
             try
             {
-                string text = (i == 0) ? await ReadAllTextRemote() : await ReadAllTextLocal();
+                string text = (i == 0) ? await ReadAllTextRemoteAsync() : await ReadAllTextLocalAsync();
 
                 if (!string.IsNullOrEmpty(text))
                 {
@@ -267,11 +260,11 @@ internal static class Model
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"GetVersionsList found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"{nameof(GetVersionsListAsync)} found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return versionsList;
     }
 
-    private static async Task<string> ReadAllTextRemote()
+    private static async Task<string> ReadAllTextRemoteAsync()
     {
         try
         {
@@ -289,7 +282,7 @@ internal static class Model
         return string.Empty;
     }
 
-    private static async Task<string> ReadAllTextLocal()
+    private static async Task<string> ReadAllTextLocalAsync()
     {
         try
         {
@@ -311,7 +304,6 @@ internal static class Model
 
         return string.Empty;
     }
-
 
     // Thread safe asynchronous lazy initialization 
     // based on the following:

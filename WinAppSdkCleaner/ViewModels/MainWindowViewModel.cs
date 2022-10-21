@@ -1,6 +1,4 @@
-﻿using CsWin32Lib;
-
-namespace WinAppSdkCleaner.ViewModels;
+﻿namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed class MainWindowViewModel
 {
@@ -9,7 +7,7 @@ internal sealed class MainWindowViewModel
 
     public MainWindowViewModel()
     {
-        if (IntegrityLevel.IsElevated())
+        if (Models.IntegrityLevel.IsElevated)
         {
             SdkTabHeading = "All _Users";
             WindowIcon = BitmapFrame.Create(new Uri("pack://application:,,,/resources/elevated.ico"));
