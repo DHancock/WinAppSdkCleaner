@@ -2,7 +2,9 @@
 
 internal static class IntegrityLevel
 {
-    public static readonly bool IsElevated = GetIsElevated();
+    // using lazy initialization isn't strictly necessary, but it does guarantee 
+    // exactly when it occurs, even if new static members are added
+    private static readonly Lazy<bool> IsElevatedProvider = new Lazy<bool>(() => GetIsElevated());
 
     private static bool GetIsElevated()
     {
@@ -14,9 +16,13 @@ internal static class IntegrityLevel
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
-        catch (PlatformNotSupportedException)
+        catch (Exception ex)
         {
-            return false; 
+            Trace.WriteLine(ex.ToString());
         }
+
+        return false;
     }
+
+    public static bool IsElevated => IsElevatedProvider.Value;
 }
