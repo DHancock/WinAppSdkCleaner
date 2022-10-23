@@ -170,9 +170,6 @@ internal static class Model
         CancellationToken.None);
     }
 
-    
-
-
     private async static Task RemoveBatchAsync(IEnumerable<PackageRecord> packageRecords)
     {
         const int cTimeoutPerPackage = 10 * 1000; // milliseconds
@@ -228,7 +225,7 @@ internal static class Model
 
     private static async Task<IEnumerable<VersionRecord>> GetVersionsListAsync()
     {
-        Trace.WriteLine($"{nameof(GetVersionsListAsync)} entry");
+        Trace.WriteLine($"  {nameof(GetVersionsListAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         const int cMinValidVersions = 44;
@@ -260,7 +257,7 @@ internal static class Model
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"{nameof(GetVersionsListAsync)} found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"  {nameof(GetVersionsListAsync)} found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return versionsList;
     }
 
