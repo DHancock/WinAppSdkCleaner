@@ -18,7 +18,10 @@ public partial class TraceView : UserControl
         if (viewTraceListener is not null)
             viewTraceListener.RegisterConsumer(TraceTextBox);
         else
+        {
             TraceTextBox.Text = $"Trace.Listeners doesn't contain {nameof(ViewTraceListener)}";
+            Debug.Fail(TraceTextBox.Text);
+        }
 
         Loaded += (s, a) => AdjustCommandsState();
     }
