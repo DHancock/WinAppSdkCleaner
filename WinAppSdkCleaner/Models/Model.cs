@@ -8,45 +8,22 @@ internal static class Model
     private static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
         new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsListAsync());
 
-    private static bool IsWinAppSdkName(PackageId id)
-    {
-        return (id.FullName.Contains("WinAppRuntime", StringComparison.OrdinalIgnoreCase) ||
-                    id.FullName.Contains("WindowsAppRuntime", StringComparison.OrdinalIgnoreCase) ||
-                    id.FullName.StartsWith("Microsoft.WindowsAppSDK", StringComparison.Ordinal));  // for 1.0.0 experimental 1 only
-    }
+    private static readonly IEnumerable<ISdk> sdkTypes =
+        new List<ISdk>() { new ProjectReunion(), new WinAppSdk() };
 
-    private static bool IsReunionName(PackageId id)
-    {
-        return id.FullName.Contains("ProjectReunion", StringComparison.OrdinalIgnoreCase);
-    }
 
     private static bool IsMicrosoftPublisher(PackageId id)
     {
         return string.Equals(id.PublisherId, "8wekyb3d8bbwe", StringComparison.Ordinal);
     }
 
-    private static bool IsSdkName(PackageId id, SdkTypes sdkId)
-    {
-        if (IsMicrosoftPublisher(id))
-        {
-            switch (sdkId)
-            {
-                case SdkTypes.Reunion: return IsReunionName(id);
-                case SdkTypes.WinAppSdk: return IsWinAppSdkName(id);
-                default: throw new ArgumentOutOfRangeException(nameof(sdkId));
-            }
-        }
-
-        return false;
-    }
-
-    private static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, SdkTypes sdkId)
+    private static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, ISdk sdk)
     {
         IEnumerable<VersionRecord> versions = await sVersionsProvider;
-        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
+        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdk.TypeId && v.Release == packageVersion);
 
         if (versionRecord is null)
-            return new VersionRecord(string.Empty, string.Empty, string.Empty, sdkId, packageVersion);
+            return new VersionRecord(string.Empty, string.Empty, string.Empty, sdk.TypeId, packageVersion);
 
         return versionRecord;
     }
@@ -94,16 +71,16 @@ internal static class Model
         else
             allPackages = packageManager.FindPackagesForUser(string.Empty);
 
-        foreach (SdkTypes sdkId in Enum.GetValues<SdkTypes>())
+        foreach (ISdk sdk in sdkTypes)
         {
             var query = from package in allPackages
-                        where IsSdkName(package.Id, sdkId)
+                        where IsMicrosoftPublisher(package.Id) && sdk.Match(package.Id)
                         group package by package.Id.Version;
 
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
                 List<PackageRecord> packageRecords = new List<PackageRecord>();
-                VersionRecord sdkVersion = await CategorizePackageVersionAsync(group.Key, sdkId);
+                VersionRecord sdkVersion = await CategorizePackageVersionAsync(group.Key, sdk);
 
                 foreach (Package package in group)
                 {
@@ -114,7 +91,7 @@ internal static class Model
                         lookUpTable[package.Id.FullName] = packageRecord; // used to find dependents
                 }
 
-                sdks.Add(new SdkRecord(sdkVersion, sdkId, packageRecords));
+                sdks.Add(new SdkRecord(sdkVersion, sdk, packageRecords));
             }
         }
 
@@ -176,24 +153,26 @@ internal static class Model
 
         if (packageRecords.Any())
         {
-            int milliSeconds = 0;
-            CancellationTokenSource cts = new CancellationTokenSource();
-            List<Task> tasks = new List<Task>();
-
-            foreach (PackageRecord packageRecord in packageRecords)
+            using (CancellationTokenSource cts = new CancellationTokenSource())
             {
-                tasks.Add(RemoveAsync(packageRecord.Package.Id.FullName, cts.Token));
-                milliSeconds += cTimeoutPerPackage;
-            }
+                int milliSeconds = 0;
+                List<Task> tasks = new List<Task>();
 
-            Task timeOut = Task.Delay(milliSeconds);
+                foreach (PackageRecord packageRecord in packageRecords)
+                {
+                    tasks.Add(RemoveAsync(packageRecord.Package.Id.FullName, cts.Token));
+                    milliSeconds += cTimeoutPerPackage;
+                }
 
-            Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
+                Task timeOut = Task.Delay(milliSeconds);
 
-            if (firstOut == timeOut)
-            {
-                cts.Cancel();
-                throw new TimeoutException($"Removal of sdk timed out after {milliSeconds / 1000} seconds");
+                Task firstOut = await Task.WhenAny(Task.WhenAll(tasks), timeOut);
+
+                if (firstOut == timeOut)
+                {
+                    cts.Cancel();
+                    throw new TimeoutException($"Removal of sdk timed out after {milliSeconds / 1000} seconds");
+                }
             }
         }
     }

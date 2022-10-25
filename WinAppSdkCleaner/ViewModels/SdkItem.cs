@@ -22,32 +22,22 @@ internal sealed class SdkItem : ItemBase
         get
         {
             if (SdkRecord.Version.SemanticVersion.Length == 0)
-                return $"{ConvertToString(SdkRecord.SdkId)} package version: {ConvertToString(SdkRecord.Version.Release)}";
+                return $"{SdkRecord.Sdk.DispalyName} package version: {ConvertToString(Version.Release)}";
 
             if (SdkRecord.Version.VersionTag.Length > 0)
-                return $"{ConvertToString(SdkRecord.SdkId)} {SdkRecord.Version.SemanticVersion} - {SdkRecord.Version.VersionTag}";
+                return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion} - {Version.VersionTag}";
 
-            return $"{ConvertToString(SdkRecord.SdkId)} {SdkRecord.Version.SemanticVersion}";
+            return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion}";
         } 
     }
 
-    public override string ToolTipText => $"Package version: {ConvertToString(SdkRecord.Version.Release)}";
+    public override string ToolTipText => $"Package version: {ConvertToString(Version.Release)}";
 
-    public VersionRecord Version => SdkRecord.Version;
+    private VersionRecord Version => SdkRecord.Version;
 
     private static string ConvertToString(PackageVersion pv)
     {
         return $"{pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
-    }
-
-    private static string ConvertToString(SdkTypes sdkId)
-    {
-        switch (sdkId)
-        {
-            case SdkTypes.Reunion: return "Project Reunion";
-            case SdkTypes.WinAppSdk: return "Windows App SDK";
-            default: throw new ArgumentOutOfRangeException(nameof(sdkId));
-        }
     }
 
     // ignores any children, it's only used to identify this tree node
@@ -59,12 +49,12 @@ internal sealed class SdkItem : ItemBase
         if ((x is null) || (y is null))
             return false;
 
-        return (x.SdkRecord.Version.SdkId == y.SdkRecord.Version.SdkId) &&
-                x.SdkRecord.Version.Release.Equals(y.SdkRecord.Version.Release);
+        return (x.Version.SdkId == y.Version.SdkId) &&
+                x.Version.Release.Equals(y.Version.Release);
     }
 
     public static bool operator !=(SdkItem? x, SdkItem? y) => !(x == y);
-    public override int GetHashCode() => SdkRecord.Version.GetHashCode();
+    public override int GetHashCode() => Version.GetHashCode();
     public override bool Equals(object? obj) => this == (obj as SdkItem);
 
     public override int CompareTo(ItemBase? item)

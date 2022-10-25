@@ -1,3 +1,3 @@
 ﻿namespace WinAppSdkCleaner.Models;
 
-internal sealed record SdkRecord(VersionRecord Version, SdkTypes SdkId, List<PackageRecord> SdkPackages);
+internal sealed record SdkRecord(VersionRecord Version, ISdk Sdk, List<PackageRecord> SdkPackages);
