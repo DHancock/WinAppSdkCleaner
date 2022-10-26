@@ -8,10 +8,6 @@ internal static class Model
     private static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
         new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsListAsync());
 
-    private static readonly IEnumerable<ISdk> sdkTypes =
-        new List<ISdk>() { new ProjectReunion(), new WinAppSdk() };
-
-
     private static bool IsMicrosoftPublisher(PackageId id)
     {
         return string.Equals(id.PublisherId, "8wekyb3d8bbwe", StringComparison.Ordinal);
@@ -20,10 +16,10 @@ internal static class Model
     private static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, ISdk sdk)
     {
         IEnumerable<VersionRecord> versions = await sVersionsProvider;
-        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdk.TypeId && v.Release == packageVersion);
+        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdk.Id && v.Release == packageVersion);
 
         if (versionRecord is null)
-            return new VersionRecord(string.Empty, string.Empty, string.Empty, sdk.TypeId, packageVersion);
+            return new VersionRecord(string.Empty, string.Empty, sdk.Id, packageVersion);
 
         return versionRecord;
     }
@@ -62,6 +58,7 @@ internal static class Model
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<SdkRecord> sdks = new List<SdkRecord>();
         Dictionary<string, PackageRecord> lookUpTable = new Dictionary<string, PackageRecord>();
+        IEnumerable<ISdk> sdkTypes = new List<ISdk>() { new ProjectReunion(), new WinAppSdk() };
 
         PackageManager packageManager = new PackageManager();
         IEnumerable<Package> allPackages;
