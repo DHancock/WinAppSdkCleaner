@@ -53,7 +53,7 @@ public partial class MainWindow : Window
 
             if (source is not null)
             {
-                Point[] pIn = new Point[] { new Point(restoreBounds.Left, restoreBounds.Top), new Point(restoreBounds.Right, restoreBounds.Bottom) };
+                Point[] pIn = new Point[] { restoreBounds.TopLeft, restoreBounds.BottomRight };
 
                 // convert to device pixels
                 source.CompositionTarget.TransformToDevice.Transform(pIn);
@@ -75,7 +75,10 @@ public partial class MainWindow : Window
                 if (topLeft.X < workingArea.Left)
                     topLeft.X = workingArea.Left;
 
-                Point[] pOut = new Point[] { topLeft, new Point(topLeft.X + windowArea.Width, topLeft.Y + windowArea.Height) };
+                Point bottomRight = new Point(topLeft.X + Math.Min(windowArea.Width, workingArea.Width), 
+                                                topLeft.Y + Math.Min(windowArea.Height, workingArea.Height));
+
+                Point[] pOut = new Point[] { topLeft, bottomRight };
 
                 // convert back to wpf coordinates in dip's
                 source.CompositionTarget.TransformFromDevice.Transform(pOut);
