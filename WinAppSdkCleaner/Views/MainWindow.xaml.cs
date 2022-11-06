@@ -53,15 +53,14 @@ public partial class MainWindow : Window
 
             if (source is not null)
             {
-                Point[] pIn = new Point[] { restoreBounds.TopLeft, restoreBounds.BottomRight };
+                Rect windowArea = restoreBounds;
 
                 // convert to device pixels
-                source.CompositionTarget.TransformToDevice.Transform(pIn);
+                windowArea.Transform(source.CompositionTarget.TransformToDevice);
 
-                Rect windowArea = new Rect(pIn[0], pIn[1]);
                 Rect workingArea = Monitors.GetWorkingAreaOfClosestMonitor(windowArea);
 
-                Point topLeft = pIn[0];
+                Point topLeft = windowArea.TopLeft;
 
                 if ((topLeft.Y + windowArea.Height) > workingArea.Bottom)
                     topLeft.Y = workingArea.Bottom - windowArea.Height;
@@ -78,12 +77,12 @@ public partial class MainWindow : Window
                 Point bottomRight = new Point(topLeft.X + Math.Min(windowArea.Width, workingArea.Width), 
                                                 topLeft.Y + Math.Min(windowArea.Height, workingArea.Height));
 
-                Point[] pOut = new Point[] { topLeft, bottomRight };
+                windowArea = new Rect(topLeft, bottomRight);
 
-                // convert back to wpf coordinates in dip's
-                source.CompositionTarget.TransformFromDevice.Transform(pOut);
+                // convert back to wpf coordinates
+                windowArea.Transform(source.CompositionTarget.TransformFromDevice);
 
-                return new Rect(pOut[0], pOut[1]);
+                return windowArea;
             }
         }
         catch (Exception ex)
