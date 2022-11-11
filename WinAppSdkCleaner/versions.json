@@ -480,8 +480,8 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.220727.1 - experimental 1",
-    "SemanticVersion": "1.2.220727.1",
+    "Description": "WinAppSdk 1.2.0 - experimental 1",
+    "SemanticVersion": "1.2.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
     "Release": {
@@ -492,8 +492,8 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.220909.2 - experimental 2",
-    "SemanticVersion": "1.2.220909.2",
+    "Description": "WinAppSdk 1.2.0 - experimental 2",
+    "SemanticVersion": "1.2.0",
     "VersionTag": "experimental 2",
     "SdkId": 1,
     "Release": {
@@ -504,8 +504,8 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.220902.1 - preview 1",
-    "SemanticVersion": "1.2.220902.1",
+    "Description": "WinAppSdk 1.2.0 - preview 1",
+    "SemanticVersion": "1.2.0",
     "VersionTag": "preview 1",
     "SdkId": 1,
     "Release": {
@@ -516,8 +516,8 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.220930.4 - preview 2",
-    "SemanticVersion": "1.2.220930.4",
+    "Description": "WinAppSdk 1.2.0 - preview 2",
+    "SemanticVersion": "1.2.0",
     "VersionTag": "preview 2",
     "SdkId": 1,
     "Release": {
@@ -528,8 +528,8 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.221109.1",
-    "SemanticVersion": "1.2.221109.1",
+    "Description": "WinAppSdk 1.2.0",
+    "SemanticVersion": "1.2.0",
     "VersionTag": "",
     "SdkId": 1,
     "Release": {
