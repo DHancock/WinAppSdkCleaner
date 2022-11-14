@@ -72,7 +72,7 @@
                     </HierarchicalDataTemplate>
 
                     <HierarchicalDataTemplate DataType="{x:Type vm:DependentsItem}" ItemsSource="{Binding Children, Mode=OneWay}">
-                        <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,0,0"/>
+                        <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,2,0"/>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
                                 <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedFocusedTextColour}"/>
@@ -94,7 +94,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Image Height="16" Source="{Binding Logo, Mode=OneTime}"/>
-                            <TextBlock Grid.Column="1" x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,0,0"/>
+                            <TextBlock Grid.Column="1" x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,2,0"/>
                         </Grid>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
