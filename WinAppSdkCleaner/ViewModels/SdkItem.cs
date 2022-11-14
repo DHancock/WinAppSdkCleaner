@@ -31,16 +31,9 @@ internal sealed class SdkItem : ItemBase
         }
     }
 
-    public string OtherAppsCount
-    {
-        get
-        {
-            if (SdkRecord.OtherAppsCount > 0)
-                return $"  (+{SdkRecord.OtherAppsCount})";
+    public string OtherAppsCount => $"(+{SdkRecord.OtherAppsCount})";
 
-            return string.Empty;
-        }
-    }
+    public Visibility OtherAppsCountVisibity => SdkRecord.OtherAppsCount > 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public override string ToolTipText => $"Package version: {ConvertToString(Version.Release)}";
 
