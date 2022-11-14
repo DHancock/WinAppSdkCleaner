@@ -53,10 +53,12 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" FontWeight="SemiBold" Foreground="Blue"/>
+                            <TextBlock x:Name="OtherAppsTextBlock" Text="{Binding OtherAppsCount, Mode=OneTime}" Grid.Column="1" FontWeight="SemiBold" Foreground="Crimson"/>
                         </Grid>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
                                 <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedFocusedTextColour}"/>
+                                <Setter TargetName="OtherAppsTextBlock" Property="Foreground" Value="Gold"/>
                             </DataTrigger>
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
@@ -64,6 +66,7 @@
                                     <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="False"/>
                                 </MultiDataTrigger.Conditions>
                                 <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
+                                <Setter TargetName="OtherAppsTextBlock" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
                             </MultiDataTrigger>
                         </HierarchicalDataTemplate.Triggers>
                     </HierarchicalDataTemplate>

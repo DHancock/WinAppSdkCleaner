@@ -28,7 +28,18 @@ internal sealed class SdkItem : ItemBase
                 return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion} - {Version.VersionTag}";
 
             return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion}";
-        } 
+        }
+    }
+
+    public string OtherAppsCount
+    {
+        get
+        {
+            if (SdkRecord.OtherAppsCount > 0)
+                return $"  (+{SdkRecord.OtherAppsCount})";
+
+            return string.Empty;
+        }
     }
 
     public override string ToolTipText => $"Package version: {ConvertToString(Version.Release)}";

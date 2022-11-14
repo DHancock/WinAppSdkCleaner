@@ -81,7 +81,7 @@ internal static class Model
 
                 foreach (Package package in group)
                 {
-                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), 0);
+                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), Depth: 0);
                     packageRecords.Add(packageRecord);
 
                     if (package.IsFramework)
@@ -93,11 +93,49 @@ internal static class Model
         }
 
         if (lookUpTable.Count > 0)
-            AddDependents(lookUpTable, allPackages, 1);
+        {
+            AddDependents(lookUpTable, allPackages, depth: 1);
+            sdks = CalculateDependentAppCounts(sdkTypes, sdks);
+        }
 
         stopwatch.Stop();
         Trace.WriteLine($"{nameof(GetSDKsAsync)} found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdks;
+    }
+
+    private static List<SdkRecord> CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, List<SdkRecord> sdks)
+    {
+        List<SdkRecord> modifiedList = new List<SdkRecord>(); 
+
+        foreach (ISdk sdk in sdkTypes)
+        {
+            foreach (SdkRecord sdkRecord in sdks)
+            {
+                if (sdkRecord.Sdk.Id == sdk.Id)
+                {
+                    int count = IdentifyOtherApps(sdk, sdkRecord.SdkPackages);
+                    modifiedList.Add(new SdkRecord(sdkRecord.Version, sdkRecord.Sdk, sdkRecord.SdkPackages, count));
+                }
+            }
+        }
+
+        return modifiedList;
+    }
+
+    private static int IdentifyOtherApps(ISdk sdk, List<PackageRecord> packageRecords)
+    {
+        int count = 0;
+
+        foreach (PackageRecord packageRecord in packageRecords)
+        {
+            if (!(sdk.Match(packageRecord.Package.Id) && IsMicrosoftPublisher(packageRecord.Package.Id)))
+                count += 1;
+
+            if (packageRecord.PackagesDependentOnThis.Count > 0)
+                count += IdentifyOtherApps(sdk, packageRecord.PackagesDependentOnThis);
+        }
+
+        return count;
     }
 
     private async static Task RemoveAsync(string fullName, CancellationToken cancellationToken)
