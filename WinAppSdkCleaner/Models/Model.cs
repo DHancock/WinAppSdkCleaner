@@ -103,7 +103,7 @@ internal static class Model
         return sdks;
     }
 
-    private static List<SdkRecord> CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, List<SdkRecord> sdks)
+    private static List<SdkRecord> CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkRecord> sdks)
     {
         List<SdkRecord> modifiedList = new List<SdkRecord>(); 
 
@@ -114,7 +114,7 @@ internal static class Model
                 if (sdkRecord.Sdk.Id == sdk.Id)
                 {
                     int count = IdentifyOtherApps(sdk, sdkRecord.SdkPackages);
-                    modifiedList.Add(new SdkRecord(sdkRecord.Version, sdkRecord.Sdk, sdkRecord.SdkPackages, count));
+                    modifiedList.Add(sdkRecord with { OtherAppsCount = count });
                 }
             }
         }
@@ -122,7 +122,7 @@ internal static class Model
         return modifiedList;
     }
 
-    private static int IdentifyOtherApps(ISdk sdk, List<PackageRecord> packageRecords)
+    private static int IdentifyOtherApps(ISdk sdk, IEnumerable<PackageRecord> packageRecords)
     {
         int count = 0;
 
