@@ -14,6 +14,6 @@
  
  A typical scenario:
  
-![Screenshot 2022-10-15 095122](https://user-images.githubusercontent.com/28826959/195978170-9390ae44-96a9-470b-9ba0-44c4c47ccf74.png)
+![application screen shot](https://user-images.githubusercontent.com/28826959/201951246-a55dd1d1-e92f-48d0-8b1a-640202f04c90.PNG)
 
 [^1]:If not, you run the risk of ending up with orphaned framework packages that cannot be removed without reinstalling the WinAppSdk version that they were installed with. This occurs if you install a provisioned WinAppSdk, followed by a non provisioned WinAppSdk that only has a higher patch version e.g. WinAppSdk version 1.1.3 provisioned, followed by 1.1.4 non provisioned. This results in the provisioned packages having a dependency on the non provisioned framework packages. If you then attempt to remove the WinAppSdk 1.1.4 version using the utility running non elevated, both WinAppSdk versions will be removed for the current user. However if you then start the utility elevated, it appears that both WinAppSdk versions still exist. If you attempt to remove the WinAppSdk version 1.1.4 for all users, the removal fails with file not found errors. However the Package Manager still indicates that the WinAppSdk 1.1.4 framework packages remain. Further attempts to remove them also fail, sometimes without errors. Your experience may differ depending on the windows OS build.
