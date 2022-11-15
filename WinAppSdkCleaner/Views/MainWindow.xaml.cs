@@ -43,6 +43,12 @@ public partial class MainWindow : Window
             Settings.Data.RestoreBounds = RestoreBounds;
             Settings.Data.Save();
         };
+
+        Activated += (s, e) =>
+        {
+            if (sdkView.CanSearch())
+                sdkView.ExecuteSearch();
+        };
     }
 
     internal Rect ValidateRestoreBounds(Rect restoreBounds)

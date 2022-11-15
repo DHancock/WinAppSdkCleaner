@@ -23,7 +23,7 @@
             </TabControl.ItemContainerStyle>
 
             <TabItem Header="{Binding SdkTabHeading}">
-                <local:SdkView/>
+                <local:SdkView x:Name="sdkView"/>
             </TabItem>
             <TabItem Header="_Output">
                 <local:TraceView/>
