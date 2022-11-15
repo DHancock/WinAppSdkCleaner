@@ -24,8 +24,6 @@ public partial class SdkView : UserControl
         copyCommand = InitialiseCommand("Copy", ExecuteCopy, CanCopy);
 
         DataContext = viewModel = new SdkViewModel();
-
-        Loaded += (s, a) => AdjustCommandsState();
     }
 
     private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)
