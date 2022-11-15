@@ -52,7 +52,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" FontWeight="SemiBold" Foreground="Blue" Margin="1,0,2,0"/>
+                            <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" FontWeight="Bold" Margin="1,0,2,0"/>
                         <TextBlock x:Name="OtherAppsTextBlock" Text="{Binding OtherAppsCount, Mode=OneTime}" Visibility="{Binding OtherAppsCountVisibity, Mode=OneTime}" Grid.Column="1" FontWeight="SemiBold" Foreground="Crimson" Margin="6,0,2,0" />
                         </Grid>
                         <HierarchicalDataTemplate.Triggers>
