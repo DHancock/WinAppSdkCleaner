@@ -13,7 +13,6 @@ public partial class SdkView : UserControl
     private readonly ViewCommand copyCommand;
     private readonly SdkViewModel viewModel;
 
-    private bool firstLoad = true;
     private bool isIdle = true;
 
     public SdkView()
@@ -26,16 +25,7 @@ public partial class SdkView : UserControl
 
         DataContext = viewModel = new SdkViewModel();
 
-        Loaded += (s, a) =>
-        {
-            AdjustCommandsState();
-
-            if (firstLoad)
-            {
-                firstLoad = false;
-                ExecuteSearch();
-            }
-        };
+        Loaded += (s, a) => AdjustCommandsState();
     }
 
     private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)
@@ -64,7 +54,7 @@ public partial class SdkView : UserControl
         }
     }
 
-    private bool CanSearch(object? param) => IsIdle;
+    public bool CanSearch(object? param = null) => IsIdle;
 
     private async void ExecuteRemove(object? param)
     {
