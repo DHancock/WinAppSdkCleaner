@@ -538,5 +538,17 @@
       "Build": 1750,
       "Revision": 0
     }
+  },
+  {
+    "Description": "WinAppSdk 1.2.1",
+    "SemanticVersion": "1.2.1",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2000,
+      "Minor": 684,
+      "Build": 1510,
+      "Revision": 0
+    }
   }
 ]
