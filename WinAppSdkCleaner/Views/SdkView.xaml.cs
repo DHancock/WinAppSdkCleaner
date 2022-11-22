@@ -61,6 +61,16 @@ public partial class SdkView : UserControl
             IsIdle = false;
             await viewModel.ExecuteRemove();
         }
+        catch (TimeoutException tex)
+        {
+            Trace.WriteLine(tex.ToString());
+
+            string message = $"{tex.Message}{Environment.NewLine}"
+                + "This can occur if an unpackaged application, "
+                + "that depends on this Windows App SDK is currently executing";
+
+            MessageBox.Show(message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
         catch (Exception ex)
         {
             Trace.WriteLine(ex.ToString());
