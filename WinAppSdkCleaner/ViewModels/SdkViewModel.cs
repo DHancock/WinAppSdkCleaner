@@ -41,7 +41,7 @@ internal class SdkViewModel : INotifyPropertyChanged
     {
         try
         {
-            // guarantee the latest dependencies are used, a store
+            // attempt to ensure the latest dependencies are used, a store
             // application may have been installed in the background
             await ExecuteSearch(); 
 
