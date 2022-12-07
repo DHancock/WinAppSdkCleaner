@@ -45,15 +45,18 @@
                         <Setter Property="IsEnabled" Value="{Binding IsEnabled, Mode=OneWay}"/>
                     </Style>
                 </TreeView.ItemContainerStyle>
+
                 <TreeView.Resources>
-                    <HierarchicalDataTemplate DataType="{x:Type vm:SdkItem}" ItemsSource="{Binding Children, Mode=OneWay}">
-                        <Grid HorizontalAlignment="Stretch">
+                    <HierarchicalDataTemplate DataType="{x:Type vm:ItemBase}" ItemsSource="{Binding Children, Mode=OneWay}">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" FontWeight="Bold" Margin="1,0,2,0"/>
-                        <TextBlock x:Name="OtherAppsTextBlock" Text="{Binding OtherAppsCount, Mode=OneTime}" Visibility="{Binding OtherAppsCountVisibity, Mode=OneTime}" Grid.Column="1" FontWeight="SemiBold" Foreground="Crimson" Margin="6,0,2,0" />
+                            <Image Height="16" Source="{Binding Logo, Mode=OneTime}" Visibility="{Binding LogoVisibity, Mode=OneTime}"/>
+                            <TextBlock Grid.Column="1" x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" FontWeight="{Binding HeadingFontWeight}" Padding="4,0,2,0"/>
+                            <TextBlock Grid.Column="2" x:Name="OtherAppsTextBlock" Text="{Binding OtherAppsCount, Mode=OneTime}" Visibility="{Binding OtherAppsCountVisibity, Mode=OneTime}" FontWeight="SemiBold" Foreground="Crimson" Margin="2,0,2,0" />
                         </Grid>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
@@ -67,45 +70,6 @@
                                 </MultiDataTrigger.Conditions>
                                 <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
                                 <Setter TargetName="OtherAppsTextBlock" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
-                            </MultiDataTrigger>
-                        </HierarchicalDataTemplate.Triggers>
-                    </HierarchicalDataTemplate>
-
-                    <HierarchicalDataTemplate DataType="{x:Type vm:DependentsItem}" ItemsSource="{Binding Children, Mode=OneWay}">
-                        <TextBlock x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,2,0"/>
-                        <HierarchicalDataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
-                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedFocusedTextColour}"/>
-                            </DataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True"/>
-                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="False"/>
-                                </MultiDataTrigger.Conditions>
-                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
-                            </MultiDataTrigger>
-                        </HierarchicalDataTemplate.Triggers>
-                    </HierarchicalDataTemplate>
-                    
-                    <HierarchicalDataTemplate DataType="{x:Type vm:ItemBase}" ItemsSource="{Binding Children, Mode=OneWay}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Image Height="16" Source="{Binding Logo, Mode=OneTime}"/>
-                            <TextBlock Grid.Column="1" x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" Padding="5,0,2,0"/>
-                        </Grid>
-                        <HierarchicalDataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
-                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedFocusedTextColour}"/>
-                            </DataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True"/>
-                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="False"/>
-                                </MultiDataTrigger.Conditions>
-                                <Setter TargetName="HeadingTextBox" Property="Foreground" Value="{StaticResource SelectedUnFocusedTextColour}"/>
                             </MultiDataTrigger>
                         </HierarchicalDataTemplate.Triggers>
                     </HierarchicalDataTemplate>

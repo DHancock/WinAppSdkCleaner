@@ -38,7 +38,7 @@ internal static class Model
                 {
                     lock (lockObject)
                     {
-                        PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), depth);
+                        PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), OtherAppsCount: 0, depth);
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                         if (package.IsFramework)
@@ -81,7 +81,7 @@ internal static class Model
 
                 foreach (Package package in group)
                 {
-                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), Depth: 0);
+                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), OtherAppsCount: 0, Depth: 0);
                     packageRecords.Add(packageRecord);
 
                     if (package.IsFramework)
@@ -122,20 +122,29 @@ internal static class Model
         return modifiedList;
     }
 
-    private static int IdentifyOtherApps(ISdk sdk, IEnumerable<PackageRecord> packageRecords)
+    private static int IdentifyOtherApps(ISdk sdk, List<PackageRecord> packageRecords)
     {
-        int count = 0;
+        int total = 0;
+        List<PackageRecord> modifiedList = new List<PackageRecord>();
 
         foreach (PackageRecord packageRecord in packageRecords)
         {
+            int count = 0;
+
             if (!(sdk.Match(packageRecord.Package.Id) && IsMicrosoftPublisher(packageRecord.Package.Id)))
                 count += 1;
 
             if (packageRecord.PackagesDependentOnThis.Count > 0)
                 count += IdentifyOtherApps(sdk, packageRecord.PackagesDependentOnThis);
+
+            total += count;
+            modifiedList.Add(packageRecord with { OtherAppsCount = count });
         }
 
-        return count;
+        packageRecords.Clear();
+        packageRecords.AddRange(modifiedList);
+
+        return total;
     }
 
     private async static Task RemoveAsync(string fullName, CancellationToken cancellationToken)

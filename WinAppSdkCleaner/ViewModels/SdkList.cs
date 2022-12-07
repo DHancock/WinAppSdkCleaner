@@ -40,7 +40,7 @@ internal class SdkList : List<ItemBase>
 
             if (item is not null)
             {
-                if (item is PackageItemBase packageItem)
+                if (item is PackageItem packageItem)
                     packages.Add(packageItem.PackageRecord);
 
                 foreach (ItemBase child in item.Children)
@@ -61,7 +61,7 @@ internal class SdkList : List<ItemBase>
         {
             sb.Append(new string(' ', indent * 4));
 
-            if (item is PackageItemBase packageItem)
+            if (item is PackageItem packageItem)
                 sb.AppendLine(packageItem.Package.Id.FullName);
             else
                 sb.AppendLine(item.HeadingText);

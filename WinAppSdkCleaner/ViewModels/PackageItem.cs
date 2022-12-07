@@ -2,20 +2,92 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal class PackageItem : PackageItemBase
+internal class PackageItem : ItemBase
 {
-    private PackageItem(PackageRecord packageRecord, ItemBase parent) : base(packageRecord, parent)
+    private readonly ImageSource cachedLogo;
+    public PackageRecord PackageRecord { get; init; }
+
+    public PackageItem(PackageRecord packageRecord, ItemBase parent) : base(parent)
     {
+        PackageRecord = packageRecord;
+        cachedLogo = LoadPackageLogo();
+
         foreach (PackageRecord dependentPackage in packageRecord.PackagesDependentOnThis)
             Children.Add(new PackageItem(dependentPackage, this));
+
+        Children.Sort();
     }
 
-    public PackageItem(PackageRecord packageRecord, PackageItem parent) : this(packageRecord, (ItemBase)parent)
+    public Package Package => PackageRecord.Package;
+
+    public override string HeadingText => Package.DisplayName;
+
+    public override string ToolTipText
     {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Package.Description))
+                return Package.Id.FullName;
+
+            return Package.Description;
+        }
+    }
+    public override string OtherAppsCount => $"+{PackageRecord.OtherAppsCount}";
+
+    public override Visibility OtherAppsCountVisibity
+    {
+        get
+        {
+            return Children.Any() && (PackageRecord.OtherAppsCount > 0) ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 
-    public PackageItem(PackageRecord packageRecord, DependentsItem parent) : this(packageRecord, (ItemBase)parent)
+    public override Visibility LogoVisibity => Visibility.Visible;
+
+    public override FontWeight HeadingFontWeight => FontWeights.Regular;
+
+    public override ImageSource? Logo => cachedLogo;
+
+    private ImageSource LoadPackageLogo()
     {
+        try
+        {
+            BitmapImage bitmap = new BitmapImage();
+
+            bitmap.BeginInit();
+            bitmap.DecodePixelHeight = 16;
+            bitmap.UriSource = Package.Logo;
+            bitmap.EndInit();
+
+            return bitmap;
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex.ToString());
+        }
+
+        return new BitmapImage(new Uri("pack://application:,,,/resources/unknown.png"));
     }
+
+    // ignores any children, it's only used to identify this tree node
+    public static bool operator ==(PackageItem? x, PackageItem? y)
+    {
+        if (ReferenceEquals(x, y))
+            return true;
+
+        if ((x is null) || (y is null))
+            return false;
+
+        if (string.Equals(x.Package.Id.FullName, y.Package.Id.FullName, StringComparison.Ordinal))
+        {
+            // this node can occur in multiple places, check parents 
+            return x.Parent!.Equals(y.Parent);
+        }
+
+        return false;
+    }
+    public static bool operator !=(PackageItem? x, PackageItem? y) => !(x == y);
+    public override int GetHashCode() => Package.GetHashCode();
+    public override bool Equals(object? obj) => this == (obj as PackageItem);
 }
 
