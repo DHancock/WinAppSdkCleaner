@@ -13,6 +13,11 @@ internal abstract class ItemBase : IComparable<ItemBase>
     public List<ItemBase> Children { get; } = new List<ItemBase>();
     public abstract string HeadingText { get; }
     public abstract string ToolTipText { get; }
+    public abstract string OtherAppsCount { get; }
+    public abstract Visibility OtherAppsCountVisibity { get; }
+    public abstract ImageSource? Logo { get; }
+    public abstract Visibility LogoVisibity { get; }
+    public abstract FontWeight HeadingFontWeight { get; }
     public ItemBase? Parent { get; init; }
 
     public virtual int CompareTo(ItemBase? other)

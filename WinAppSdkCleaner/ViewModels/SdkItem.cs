@@ -12,7 +12,7 @@ internal sealed class SdkItem : ItemBase
         SdkRecord = sdkRecord;
 
         foreach (PackageRecord packageRecord in sdkRecord.SdkPackages)
-            Children.Add(new SdkPackageItem(packageRecord, this));
+            Children.Add(new PackageItem(packageRecord, this));
 
         Children.Sort();
     }
@@ -31,9 +31,15 @@ internal sealed class SdkItem : ItemBase
         }
     }
 
-    public string OtherAppsCount => $"(+{SdkRecord.OtherAppsCount})";
+    public override string OtherAppsCount => $"+{SdkRecord.OtherAppsCount}";
 
-    public Visibility OtherAppsCountVisibity => SdkRecord.OtherAppsCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+    public override Visibility OtherAppsCountVisibity => SdkRecord.OtherAppsCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public override Visibility LogoVisibity => Visibility.Collapsed;
+
+    public override ImageSource? Logo => null;
+
+    public override FontWeight HeadingFontWeight => FontWeights.Bold;
 
     public override string ToolTipText => $"Package version: {ConvertToString(Version.Release)}";
 
@@ -89,6 +95,7 @@ internal sealed class SdkItem : ItemBase
             }
         }
 
+        // it would have been simpler if the version record had a "rank" field... 
         return result;
     }
 }
