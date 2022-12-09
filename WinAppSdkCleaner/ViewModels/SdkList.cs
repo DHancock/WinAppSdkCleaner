@@ -57,24 +57,29 @@ internal class SdkList : List<ItemBase>
 
     public string GetCopyData()
     {
-        static void GetCopyData(ItemBase item, int indent, StringBuilder sb)
-        {
-            sb.Append(new string(' ', indent * 4));
-
-            if (item is PackageItem packageItem)
-                sb.AppendLine(packageItem.Package.Id.FullName);
-            else
-                sb.AppendLine(item.HeadingText);
-
-            foreach (ItemBase child in item.Children)
-                GetCopyData(child, indent + 1, sb);
-        }
+        IEnumerable<PackageRecord> allPackages = GetDistinctSelectedPackages();
+        IEnumerable<string> frameworks = allPackages.Where(p => p.Package.IsFramework).Select(p => p.Package.Id.FullName);
+        IEnumerable<string> others = allPackages.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName);
 
         StringBuilder sb = new StringBuilder();
-        ItemBase? item = GetSelectedItem(this);
 
-        if (item is not null)
-            GetCopyData(item, 0, sb);
+        if (frameworks.Any())
+        {
+            sb.AppendLine("Framework packages:");
+            sb.AppendJoin(Environment.NewLine, frameworks);
+            sb.Append(Environment.NewLine);
+        }
+
+        if (others.Any())
+        {
+            if (frameworks.Any())
+            {
+                sb.Append(Environment.NewLine);
+                sb.AppendLine("Dependent packages:");
+            }
+
+            sb.AppendJoin(Environment.NewLine, others);
+        }
 
         return sb.ToString();
     }

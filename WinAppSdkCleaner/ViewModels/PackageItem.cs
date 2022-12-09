@@ -89,5 +89,22 @@ internal class PackageItem : ItemBase
     public static bool operator !=(PackageItem? x, PackageItem? y) => !(x == y);
     public override int GetHashCode() => Package.GetHashCode();
     public override bool Equals(object? obj) => this == (obj as PackageItem);
+
+    public override int CompareTo(ItemBase? item)
+    {
+        const int cBefore = -1;
+        const int cAfter = 1;
+
+        if (item is not PackageItem other)
+            throw new ArgumentException("incompatible type", nameof(item));
+
+        bool noneSdkApp = (Children.Count == 0) && (PackageRecord.OtherAppsCount > 0);
+        bool otherNoneSdkApp = (other.Children.Count == 0) && (other.PackageRecord.OtherAppsCount > 0);
+
+        if (noneSdkApp != otherNoneSdkApp)
+            return noneSdkApp ? cBefore : cAfter;
+
+        return base.CompareTo(item);
+    }
 }
 
