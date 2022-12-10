@@ -36,15 +36,15 @@ internal class PackageItem : ItemBase
 
     public override Visibility OtherAppsCountVisibity
     {
-        get
-        {
-            return Children.Any() && (PackageRecord.OtherAppsCount > 0) ? Visibility.Visible : Visibility.Collapsed;
-        }
+        get => Children.Any() && (PackageRecord.OtherAppsCount > 0) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public override Visibility LogoVisibity => Visibility.Visible;
 
-    public override FontWeight HeadingFontWeight => FontWeights.Regular;
+    public override FontWeight HeadingFontWeight
+    {
+        get => IsNonSdkPackage ? FontWeights.SemiBold : FontWeights.Regular;
+    }
 
     public override ImageSource? Logo => cachedLogo;
 
@@ -63,6 +63,7 @@ internal class PackageItem : ItemBase
         }
         catch (Exception ex)
         {
+            Trace.WriteLine($"An exception was thrown retrieving the logo for package: {Package.DisplayName} ({Package.Id.FullName})");
             Trace.WriteLine(ex.ToString());
         }
 
@@ -90,6 +91,8 @@ internal class PackageItem : ItemBase
     public override int GetHashCode() => Package.GetHashCode();
     public override bool Equals(object? obj) => this == (obj as PackageItem);
 
+    private bool IsNonSdkPackage => (Children.Count == 0) && (PackageRecord.OtherAppsCount == 1);
+
     public override int CompareTo(ItemBase? item)
     {
         const int cBefore = -1;
@@ -98,11 +101,8 @@ internal class PackageItem : ItemBase
         if (item is not PackageItem other)
             throw new ArgumentException("incompatible type", nameof(item));
 
-        bool noneSdkApp = (Children.Count == 0) && (PackageRecord.OtherAppsCount > 0);
-        bool otherNoneSdkApp = (other.Children.Count == 0) && (other.PackageRecord.OtherAppsCount > 0);
-
-        if (noneSdkApp != otherNoneSdkApp)
-            return noneSdkApp ? cBefore : cAfter;
+        if (IsNonSdkPackage != other.IsNonSdkPackage)
+            return IsNonSdkPackage ? cBefore : cAfter;
 
         return base.CompareTo(item);
     }
