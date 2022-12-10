@@ -8,9 +8,9 @@ internal class SdkList : List<ItemBase>
     {
     }
 
-    public SdkList(IEnumerable<SdkRecord> sdks) : base()
+    public SdkList(IEnumerable<SdkData> sdks) : base()
     {
-        foreach (SdkRecord sdk in sdks)
+        foreach (SdkData sdk in sdks)
             Add(new SdkItem(sdk));
 
         Sort();
@@ -32,11 +32,11 @@ internal class SdkList : List<ItemBase>
         return null;
     }
 
-    public IEnumerable<PackageRecord> GetDistinctSelectedPackages()
+    public IEnumerable<PackageData> GetDistinctSelectedPackages()
     {
-        static List<PackageRecord> GetSelectedPackages(ItemBase? item)
+        static List<PackageData> GetSelectedPackages(ItemBase? item)
         {
-            List<PackageRecord> packages = new List<PackageRecord>();
+            List<PackageData> packages = new List<PackageData>();
 
             if (item is not null)
             {
@@ -57,7 +57,7 @@ internal class SdkList : List<ItemBase>
 
     public string GetCopyData()
     {
-        IEnumerable<PackageRecord> allPackages = GetDistinctSelectedPackages();
+        IEnumerable<PackageData> allPackages = GetDistinctSelectedPackages();
         IEnumerable<string> frameworks = allPackages.Where(p => p.Package.IsFramework).Select(p => p.Package.Id.FullName);
         IEnumerable<string> others = allPackages.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName);
 

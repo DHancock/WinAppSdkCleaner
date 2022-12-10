@@ -45,7 +45,7 @@ internal class SdkViewModel : INotifyPropertyChanged
             // application may have been installed in the background
             await ExecuteSearch(); 
 
-            IEnumerable<PackageRecord> packages = sdkList.GetDistinctSelectedPackages();
+            IEnumerable<PackageData> packages = sdkList.GetDistinctSelectedPackages();
 
             if (packages.Any())
             {

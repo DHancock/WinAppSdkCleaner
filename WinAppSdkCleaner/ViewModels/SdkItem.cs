@@ -4,14 +4,14 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed class SdkItem : ItemBase
 {
-    private SdkRecord SdkRecord { get; init; }
+    private SdkData SdkRecord { get; init; }
 
-    public SdkItem(SdkRecord sdkRecord) : base(null)
+    public SdkItem(SdkData sdkRecord) : base(null)
     {
         IsExpanded = true;
         SdkRecord = sdkRecord;
 
-        foreach (PackageRecord packageRecord in sdkRecord.SdkPackages)
+        foreach (PackageData packageRecord in sdkRecord.SdkPackages)
             Children.Add(new PackageItem(packageRecord, this));
 
         Children.Sort();
