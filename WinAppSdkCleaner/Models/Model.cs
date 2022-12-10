@@ -38,7 +38,7 @@ internal static class Model
                 {
                     lock (lockObject)
                     {
-                        PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), OtherAppsCount: 0, depth);
+                        PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), otherAppsCount: 0, depth);
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                         if (package.IsFramework)
@@ -81,7 +81,7 @@ internal static class Model
 
                 foreach (Package package in group)
                 {
-                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), OtherAppsCount: 0, Depth: 0);
+                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), otherAppsCount: 0, depth: 0);
                     packageRecords.Add(packageRecord);
 
                     if (package.IsFramework)
@@ -95,7 +95,7 @@ internal static class Model
         if (lookUpTable.Count > 0)
         {
             AddDependents(lookUpTable, allPackages, depth: 1);
-            sdks = CalculateDependentAppCounts(sdkTypes, sdks);
+            CalculateDependentAppCounts(sdkTypes, sdks);
         }
 
         stopwatch.Stop();
@@ -103,29 +103,21 @@ internal static class Model
         return sdks;
     }
 
-    private static List<SdkRecord> CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkRecord> sdks)
+    private static void CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkRecord> sdks)
     {
-        List<SdkRecord> modifiedList = new List<SdkRecord>(); 
-
         foreach (ISdk sdk in sdkTypes)
         {
             foreach (SdkRecord sdkRecord in sdks)
             {
                 if (sdkRecord.Sdk.Id == sdk.Id)
-                {
-                    int count = IdentifyOtherApps(sdk, sdkRecord.SdkPackages);
-                    modifiedList.Add(sdkRecord with { OtherAppsCount = count });
-                }
+                    sdkRecord.OtherAppsCount = IdentifyOtherApps(sdk, sdkRecord.SdkPackages); ;
             }
         }
-
-        return modifiedList;
     }
 
     private static int IdentifyOtherApps(ISdk sdk, List<PackageRecord> packageRecords)
     {
         int total = 0;
-        List<PackageRecord> modifiedList = new List<PackageRecord>();
 
         foreach (PackageRecord packageRecord in packageRecords)
         {
@@ -138,11 +130,8 @@ internal static class Model
                 count += IdentifyOtherApps(sdk, packageRecord.PackagesDependentOnThis);
 
             total += count;
-            modifiedList.Add(packageRecord with { OtherAppsCount = count });
+            packageRecord.OtherAppsCount = count;
         }
-
-        packageRecords.Clear();
-        packageRecords.AddRange(modifiedList);
 
         return total;
     }
