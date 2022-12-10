@@ -38,7 +38,7 @@ internal static class Model
                 {
                     lock (lockObject)
                     {
-                        PackageData dependentPackage = new PackageData(package, new List<PackageData>(), otherAppsCount: 0, depth);
+                        PackageData dependentPackage = new PackageData(package, new List<PackageData>(), depth);
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                         if (package.IsFramework)
@@ -81,7 +81,7 @@ internal static class Model
 
                 foreach (Package package in group)
                 {
-                    PackageData packageRecord = new PackageData(package, new List<PackageData>(), otherAppsCount: 0, depth: 0);
+                    PackageData packageRecord = new PackageData(package, new List<PackageData>(), depth: 0);
                     packageRecords.Add(packageRecord);
 
                     if (package.IsFramework)
