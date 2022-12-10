@@ -1,13 +1,13 @@
 ﻿namespace WinAppSdkCleaner.Models;
 
-internal sealed class PackageRecord
+internal sealed class PackageData
 {
     public Package Package { get; set; }
-    public List<PackageRecord> PackagesDependentOnThis { get; set; }
+    public List<PackageData> PackagesDependentOnThis { get; set; }
     public int OtherAppsCount { get; set; }
     public int Depth { get; set; }
 
-    public PackageRecord(Package package, List<PackageRecord> packagesDependentOnThis, int otherAppsCount, int depth)
+    public PackageData(Package package, List<PackageData> packagesDependentOnThis, int otherAppsCount, int depth)
     {
         Package = package;
         PackagesDependentOnThis = packagesDependentOnThis;

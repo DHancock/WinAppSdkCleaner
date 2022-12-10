@@ -5,14 +5,14 @@ namespace WinAppSdkCleaner.ViewModels;
 internal class PackageItem : ItemBase
 {
     private readonly ImageSource cachedLogo;
-    public PackageRecord PackageRecord { get; init; }
+    public PackageData PackageRecord { get; init; }
 
-    public PackageItem(PackageRecord packageRecord, ItemBase parent) : base(parent)
+    public PackageItem(PackageData packageRecord, ItemBase parent) : base(parent)
     {
         PackageRecord = packageRecord;
         cachedLogo = LoadPackageLogo();
 
-        foreach (PackageRecord dependentPackage in packageRecord.PackagesDependentOnThis)
+        foreach (PackageData dependentPackage in packageRecord.PackagesDependentOnThis)
             Children.Add(new PackageItem(dependentPackage, this));
 
         Children.Sort();

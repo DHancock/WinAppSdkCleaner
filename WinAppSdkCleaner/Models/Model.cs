@@ -24,21 +24,21 @@ internal static class Model
         return versionRecord;
     }
 
-    private static void AddDependents(IReadOnlyDictionary<string, PackageRecord> lookUpTable, IEnumerable<Package> allPackages, int depth)
+    private static void AddDependents(IReadOnlyDictionary<string, PackageData> lookUpTable, IEnumerable<Package> allPackages, int depth)
     {
         object lockObject = new object();
-        Dictionary<string, PackageRecord> subLookUp = new Dictionary<string, PackageRecord>();
+        Dictionary<string, PackageData> subLookUp = new Dictionary<string, PackageData>();
 
         Parallel.ForEach(allPackages, package =>
         {
             foreach (Package dependency in package.Dependencies)
             {
                 // TryGetValue() is thread safe as long as the dictionary isn't modified by another thread
-                if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageRecord? parentPackageRecord))
+                if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentPackageRecord))
                 {
                     lock (lockObject)
                     {
-                        PackageRecord dependentPackage = new PackageRecord(package, new List<PackageRecord>(), otherAppsCount: 0, depth);
+                        PackageData dependentPackage = new PackageData(package, new List<PackageData>(), otherAppsCount: 0, depth);
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                         if (package.IsFramework)
@@ -52,12 +52,12 @@ internal static class Model
             AddDependents(subLookUp, allPackages, depth + 1);
     }
 
-    public static async Task<IEnumerable<SdkRecord>> GetSDKsAsync()
+    public static async Task<IEnumerable<SdkData>> GetSDKsAsync()
     {
         Trace.WriteLine($"{nameof(GetSDKsAsync)} entry, allUsers: {IntegrityLevel.IsElevated}");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        List<SdkRecord> sdks = new List<SdkRecord>();
-        Dictionary<string, PackageRecord> lookUpTable = new Dictionary<string, PackageRecord>();
+        List<SdkData> sdks = new List<SdkData>();
+        Dictionary<string, PackageData> lookUpTable = new Dictionary<string, PackageData>();
         IEnumerable<ISdk> sdkTypes = new List<ISdk>() { new ProjectReunion(), new WinAppSdk() };
 
         PackageManager packageManager = new PackageManager();
@@ -76,19 +76,19 @@ internal static class Model
 
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
-                List<PackageRecord> packageRecords = new List<PackageRecord>();
+                List<PackageData> packageRecords = new List<PackageData>();
                 VersionRecord sdkVersion = await CategorizePackageVersionAsync(group.Key, sdk);
 
                 foreach (Package package in group)
                 {
-                    PackageRecord packageRecord = new PackageRecord(package, new List<PackageRecord>(), otherAppsCount: 0, depth: 0);
+                    PackageData packageRecord = new PackageData(package, new List<PackageData>(), otherAppsCount: 0, depth: 0);
                     packageRecords.Add(packageRecord);
 
                     if (package.IsFramework)
                         lookUpTable[package.Id.FullName] = packageRecord; // used to find dependents
                 }
 
-                sdks.Add(new SdkRecord(sdkVersion, sdk, packageRecords));
+                sdks.Add(new SdkData(sdkVersion, sdk, packageRecords));
             }
         }
 
@@ -103,11 +103,11 @@ internal static class Model
         return sdks;
     }
 
-    private static void CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkRecord> sdks)
+    private static void CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkData> sdks)
     {
         foreach (ISdk sdk in sdkTypes)
         {
-            foreach (SdkRecord sdkRecord in sdks)
+            foreach (SdkData sdkRecord in sdks)
             {
                 if (sdkRecord.Sdk.Id == sdk.Id)
                     sdkRecord.OtherAppsCount = IdentifyOtherApps(sdk, sdkRecord.SdkPackages); ;
@@ -115,11 +115,11 @@ internal static class Model
         }
     }
 
-    private static int IdentifyOtherApps(ISdk sdk, List<PackageRecord> packageRecords)
+    private static int IdentifyOtherApps(ISdk sdk, List<PackageData> packageRecords)
     {
         int total = 0;
 
-        foreach (PackageRecord packageRecord in packageRecords)
+        foreach (PackageData packageRecord in packageRecords)
         {
             int count = 0;
 
@@ -180,7 +180,7 @@ internal static class Model
         CancellationToken.None);
     }
 
-    private async static Task RemoveBatchAsync(IEnumerable<PackageRecord> packageRecords)
+    private async static Task RemoveBatchAsync(IEnumerable<PackageData> packageRecords)
     {
         const int cTimeoutPerPackage = 10 * 1000; // milliseconds
 
@@ -191,7 +191,7 @@ internal static class Model
                 int milliSeconds = 0;
                 List<Task> tasks = new List<Task>();
 
-                foreach (PackageRecord packageRecord in packageRecords)
+                foreach (PackageData packageRecord in packageRecords)
                 {
                     tasks.Add(RemoveAsync(packageRecord.Package.Id.FullName, cts.Token));
                     milliSeconds += cTimeoutPerPackage;
@@ -210,7 +210,7 @@ internal static class Model
         }
     }
 
-    public async static Task RemovePackagesAsync(IEnumerable<PackageRecord> packageRecords)
+    public async static Task RemovePackagesAsync(IEnumerable<PackageData> packageRecords)
     {
         Trace.WriteLine($"{nameof(RemovePackagesAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -225,7 +225,7 @@ internal static class Model
                     orderby packageRecord.Depth descending
                     group packageRecord by packageRecord.Depth;
 
-        foreach (IGrouping<int, PackageRecord> batch in query)
+        foreach (IGrouping<int, PackageData> batch in query)
         {
             // remove batches of framework packages in order of depth, deepest first
             await RemoveBatchAsync(batch);
