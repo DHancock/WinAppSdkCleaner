@@ -38,7 +38,7 @@ internal static class Model
                 {
                     lock (lockObject)
                     {
-                        PackageData dependentPackage = new PackageData(package, new List<PackageData>(), otherAppsCount: 0, depth);
+                        PackageData dependentPackage = new PackageData(package, new List<PackageData>(), depth);
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                         if (package.IsFramework)
@@ -56,7 +56,7 @@ internal static class Model
     {
         Trace.WriteLine($"{nameof(GetSDKsAsync)} entry, allUsers: {IntegrityLevel.IsElevated}");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        List<SdkData> sdks = new List<SdkData>();
+        List<SdkData> sdkList = new List<SdkData>();
         Dictionary<string, PackageData> lookUpTable = new Dictionary<string, PackageData>();
         IEnumerable<ISdk> sdkTypes = new List<ISdk>() { new ProjectReunion(), new WinAppSdk() };
 
@@ -76,61 +76,61 @@ internal static class Model
 
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
-                List<PackageData> packageRecords = new List<PackageData>();
-                VersionRecord sdkVersion = await CategorizePackageVersionAsync(group.Key, sdk);
+                List<PackageData> packageList = new List<PackageData>();
+                VersionRecord sdkVersion = await CategorizePackageVersionAsync(packageVersion: group.Key, sdk);
 
                 foreach (Package package in group)
                 {
-                    PackageData packageRecord = new PackageData(package, new List<PackageData>(), otherAppsCount: 0, depth: 0);
-                    packageRecords.Add(packageRecord);
+                    PackageData packageData = new PackageData(package, new List<PackageData>(), depth: 0);
+                    packageList.Add(packageData);
 
                     if (package.IsFramework)
-                        lookUpTable[package.Id.FullName] = packageRecord; // used to find dependents
+                        lookUpTable[package.Id.FullName] = packageData; // used to find dependents
                 }
 
-                sdks.Add(new SdkData(sdkVersion, sdk, packageRecords));
+                sdkList.Add(new SdkData(sdkVersion, sdk, packageList));
             }
         }
 
         if (lookUpTable.Count > 0)
         {
             AddDependents(lookUpTable, allPackages, depth: 1);
-            CalculateDependentAppCounts(sdkTypes, sdks);
+            CalculateDependentAppCounts(sdkTypes, sdkList);
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"{nameof(GetSDKsAsync)} found {sdks.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
-        return sdks;
+        Trace.WriteLine($"{nameof(GetSDKsAsync)} found {sdkList.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        return sdkList;
     }
 
-    private static void CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkData> sdks)
+    private static void CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkData> sdkList)
     {
         foreach (ISdk sdk in sdkTypes)
         {
-            foreach (SdkData sdkRecord in sdks)
+            foreach (SdkData sdkData in sdkList)
             {
-                if (sdkRecord.Sdk.Id == sdk.Id)
-                    sdkRecord.OtherAppsCount = IdentifyOtherApps(sdk, sdkRecord.SdkPackages); ;
+                if (sdkData.Sdk.Id == sdk.Id)
+                    sdkData.OtherAppsCount = IdentifyOtherApps(sdk, sdkData.SdkPackages);
             }
         }
     }
 
-    private static int IdentifyOtherApps(ISdk sdk, List<PackageData> packageRecords)
+    private static int IdentifyOtherApps(ISdk sdk, List<PackageData> packageList)
     {
         int total = 0;
 
-        foreach (PackageData packageRecord in packageRecords)
+        foreach (PackageData packageData in packageList)
         {
             int count = 0;
 
-            if (!(sdk.Match(packageRecord.Package.Id) && IsMicrosoftPublisher(packageRecord.Package.Id)))
+            if (!(sdk.Match(packageData.Package.Id) && IsMicrosoftPublisher(packageData.Package.Id)))
                 count += 1;
 
-            if (packageRecord.PackagesDependentOnThis.Count > 0)
-                count += IdentifyOtherApps(sdk, packageRecord.PackagesDependentOnThis);
+            if (packageData.PackagesDependentOnThis.Count > 0)
+                count += IdentifyOtherApps(sdk, packageData.PackagesDependentOnThis);
 
             total += count;
-            packageRecord.OtherAppsCount = count;
+            packageData.OtherAppsCount = count;
         }
 
         return total;
@@ -152,9 +152,9 @@ internal static class Model
                 else
                     deploymentOperation = packageManager.RemovePackageAsync(fullName);
 
-                deploymentOperation.Completed = (depProgress, status) => 
-                { 
-                    opCompletedEvent.Set(); 
+                deploymentOperation.Completed = (depProgress, status) =>
+                {
+                    opCompletedEvent.Set();
                 };
 
                 try
@@ -214,7 +214,7 @@ internal static class Model
     {
         Trace.WriteLine($"{nameof(RemovePackagesAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        
+
         // when removing for all users, any provisioned packages will also be removed
         await RemoveBatchAsync(packageRecords.Where(p => !p.Package.IsFramework));
 
@@ -329,6 +329,6 @@ internal static class Model
         {
         }
 
-        public TaskAwaiter<T> GetAwaiter() => Value.GetAwaiter(); 
+        public TaskAwaiter<T> GetAwaiter() => Value.GetAwaiter();
     }
 }
