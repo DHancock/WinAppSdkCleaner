@@ -562,5 +562,17 @@
       "Build": 2303,
       "Revision": 0
     }
+  },
+  {
+    "Description": "WinAppSdk 1.2.3",
+    "SemanticVersion": "1.2.3",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2000,
+      "Minor": 747,
+      "Build": 1945,
+      "Revision": 0
+    }
   }
 ]
