@@ -588,6 +588,18 @@
     }
   },
   {
+    "Description": "WinAppSdk 1.2.5",
+    "SemanticVersion": "1.2.5",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2000,
+      "Minor": 802,
+      "Build": 31,
+      "Revision": 0
+    }
+  },
+  {
     "Description": "WinAppSdk 1.3.0 - experimental 1",
     "SemanticVersion": "1.3.0",
     "VersionTag": "experimental 1",
