@@ -5,7 +5,7 @@ namespace WinAppSdkCleaner.Models;
 
 internal static class Model
 {
-    private static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
+    internal static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
         new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsListAsync());
 
     private static bool IsMicrosoftPublisher(PackageId id)
@@ -319,7 +319,7 @@ internal static class Model
     // https://devblogs.microsoft.com/pfxteam/asynclazyt/?WT.mc_id=DT-MVP-5000058
     // https://blog.stephencleary.com/2012/08/asynchronous-lazy-initialization.html
 
-    private sealed class AsyncLazy<T> : Lazy<Task<T>>
+    internal sealed class AsyncLazy<T> : Lazy<Task<T>>
     {
         public AsyncLazy(Func<T> valueFactory) : base(() => Task.Run(valueFactory))
         {

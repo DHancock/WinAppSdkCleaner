@@ -12,7 +12,7 @@
         <local:ViewCommand x:Key="Clear"/>
     </UserControl.Resources>
 
-    <Grid Margin="20,20,20,20" SnapsToDevicePixels="true">
+    <Grid Margin="15" SnapsToDevicePixels="true">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition MinWidth="110" Width="Auto"/>

@@ -75,27 +75,8 @@ internal sealed class SdkItem : ItemBase
         int result = Version.SdkId - other.Version.SdkId;
 
         if (result == 0)
-        {
-            if ((Version.SemanticVersion.Length > 0) && (other.Version.SemanticVersion.Length > 0))
-                result = string.Compare(Version.SemanticVersion, other.Version.SemanticVersion);
-            else
-            {
-                result = other.Version.SemanticVersion.Length - Version.SemanticVersion.Length;
+            result = new PackageVersionComparer().Compare(Version.Release, other.Version.Release);
 
-                if (result == 0) // they are both uncategorized
-                    result = string.Compare(HeadingText, other.HeadingText);
-            }
-
-            if (result == 0)
-            {
-                if ((Version.VersionTag.Length > 0) && (other.Version.VersionTag.Length > 0))
-                    result = string.Compare(Version.VersionTag, other.Version.VersionTag);
-                else
-                    result = other.Version.VersionTag.Length - Version.VersionTag.Length;
-            }
-        }
-
-        // it would have been simpler if the version record had a "rank" field... 
         return result;
     }
 }
