@@ -27,7 +27,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid SnapsToDevicePixels="true" Margin="20,20,20,17">
+    <Grid SnapsToDevicePixels="true" Margin="15,15,15,12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition MinWidth="110" Width="Auto"/>
