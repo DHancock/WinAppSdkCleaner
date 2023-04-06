@@ -20,19 +20,19 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <ListView ItemsSource="{Binding WinAppSdkList}" Margin="15">
+        <ListView ItemsSource="{Binding WinAppSdkList, Mode=OneWay}" Margin="15">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="WinAppSdk Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion}"/>
-                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion}"/>
+                    <GridViewColumn Header="WinAppSdk Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion, Mode=OneWay}"/>
+                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion, Mode=OneWay}"/>
                 </GridView>
             </ListView.View>
         </ListView>
-        <ListView Grid.Column="1" ItemsSource="{Binding ReunionList}" Margin="15">
+        <ListView Grid.Column="1" ItemsSource="{Binding ReunionList, Mode=OneWay}" Margin="15">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Reunion Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion}"/>
-                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion}"/>
+                    <GridViewColumn Header="Reunion Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion, Mode=OneWay}"/>
+                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion, Mode=OneWay}"/>
                 </GridView>
             </ListView.View>
         </ListView>

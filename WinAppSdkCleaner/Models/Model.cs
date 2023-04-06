@@ -240,7 +240,7 @@ internal static class Model
         Trace.WriteLine($"  {nameof(GetVersionsListAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        const int cMinValidVersions = 44;
+        const int cMinValidVersions = 52;
         List<VersionRecord> versionsList = new List<VersionRecord>();
         JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true, };
 
