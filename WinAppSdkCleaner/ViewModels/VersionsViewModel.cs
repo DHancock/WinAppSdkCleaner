@@ -4,37 +4,89 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal class VersionsViewModel : INotifyPropertyChanged
 {
-    private IEnumerable<VersionRecord>? versions;
+    private List<DisplayVersion>? winAppSdkList;
+    private List<DisplayVersion>? reunionList;
 
     public async Task LoadVersionInfo()
     {
-        if (versions is null)
+        if (winAppSdkList is null)
         {
-            versions = await Model.sVersionsProvider;
+            IEnumerable<VersionRecord> versions = await Model.sVersionsProvider;
 
-            RaisePropertyChanged(nameof(WinAppSdkList));
-            RaisePropertyChanged(nameof(ReunionList));
+            WinAppSdkList = FilterVersionsList(versions, SdkId.WinAppSdk);
+            ReunionList = FilterVersionsList(versions, SdkId.Reunion);
         }
     }
 
-    public IEnumerable<DisplayVersion> WinAppSdkList => FilterVersionsList(SdkId.WinAppSdk);
-
-    public IEnumerable<DisplayVersion> ReunionList => FilterVersionsList(SdkId.Reunion);
-
-    private IEnumerable<DisplayVersion> FilterVersionsList(SdkId sdkId)
+    public List<DisplayVersion> WinAppSdkList
     {
-        if (versions is null)
-            return new List<DisplayVersion>();
+        get => winAppSdkList ?? new List<DisplayVersion>();
 
+        set 
+        {
+            winAppSdkList = value;
+            RaisePropertyChanged();
+        }
+    }
+
+    public List<DisplayVersion> ReunionList
+    {
+        get => reunionList ?? new List<DisplayVersion>();
+
+        set
+        {
+            reunionList = value;
+            RaisePropertyChanged();
+        }
+    }
+
+    private static List<DisplayVersion> FilterVersionsList(IEnumerable<VersionRecord> versions, SdkId sdkId)
+    {
         return versions.Where(v => v.SdkId == sdkId)
                         .OrderByDescending(v => v.Release, new PackageVersionComparer())
-                        .Select(v => new DisplayVersion($"{v.SemanticVersion} {v.VersionTag}", ConvertToString(v.Release)));
+                        .Select(v => new DisplayVersion($"{v.SemanticVersion} {v.VersionTag}", ConvertToString(v.Release))).ToList();
     }
 
     private static string ConvertToString(PackageVersion pv)
     {
         return $"{pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
     }
+
+    public void ExecuteCopy(SdkId sdkId)
+    {
+        switch (sdkId)
+        {
+            case SdkId.WinAppSdk: Copy(WinAppSdkList); break;
+            case SdkId.Reunion: Copy(ReunionList); break;
+            default:
+                Debug.Fail($"unknown SdkId: {sdkId}");
+                break;
+        }
+    }
+
+    private void Copy(List<DisplayVersion> list) 
+    { 
+        IEnumerable<string> selected = list.Where(p => p.IsSelected).Select(p => $"{p.SemanticVersion}\t{p.PackageVersion}");
+
+        StringBuilder sb = new StringBuilder();
+        sb.AppendJoin(Environment.NewLine, selected);
+
+        if (sb.Length > 0) 
+            Clipboard.SetText(sb.ToString());
+    }
+
+    public bool CanCopy(SdkId sdkId)
+    {
+        switch (sdkId)
+        {
+            case SdkId.WinAppSdk: return WinAppSdkList.Any(x => x.IsSelected);
+            case SdkId.Reunion: return ReunionList.Any(x => x.IsSelected);
+        }
+
+        Debug.Fail($"unknown SdkId: {sdkId}");
+        return false;
+    }
+
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
     {
@@ -43,5 +95,5 @@ internal class VersionsViewModel : INotifyPropertyChanged
     
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    internal sealed record DisplayVersion(string SemanticVersion, string PackageVersion);
+    internal sealed record DisplayVersion(string SemanticVersion, string PackageVersion, bool IsSelected = false);
 }

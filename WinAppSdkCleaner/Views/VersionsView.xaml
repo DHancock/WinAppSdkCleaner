@@ -6,6 +6,12 @@
              xmlns:local="clr-namespace:WinAppSdkCleaner.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <local:ViewCommand x:Key="WinAppSdkCopy"/>
+        <local:ViewCommand x:Key="ReunionCopy"/>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.Resources>
             <DataTemplate x:Key="ColumnHeaderTemplate">
@@ -18,6 +24,7 @@
 
             <!-- make the selection colours the same as a tree view -->
             <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=OneWayToSource}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ListViewItem}">
@@ -63,22 +70,53 @@
         </Grid.ColumnDefinitions>
 
         <!-- left, top, right, bottom -->
-        <ListView ItemsSource="{Binding WinAppSdkList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" Margin="15,15,10,15">
+        <ListView ItemsSource="{Binding WinAppSdkList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="WinAppSdkSelectionChanged" Margin="15,15,10,15">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="WinAppSdk Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion, Mode=OneWay}"/>
                     <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion, Mode=OneWay}"/>
                 </GridView>
             </ListView.View>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <ContextMenu.InputBindings>
+                        <KeyBinding Command="{StaticResource WinAppSdkCopy}" Modifiers="Control" Key="C" />
+                    </ContextMenu.InputBindings>
+                    <MenuItem Header="Copy" Command="{StaticResource WinAppSdkCopy}" InputGestureText="Ctrl+C">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE16F;" FontFamily="Segoe MDL2 Assets" FontSize="15" IsEnabled="False"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.InputBindings>
+                <KeyBinding Command="{StaticResource WinAppSdkCopy}" Modifiers="Control" Key="C" />
+            </ListView.InputBindings>
         </ListView>
 
-        <ListView Grid.Column="1" ItemsSource="{Binding ReunionList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" Margin="10,15,15,15">
+        <ListView Grid.Column="1" ItemsSource="{Binding ReunionList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="ReunionSelectionChanged" Margin="10,15,15,15">
+
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Reunion Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion, Mode=OneWay}"/>
                     <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion, Mode=OneWay}"/>
                 </GridView>
             </ListView.View>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <ContextMenu.InputBindings>
+                        <KeyBinding Command="{StaticResource ReunionCopy}" Modifiers="Control" Key="C" />
+                    </ContextMenu.InputBindings>
+                    <MenuItem Header="Copy" Command="{StaticResource ReunionCopy}" InputGestureText="Ctrl+C">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE16F;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.InputBindings>
+                <KeyBinding Command="{StaticResource ReunionCopy}" Modifiers="Control" Key="C" />
+            </ListView.InputBindings>
         </ListView>
     </Grid>
 </UserControl>
