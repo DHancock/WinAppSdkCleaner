@@ -22,13 +22,17 @@
                 </TextBlock>
             </DataTemplate>
 
+            <Style TargetType="{x:Type GridViewColumnHeader}">
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Padding" Value="5,0,0,0"/>
+            </Style>
+            
             <!-- make the selection colours the same as a tree view -->
             <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
-                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=OneWayToSource}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ListViewItem}">
-                            <Border BorderThickness="0" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                            <Border BorderThickness="0" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
                                 <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                             </Border>
                         </ControlTemplate>
@@ -38,7 +42,7 @@
                     <MultiTrigger>
                         <MultiTrigger.Conditions>
                             <Condition Property="IsSelected" Value="True"/>
-                            <Condition Property="IsKeyboardFocused" Value="False"/>
+                            <Condition Property="Selector.IsSelectionActive" Value="False"/>
                         </MultiTrigger.Conditions>
                         <MultiTrigger.Setters>
                             <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}"/>
@@ -48,7 +52,7 @@
                     <MultiTrigger>
                         <MultiTrigger.Conditions>
                             <Condition Property="IsSelected" Value="True"/>
-                            <Condition Property="IsKeyboardFocused" Value="True"/>
+                            <Condition Property="Selector.IsSelectionActive" Value="True"/>
                         </MultiTrigger.Conditions>
                         <MultiTrigger.Setters>
                             <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
@@ -59,7 +63,7 @@
             </Style>
 
             <Style x:Key="ListViewStyle" TargetType="ListView">
-                <Setter Property="SelectionMode" Value="Single"/>
+                <Setter Property="SelectionMode" Value="Extended"/>
                 <Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle}"/>
             </Style>
         </Grid.Resources>
@@ -70,7 +74,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- left, top, right, bottom -->
-        <ListView ItemsSource="{Binding WinAppSdkList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="WinAppSdkSelectionChanged" Margin="15,15,10,15">
+        <ListView x:Name="WinAppSdkListView" ItemsSource="{Binding WinAppSdkList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="WinAppSdkSelectionChanged" Margin="15,15,10,15">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="WinAppSdk Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion, Mode=OneWay}"/>
@@ -94,7 +98,7 @@
             </ListView.InputBindings>
         </ListView>
 
-        <ListView Grid.Column="1" ItemsSource="{Binding ReunionList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="ReunionSelectionChanged" Margin="10,15,15,15">
+        <ListView Grid.Column="1" x:Name="ReunionListView"  ItemsSource="{Binding ReunionList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="ReunionSelectionChanged" Margin="10,15,15,15">
 
             <ListView.View>
                 <GridView>
