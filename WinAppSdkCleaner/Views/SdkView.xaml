@@ -103,7 +103,7 @@
                 </Style>
             </StackPanel.Resources>
 
-            <Button Content="S_earch" Command="{StaticResource Search}"/>
+            <Button Content="R_efresh" Command="{StaticResource Search}"/>
             <Button Content="Remo_ve" Command="{StaticResource Remove}"/>
         </StackPanel>
 
