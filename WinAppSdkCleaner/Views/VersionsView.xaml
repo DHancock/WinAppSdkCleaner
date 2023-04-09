@@ -6,6 +6,12 @@
              xmlns:local="clr-namespace:WinAppSdkCleaner.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <local:ViewCommand x:Key="WinAppSdkCopy"/>
+        <local:ViewCommand x:Key="ReunionCopy"/>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.Resources>
             <DataTemplate x:Key="ColumnHeaderTemplate">
@@ -15,26 +21,106 @@
                     </TextBlock.Text>
                 </TextBlock>
             </DataTemplate>
+
+            <Style TargetType="{x:Type GridViewColumnHeader}">
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Padding" Value="5,0,0,0"/>
+            </Style>
+            
+            <!-- make the selection colours the same as a tree view -->
+            <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListViewItem}">
+                            <Border BorderThickness="0" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <MultiTrigger>
+                        <MultiTrigger.Conditions>
+                            <Condition Property="IsSelected" Value="True"/>
+                            <Condition Property="Selector.IsSelectionActive" Value="False"/>
+                        </MultiTrigger.Conditions>
+                        <MultiTrigger.Setters>
+                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}}"/>
+                        </MultiTrigger.Setters>
+                    </MultiTrigger>
+                    <MultiTrigger>
+                        <MultiTrigger.Conditions>
+                            <Condition Property="IsSelected" Value="True"/>
+                            <Condition Property="Selector.IsSelectionActive" Value="True"/>
+                        </MultiTrigger.Conditions>
+                        <MultiTrigger.Setters>
+                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                        </MultiTrigger.Setters>
+                    </MultiTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="ListViewStyle" TargetType="ListView">
+                <Setter Property="SelectionMode" Value="Extended"/>
+                <Setter Property="ItemContainerStyle" Value="{StaticResource ListViewItemStyle}"/>
+            </Style>
         </Grid.Resources>
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <ListView ItemsSource="{Binding WinAppSdkList}" Margin="15">
+
+        <!-- left, top, right, bottom -->
+        <ListView x:Name="WinAppSdkListView" ItemsSource="{Binding WinAppSdkList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="WinAppSdkSelectionChanged" Margin="15,15,10,15">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="WinAppSdk Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion}"/>
-                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion}"/>
+                    <GridViewColumn Header="WinAppSdk Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion, Mode=OneWay}"/>
+                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion, Mode=OneWay}"/>
                 </GridView>
             </ListView.View>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <ContextMenu.InputBindings>
+                        <KeyBinding Command="{StaticResource WinAppSdkCopy}" Modifiers="Control" Key="C" />
+                    </ContextMenu.InputBindings>
+                    <MenuItem Header="Copy" Command="{StaticResource WinAppSdkCopy}" InputGestureText="Ctrl+C">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE16F;" FontFamily="Segoe MDL2 Assets" FontSize="15" IsEnabled="False"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.InputBindings>
+                <KeyBinding Command="{StaticResource WinAppSdkCopy}" Modifiers="Control" Key="C" />
+            </ListView.InputBindings>
         </ListView>
-        <ListView Grid.Column="1" ItemsSource="{Binding ReunionList}" Margin="15">
+
+        <ListView Grid.Column="1" x:Name="ReunionListView"  ItemsSource="{Binding ReunionList, Mode=OneWay}" Style="{StaticResource ListViewStyle}" SelectionChanged="ReunionSelectionChanged" Margin="10,15,15,15">
+
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Reunion Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion}"/>
-                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion}"/>
+                    <GridViewColumn Header="Reunion Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding SemanticVersion, Mode=OneWay}"/>
+                    <GridViewColumn Header="Package Version" Width="130" HeaderTemplate="{StaticResource ColumnHeaderTemplate}" DisplayMemberBinding="{Binding PackageVersion, Mode=OneWay}"/>
                 </GridView>
             </ListView.View>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <ContextMenu.InputBindings>
+                        <KeyBinding Command="{StaticResource ReunionCopy}" Modifiers="Control" Key="C" />
+                    </ContextMenu.InputBindings>
+                    <MenuItem Header="Copy" Command="{StaticResource ReunionCopy}" InputGestureText="Ctrl+C">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xE16F;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.InputBindings>
+                <KeyBinding Command="{StaticResource ReunionCopy}" Modifiers="Control" Key="C" />
+            </ListView.InputBindings>
         </ListView>
     </Grid>
 </UserControl>

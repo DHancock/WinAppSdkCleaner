@@ -28,7 +28,7 @@
             <TabItem Header="_Output">
                 <local:TraceView/>
             </TabItem>
-            <TabItem Header="_Versions">
+            <TabItem Header="_Info">
                 <local:VersionsView/>
             </TabItem>
             <TabItem Header="_About">

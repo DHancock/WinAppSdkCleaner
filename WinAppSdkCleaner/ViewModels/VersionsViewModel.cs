@@ -8,10 +8,13 @@ internal class VersionsViewModel : INotifyPropertyChanged
 
     public async Task LoadVersionInfo()
     {
-        versions = await Model.sVersionsProvider;
+        if (versions is null)
+        {
+            versions = await Model.sVersionsProvider;
 
-        RaisePropertyChanged(nameof(WinAppSdkList));
-        RaisePropertyChanged(nameof(ReunionList));
+            RaisePropertyChanged(nameof(WinAppSdkList));
+            RaisePropertyChanged(nameof(ReunionList));
+        }
     }
 
     public IEnumerable<DisplayVersion> WinAppSdkList => FilterVersionsList(SdkId.WinAppSdk);
@@ -37,7 +40,7 @@ internal class VersionsViewModel : INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-    
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     internal sealed record DisplayVersion(string SemanticVersion, string PackageVersion);
