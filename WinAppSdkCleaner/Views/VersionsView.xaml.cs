@@ -1,5 +1,4 @@
 ﻿using WinAppSdkCleaner.ViewModels;
-using static WinAppSdkCleaner.ViewModels.VersionsViewModel;
 
 namespace WinAppSdkCleaner.Views;
 

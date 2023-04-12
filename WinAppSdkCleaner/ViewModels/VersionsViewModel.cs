@@ -2,6 +2,8 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
+internal sealed record DisplayVersion(string SemanticVersion, string PackageVersion);
+
 internal class VersionsViewModel : INotifyPropertyChanged
 {
     private IEnumerable<VersionRecord>? versions;
@@ -42,6 +44,4 @@ internal class VersionsViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    internal sealed record DisplayVersion(string SemanticVersion, string PackageVersion);
 }

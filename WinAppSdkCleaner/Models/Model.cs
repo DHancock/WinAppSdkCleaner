@@ -168,14 +168,25 @@ internal static class Model
                 }
             }
 
-            Trace.WriteLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
+            // write trace lines once otherwise they could be interleaved with another tasks
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
 
             if (deploymentOperation.Status == AsyncStatus.Error)
             {
                 DeploymentResult deploymentResult = deploymentOperation.GetResults();
-                Trace.WriteLine($"  {deploymentOperation.ErrorCode}");
-                Trace.WriteLine($"  {deploymentResult.ErrorText}");
+                sb.AppendLine($"  {deploymentOperation.ErrorCode}");
+                sb.AppendLine($"  {deploymentResult.ErrorText}");
+
+                if ((deploymentOperation.ErrorCode is COMException cex) && ((UInt32)cex.ErrorCode == 0x80073CF3))
+                {
+                    sb.AppendLine($"    Error 0x80073CF3 usually means that an app, installed on a different user account has a dependency on this framework package.");
+                    sb.AppendLine($"    Unfortunately the PackageManager will only list an app's dependencies for the current user, even when specifing all users.");
+                    sb.AppendLine($"    As the app's dependency on this framework package cannot be determined, that app cannot be removed first.");
+                }
             }
+
+            Trace.Write(sb.ToString());
         },
         CancellationToken.None);
     }
