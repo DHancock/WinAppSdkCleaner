@@ -265,28 +265,37 @@ internal static class Model
         Trace.WriteLine($"{nameof(RemovePackagesAsync)}, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
+    enum Location { FileSystem, OnLine, Resource };
+
     private static async Task<IEnumerable<VersionRecord>> GetVersionsListAsync()
     {
-        Trace.WriteLine($"  {nameof(GetVersionsListAsync)} entry");
+        Trace.WriteLine($"\t{nameof(GetVersionsListAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
-
-        const int cMinValidVersions = 53;
         List<VersionRecord> versionsList = new List<VersionRecord>();
         JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true, };
 
-        for (int i = 0; i < 2; i++)
+        foreach(Location location in Enum.GetValues<Location>())
         {
             try
             {
-                string text = (i == 0) ? await ReadAllTextRemoteAsync() : await ReadAllTextLocalAsync();
+                string text = string.Empty;
+
+                switch (location)
+                {
+                    case Location.FileSystem: text = await ReadAllFileSystemTextAsync(); break;
+                    case Location.OnLine: text = await ReadAllOnLineTextAsync(); break;
+                    case Location.Resource: text = await ReadAllResourceTextAsync(); break;
+                }
 
                 if (!string.IsNullOrEmpty(text))
                 {
                     List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsOptions);
 
-                    if ((versions is not null) && (versions.Count >= cMinValidVersions))
+                    if (versions is not null)
                     {
                         Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
+                        Trace.WriteLine($"\t{nameof(GetVersionsListAsync)} found {versions.Count} versions, from: {location}");
+
                         versionsList = versions;
                         break;
                     }
@@ -299,11 +308,11 @@ internal static class Model
         }
 
         stopwatch.Stop();
-        Trace.WriteLine($"  {nameof(GetVersionsListAsync)} found {versionsList.Count} versions, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Trace.WriteLine($"\t{nameof(GetVersionsListAsync)} elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return versionsList;
     }
 
-    private static async Task<string> ReadAllTextRemoteAsync()
+    private static async Task<string> ReadAllOnLineTextAsync()
     {
         try
         {
@@ -321,7 +330,7 @@ internal static class Model
         return string.Empty;
     }
 
-    private static async Task<string> ReadAllTextLocalAsync()
+    private static async Task<string> ReadAllResourceTextAsync()
     {
         try
         {
@@ -335,6 +344,23 @@ internal static class Model
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex.ToString());
+        }
+
+        return string.Empty;
+    }
+
+    private static async Task<string> ReadAllFileSystemTextAsync()
+    {
+        try
+        {
+            string path = Path.Join(AppContext.BaseDirectory, "versions.json");
+
+            if (File.Exists(path))
+                return await File.ReadAllTextAsync(path);  
         }
         catch (Exception ex)
         {
