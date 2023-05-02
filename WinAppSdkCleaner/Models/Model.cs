@@ -77,10 +77,12 @@ internal static class Model
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
                 List<PackageData> packageList = new List<PackageData>();
-                VersionRecord sdkVersion = await CategorizePackageVersionAsync(packageVersion: group.Key, sdk);
 
                 foreach (Package package in group)
                 {
+                    if (IntegrityLevel.IsElevated && IsStaged(package, packageManager.FindUsers(package.Id.FullName)))
+                        continue;
+
                     PackageData packageData = new PackageData(package, new List<PackageData>(), depth: 0);
                     packageList.Add(packageData);
 
@@ -88,7 +90,11 @@ internal static class Model
                         lookUpTable[package.Id.FullName] = packageData; // used to find dependents
                 }
 
-                sdkList.Add(new SdkData(sdkVersion, sdk, packageList));
+                if (packageList.Count > 0)
+                {
+                    VersionRecord sdkVersion = await CategorizePackageVersionAsync(packageVersion: group.Key, sdk);
+                    sdkList.Add(new SdkData(sdkVersion, sdk, packageList));
+                }
             }
         }
 
@@ -101,6 +107,20 @@ internal static class Model
         stopwatch.Stop();
         Trace.WriteLine($"{nameof(GetSDKsAsync)} found {sdkList.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdkList;
+    }
+
+    private static bool IsStaged(Package package, IEnumerable<PackageUserInformation> collection)
+    {
+        Debug.Assert(collection.Count() == 1);
+        PackageUserInformation? userInfo = collection.FirstOrDefault();
+
+        if ((userInfo is not null) && (userInfo.InstallState == PackageInstallState.Staged))
+        {
+            Trace.WriteLine($"\tomitting staged package: {package.Id.FullName} sid: {userInfo.UserSecurityId}");
+            return true;
+        }
+
+        return false;
     }
 
     private static void CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkData> sdkList)
@@ -209,6 +229,8 @@ internal static class Model
         },
         CancellationToken.None);
     }
+
+
 
     private async static Task RemoveBatchAsync(IEnumerable<PackageData> packageRecords)
     {
