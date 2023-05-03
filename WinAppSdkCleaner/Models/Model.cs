@@ -114,12 +114,21 @@ internal static class Model
         Debug.Assert(collection.Count() == 1);
         PackageUserInformation? userInfo = collection.FirstOrDefault();
 
-        if (userInfo?.InstallState == PackageInstallState.Installed)
-            return true;
+        if (userInfo is not null)
+        {
+            if (userInfo.InstallState == PackageInstallState.Installed)
+                return true;
 
-        // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
-        // when it was removed for some users. Staged packages cannot be deleted by this program, so omit it from the results. 
-        Trace.WriteLine($"\tomitting package: {package.Id.FullName} install state: {userInfo?.InstallState} sid: {userInfo?.UserSecurityId}");
+            // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
+            // when it was removed for some (all?) users. Staged packages cannot be deleted by this program, so omit it from the results. 
+            // The "Staged" packages do seem to be automatically deleted after some time (reboot?) so I assume it's a temporary cached state. 
+            Trace.WriteLine($"\tomitting package: {package.Id.FullName} install state: {userInfo.InstallState} sid: {userInfo.UserSecurityId}");
+        }
+        else
+        {
+            Trace.WriteLine($"\tomitting package: {package.Id.FullName} - unable to determine package install state");
+        }
+
         return false;
     }
 
