@@ -80,7 +80,7 @@ internal static class Model
 
                 foreach (Package package in group)
                 {
-                    if (IntegrityLevel.IsElevated && IsStaged(package, packageManager.FindUsers(package.Id.FullName)))
+                    if (IntegrityLevel.IsElevated && !IsInstalled(package, packageManager.FindUsers(package.Id.FullName)))
                         continue;
 
                     PackageData packageData = new PackageData(package, new List<PackageData>(), depth: 0);
@@ -109,17 +109,17 @@ internal static class Model
         return sdkList;
     }
 
-    private static bool IsStaged(Package package, IEnumerable<PackageUserInformation> collection)
+    private static bool IsInstalled(Package package, IEnumerable<PackageUserInformation> collection)
     {
         Debug.Assert(collection.Count() == 1);
         PackageUserInformation? userInfo = collection.FirstOrDefault();
 
-        if ((userInfo is not null) && (userInfo.InstallState == PackageInstallState.Staged))
-        {
-            Trace.WriteLine($"\tomitting staged package: {package.Id.FullName} sid: {userInfo.UserSecurityId}");
+        if (userInfo?.InstallState == PackageInstallState.Installed)
             return true;
-        }
 
+        // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
+        // when it was removed for some users. Staged packages cannot be deleted by this program, so omit it from the results. 
+        Trace.WriteLine($"\tomitting package: {package.Id.FullName} install state: {userInfo?.InstallState} sid: {userInfo?.UserSecurityId}");
         return false;
     }
 
