@@ -646,5 +646,17 @@
       "Build": 1712,
       "Revision": 0
     }
+  },
+  {
+    "Description": "WinAppSdk 1.4.0 experimental 1",
+    "SemanticVersion": "1.4.0",
+    "VersionTag": "experimental 1",
+    "SdkId": 1,
+    "Release": {
+      "Major": 4000,
+      "Minor": 868,
+      "Build": 150,
+      "Revision": 0
+    }
   }
 ]
