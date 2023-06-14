@@ -1,6 +1,5 @@
 [
   {
-    "Description": "Reunion 0.1.0",
     "SemanticVersion": "0.1.0",
     "VersionTag": "",
     "SdkId": 0,
@@ -12,7 +11,6 @@
     }
   },
   {
-    "Description": "Reunion 0.5.0 - prerelease",
     "SemanticVersion": "0.5.0",
     "VersionTag": "prerelease",
     "SdkId": 0,
@@ -24,7 +22,6 @@
     }
   },
   {
-    "Description": "Reunion 0.5.0",
     "SemanticVersion": "0.5.0",
     "VersionTag": "",
     "SdkId": 0,
@@ -36,7 +33,6 @@
     }
   },
   {
-    "Description": "Reunion 0.5.5",
     "SemanticVersion": "0.5.5",
     "VersionTag": "",
     "SdkId": 0,
@@ -48,7 +44,6 @@
     }
   },
   {
-    "Description": "Reunion 0.5.6",
     "SemanticVersion": "0.5.6",
     "VersionTag": "",
     "SdkId": 0,
@@ -60,7 +55,6 @@
     }
   },
   {
-    "Description": "Reunion 0.5.7",
     "SemanticVersion": "0.5.7",
     "VersionTag": "",
     "SdkId": 0,
@@ -72,7 +66,6 @@
     }
   },
   {
-    "Description": "Reunion 0.5.9",
     "SemanticVersion": "0.5.9",
     "VersionTag": "",
     "SdkId": 0,
@@ -84,7 +77,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.0 - preview",
     "SemanticVersion": "0.8.0",
     "VersionTag": "preview",
     "SdkId": 0,
@@ -96,7 +88,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.0",
     "SemanticVersion": "0.8.0",
     "VersionTag": "",
     "SdkId": 0,
@@ -108,7 +99,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.1",
     "SemanticVersion": "0.8.1",
     "VersionTag": "",
     "SdkId": 0,
@@ -120,7 +110,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.2",
     "SemanticVersion": "0.8.2",
     "VersionTag": "",
     "SdkId": 0,
@@ -132,7 +121,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.3",
     "SemanticVersion": "0.8.3",
     "VersionTag": "",
     "SdkId": 0,
@@ -144,7 +132,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.4",
     "SemanticVersion": "0.8.4",
     "VersionTag": "",
     "SdkId": 0,
@@ -156,7 +143,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.5",
     "SemanticVersion": "0.8.5",
     "VersionTag": "",
     "SdkId": 0,
@@ -168,7 +154,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.6 - preview 1",
     "SemanticVersion": "0.8.6",
     "VersionTag": "preview 1",
     "SdkId": 0,
@@ -180,7 +165,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.6",
     "SemanticVersion": "0.8.6",
     "VersionTag": "",
     "SdkId": 0,
@@ -192,7 +176,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.7 - preview 1",
     "SemanticVersion": "0.8.7",
     "VersionTag": "preview 1",
     "SdkId": 0,
@@ -204,7 +187,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.7",
     "SemanticVersion": "0.8.7",
     "VersionTag": "",
     "SdkId": 0,
@@ -216,7 +198,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.8",
     "SemanticVersion": "0.8.8",
     "VersionTag": "",
     "SdkId": 0,
@@ -228,7 +209,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.10",
     "SemanticVersion": "0.8.10",
     "VersionTag": "",
     "SdkId": 0,
@@ -240,7 +220,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.11",
     "SemanticVersion": "0.8.11",
     "VersionTag": "",
     "SdkId": 0,
@@ -252,7 +231,6 @@
     }
   },
   {
-    "Description": "Reunion 0.8.12",
     "SemanticVersion": "0.8.12",
     "VersionTag": "",
     "SdkId": 0,
@@ -264,7 +242,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.0 - experimental 1",
     "SemanticVersion": "1.0.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
@@ -276,7 +253,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.0 - preview 1",
     "SemanticVersion": "1.0.0",
     "VersionTag": "preview 1",
     "SdkId": 1,
@@ -288,7 +264,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.0 - preview 2",
     "SemanticVersion": "1.0.0",
     "VersionTag": "preview 2",
     "SdkId": 1,
@@ -300,7 +275,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.0 - preview 3",
     "SemanticVersion": "1.0.0",
     "VersionTag": "preview 3",
     "SdkId": 1,
@@ -312,7 +286,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.0",
     "SemanticVersion": "1.0.0",
     "VersionTag": "",
     "SdkId": 1,
@@ -324,7 +297,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.1",
     "SemanticVersion": "1.0.1",
     "VersionTag": "",
     "SdkId": 1,
@@ -336,7 +308,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.2",
     "SemanticVersion": "1.0.2",
     "VersionTag": "",
     "SdkId": 1,
@@ -348,7 +319,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.3",
     "SemanticVersion": "1.0.3",
     "VersionTag": "",
     "SdkId": 1,
@@ -360,7 +330,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.0.4",
     "SemanticVersion": "1.0.4",
     "VersionTag": "",
     "SdkId": 1,
@@ -372,7 +341,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.0 - preview 1",
     "SemanticVersion": "1.1.0",
     "VersionTag": "preview 1",
     "SdkId": 1,
@@ -384,7 +352,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.0 - preview 2",
     "SemanticVersion": "1.1.0",
     "VersionTag": "preview 2",
     "SdkId": 1,
@@ -396,7 +363,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.0 - preview 3",
     "SemanticVersion": "1.1.0",
     "VersionTag": "preview 3",
     "SdkId": 1,
@@ -408,7 +374,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.0",
     "SemanticVersion": "1.1.0",
     "VersionTag": "",
     "SdkId": 1,
@@ -420,7 +385,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.1",
     "SemanticVersion": "1.1.1",
     "VersionTag": "",
     "SdkId": 1,
@@ -432,7 +396,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.2",
     "SemanticVersion": "1.1.2",
     "VersionTag": "",
     "SdkId": 1,
@@ -444,7 +407,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.3",
     "SemanticVersion": "1.1.3",
     "VersionTag": "",
     "SdkId": 1,
@@ -456,7 +418,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.4",
     "SemanticVersion": "1.1.4",
     "VersionTag": "",
     "SdkId": 1,
@@ -468,7 +429,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.1.5",
     "SemanticVersion": "1.1.5",
     "VersionTag": "",
     "SdkId": 1,
@@ -480,7 +440,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.0 - experimental 1",
     "SemanticVersion": "1.2.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
@@ -492,7 +451,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.0 - experimental 2",
     "SemanticVersion": "1.2.0",
     "VersionTag": "experimental 2",
     "SdkId": 1,
@@ -504,7 +462,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.0 - preview 1",
     "SemanticVersion": "1.2.0",
     "VersionTag": "preview 1",
     "SdkId": 1,
@@ -516,7 +473,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.0 - preview 2",
     "SemanticVersion": "1.2.0",
     "VersionTag": "preview 2",
     "SdkId": 1,
@@ -528,7 +484,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.0",
     "SemanticVersion": "1.2.0",
     "VersionTag": "",
     "SdkId": 1,
@@ -540,7 +495,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.1",
     "SemanticVersion": "1.2.1",
     "VersionTag": "",
     "SdkId": 1,
@@ -552,7 +506,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.2",
     "SemanticVersion": "1.2.2",
     "VersionTag": "",
     "SdkId": 1,
@@ -564,7 +517,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.3",
     "SemanticVersion": "1.2.3",
     "VersionTag": "",
     "SdkId": 1,
@@ -576,7 +528,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.4",
     "SemanticVersion": "1.2.4",
     "VersionTag": "",
     "SdkId": 1,
@@ -588,7 +539,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.2.5",
     "SemanticVersion": "1.2.5",
     "VersionTag": "",
     "SdkId": 1,
@@ -600,7 +550,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.3.0 - experimental 1",
     "SemanticVersion": "1.3.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
@@ -612,7 +561,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.3.0 - preview 1",
     "SemanticVersion": "1.3.0",
     "VersionTag": "preview 1",
     "SdkId": 1,
@@ -624,7 +572,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.3.0",
     "SemanticVersion": "1.3.0",
     "VersionTag": "",
     "SdkId": 1,
@@ -636,7 +583,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.3.1",
     "SemanticVersion": "1.3.1",
     "VersionTag": "",
     "SdkId": 1,
@@ -648,7 +594,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.3.2",
     "SemanticVersion": "1.3.2",
     "VersionTag": "",
     "SdkId": 1,
@@ -660,7 +605,6 @@
     }
   },
   {
-    "Description": "WinAppSdk 1.4.0 experimental 1",
     "SemanticVersion": "1.4.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
