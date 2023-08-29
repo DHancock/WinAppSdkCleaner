@@ -71,7 +71,7 @@ internal static class Model
         foreach (ISdk sdk in sdkTypes)
         {
             var query = from package in allPackages
-                        where IsMicrosoftPublisher(package.Id) && sdk.Match(package.Id)
+                        where (package.SignatureKind != PackageSignatureKind.System) && IsMicrosoftPublisher(package.Id) && sdk.Match(package.Id)
                         group package by package.Id.Version;
 
             foreach (IGrouping<PackageVersion, Package> group in query)
@@ -80,6 +80,7 @@ internal static class Model
 
                 foreach (Package package in group)
                 {
+                    // check that it's not a staged package
                     if (IntegrityLevel.IsElevated && !IsInstalled(package, packageManager.FindUsers(package.Id.FullName)))
                         continue;
 
