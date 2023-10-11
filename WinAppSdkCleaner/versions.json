@@ -669,5 +669,16 @@
       "Build": 611,
       "Revision": 0
     }
+  },
+  {
+    "SemanticVersion": "1.4.2",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 4000,
+      "Minor": 1010,
+      "Build": 1349,
+      "Revision": 0
+    }
   }
 ]
