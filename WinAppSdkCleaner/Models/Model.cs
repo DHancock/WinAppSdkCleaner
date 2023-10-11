@@ -184,6 +184,7 @@ internal static class Model
 
                 deploymentOperation.Completed = (depProgress, status) =>
                 {
+                    // status errors are processed later
                     opCompletedEvent.Set();
                 };
 
@@ -198,44 +199,54 @@ internal static class Model
                 }
             }
 
-            // write trace lines once otherwise they could be interleaved with another tasks
+            // concatenate trace lines and write once otherwise they could be interleaved with another tasks
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
 
-            if (deploymentOperation.Status == AsyncStatus.Error)
+            try
             {
-                DeploymentResult deploymentResult = deploymentOperation.GetResults();
-                sb.AppendLine($"\t{deploymentOperation.ErrorCode}");
-                sb.AppendLine($"\t{deploymentResult.ErrorText}");
+                sb.AppendLine($"Removal of {fullName}, status: {deploymentOperation.Status}");
 
-                if ((deploymentOperation.ErrorCode is COMException cex) && ((UInt32)cex.ErrorCode == 0x80073CF3))
+                if (deploymentOperation.Status == AsyncStatus.Error)
                 {
-                    sb.AppendLine($"\t\tError 0x80073CF3 usually means that an app, installed on a different user account has a dependency on this framework package.");
-                    sb.AppendLine($"\t\tUnfortunately the PackageManager will only list an app's dependencies for the current user, even when specifing all users.");
-                    sb.AppendLine($"\t\tAs the app's dependency on this framework package cannot be determined, that app cannot be removed first.");
+                    DeploymentResult deploymentResult = deploymentOperation.GetResults();
+                    sb.AppendLine($"\tError Text:{deploymentResult.ErrorText}");
+                    sb.AppendLine($"\tException: {deploymentOperation.ErrorCode}");
 
-                    List<string> users = new List<string>(packageManager.FindUsers(fullName).Select(pui => pui.UserSecurityId));
-
-                    if (users.Count > 0)
+                    if ((deploymentOperation.ErrorCode is COMException cex) && ((UInt32)cex.ErrorCode == 0x80073CF3))
                     {
-                        sb.AppendLine($"\t\tThere {(users.Count > 1 ? $"are {users.Count} users" : "is 1 user")} registered for this package: ");
+                        sb.AppendLine($"\t\tError 0x80073CF3 usually means that an app, installed on a different user account has a dependency on this framework package.");
+                        sb.AppendLine($"\t\tUnfortunately the PackageManager will only list an app's dependencies for the current user, even when specifying all users.");
+                        sb.AppendLine($"\t\tAs the app's dependency on this framework package cannot be determined, that app cannot be removed first.");
+                        sb.AppendLine($"\t\tIt can also occur if a packaged app crashes while the WinAppSdk is being installed as a package dependency.");
 
-                        foreach (string sid in users)
+                        if (IntegrityLevel.IsElevated)  // FindUsers() requires elevation
                         {
-                            try
+                            List<string> users = new List<string>(packageManager.FindUsers(fullName).Select(pui => pui.UserSecurityId));
+
+                            if (users.Count > 0)
                             {
-                                sb.AppendLine($"\t\t{new SecurityIdentifier(sid).Translate(typeof(NTAccount))}\t{sid}");
-                            }
-                            catch 
-                            {
-                                sb.AppendLine($"\t\t{sid}");
+                                sb.AppendLine($"\t\tThere {(users.Count > 1 ? $"are {users.Count} users" : "is 1 user")} registered for this package: ");
+
+                                foreach (string sid in users)
+                                {
+                                    try
+                                    {
+                                        sb.AppendLine($"\t\t{new SecurityIdentifier(sid).Translate(typeof(NTAccount))}\t{sid}");
+                                    }
+                                    catch
+                                    {
+                                        sb.AppendLine($"\t\t{sid}");
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-
-            Trace.Write(sb.ToString());
+            finally
+            {
+                Trace.Write(sb.ToString());
+            }
         },
         CancellationToken.None);
     }
