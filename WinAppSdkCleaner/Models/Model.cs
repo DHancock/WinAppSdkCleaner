@@ -184,6 +184,15 @@ internal static class Model
 
                 deploymentOperation.Completed = (depProgress, status) =>
                 {
+                    if (status == AsyncStatus.Error)
+                    {
+                        Trace.WriteLine($"Removal of {fullName}, status: Error");
+
+                        DeploymentResult dr = depProgress.GetResults();
+                        Trace.WriteLine($"\tError text: {dr.ErrorText}");
+                        Trace.WriteLine($"\tException: {dr.ExtendedErrorCode}");
+                    }
+
                     opCompletedEvent.Set();
                 };
 
