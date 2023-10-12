@@ -44,7 +44,7 @@ public partial class SdkView : UserControl
         catch (Exception ex)
         {
             Trace.WriteLine(ex.ToString());
-            MessageBox.Show(ex.Message, "Search Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(Application.Current.MainWindow, ex.Message, "Search Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -58,6 +58,14 @@ public partial class SdkView : UserControl
     {
         try
         {
+            if (viewModel.SdkList.SelectedSdkHasDependentApps)
+            {
+                string message = $"This WinAppSdk has dependent applications.{Environment.NewLine}Are you sure that you want to remove it?";
+
+                if (MessageBox.Show(Application.Current.MainWindow, message, "Caution", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel)
+                    return;
+            }
+
             IsIdle = false;
             await viewModel.ExecuteRemove();
         }
@@ -69,12 +77,12 @@ public partial class SdkView : UserControl
                 + "This can occur if an unpackaged application, "
                 + "that depends on this Windows App SDK is currently executing";
 
-            MessageBox.Show(message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(Application.Current.MainWindow, message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         catch (Exception ex)
         {
             Trace.WriteLine(ex.ToString());
-            MessageBox.Show(ex.Message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(Application.Current.MainWindow, ex.Message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
