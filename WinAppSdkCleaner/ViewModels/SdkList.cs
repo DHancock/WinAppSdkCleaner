@@ -118,4 +118,6 @@ internal class SdkList : List<ItemBase>
             RestoreState(otherItem.Children);
         }
     }
+
+    public bool SelectedSdkHasDependentApps => (GetSelectedItem(this) is SdkItem item) && item.HasOtherApps;
 }
