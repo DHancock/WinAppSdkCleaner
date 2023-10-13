@@ -95,6 +95,19 @@ internal static class Model
                 {
                     VersionRecord sdkVersion = await CategorizePackageVersionAsync(packageVersion: group.Key, sdk);
                     sdkList.Add(new SdkData(sdkVersion, sdk, packageList));
+
+                    Trace.WriteLine($"Found: {sdkVersion.SdkId} {sdkVersion.SemanticVersion}");
+
+                    foreach (PackageData packageData in packageList)
+                    {
+                        Trace.WriteLine($"{packageData.Package.Id.FullName}");
+
+                        if (packageData.Package.Dependencies.Count > 0)
+                        {
+                            foreach (Package dependency in packageData.Package.Dependencies)
+                                Trace.WriteLine($"\tdependent on: {dependency.Id.FullName}");
+                        }
+                    }
                 }
             }
         }
