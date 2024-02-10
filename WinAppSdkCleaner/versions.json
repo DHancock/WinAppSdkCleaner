@@ -724,5 +724,16 @@
       "Build": 1950,
       "Revision": 0
     }
+  },
+  {
+    "SemanticVersion": "1.5.0",
+    "VersionTag": "preview 1",
+    "SdkId": 1,
+    "Release": {
+      "Major": 5000,
+      "Minor": 35,
+      "Build": 2034,
+      "Revision": 0
+    }
   }
 ]
