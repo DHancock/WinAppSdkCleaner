@@ -746,5 +746,27 @@
       "Build": 2034,
       "Revision": 0
     }
+  },
+  {
+    "SemanticVersion": "1.5.0",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 5001,
+      "Minor": 58,
+      "Build": 448,
+      "Revision": 0
+    }
+  },
+  {
+    "SemanticVersion": "1.5.1",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 5001,
+      "Minor": 70,
+      "Build": 1338,
+      "Revision": 0
+    }
   }
 ]
