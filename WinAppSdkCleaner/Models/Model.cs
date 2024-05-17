@@ -13,18 +13,18 @@ internal static class Model
         return string.Equals(id.PublisherId, "8wekyb3d8bbwe", StringComparison.Ordinal);
     }
 
-    private static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, ISdk sdk)
+    public static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, SdkId sdkId)
     {
         IEnumerable<VersionRecord> versions = await sVersionsProvider;
-        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdk.Id && v.Release == packageVersion);
+        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
 
         if (versionRecord is null)
-            return new VersionRecord(string.Empty, string.Empty, sdk.Id, packageVersion);
+            return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion);
 
         return versionRecord;
     }
 
-    private static void AddDependents(IReadOnlyDictionary<string, PackageData> lookUpTable, IEnumerable<Package> allPackages, int depth)
+    private static void AddDependents(Dictionary<string, PackageData> lookUpTable, IEnumerable<Package> allPackages)
     {
         object lockObject = new object();
         Dictionary<string, PackageData> subLookUp = new Dictionary<string, PackageData>();
@@ -38,7 +38,7 @@ internal static class Model
                 {
                     lock (lockObject)
                     {
-                        PackageData dependentPackage = new PackageData(package, new List<PackageData>(), depth);
+                        PackageData dependentPackage = new PackageData(package, new List<PackageData>());
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                         if (package.IsFramework)
@@ -49,7 +49,7 @@ internal static class Model
         });
 
         if (subLookUp.Count > 0)
-            AddDependents(subLookUp, allPackages, depth + 1);
+            AddDependents(subLookUp, allPackages);
     }
 
     public static async Task<IEnumerable<SdkData>> GetSDKsAsync()
@@ -84,7 +84,7 @@ internal static class Model
                     if (IntegrityLevel.IsElevated && !IsInstalled(package, packageManager.FindUsers(package.Id.FullName)))
                         continue;
 
-                    PackageData packageData = new PackageData(package, new List<PackageData>(), depth: 0);
+                    PackageData packageData = new PackageData(package, new List<PackageData>());
                     packageList.Add(packageData);
 
                     if (package.IsFramework)
@@ -93,7 +93,7 @@ internal static class Model
 
                 if (packageList.Count > 0)
                 {
-                    VersionRecord sdkVersion = await CategorizePackageVersionAsync(packageVersion: group.Key, sdk);
+                    VersionRecord sdkVersion = await CategorizePackageVersionAsync(packageVersion: group.Key, sdk.Id);
                     sdkList.Add(new SdkData(sdkVersion, sdk, packageList));
 
                     Trace.WriteLine($"Found: {sdkVersion.SdkId} {sdkVersion.SemanticVersion}");
@@ -114,7 +114,7 @@ internal static class Model
 
         if (lookUpTable.Count > 0)
         {
-            AddDependents(lookUpTable, allPackages, depth: 1);
+            AddDependents(lookUpTable, allPackages);
             CalculateDependentAppCounts(sdkTypes, sdkList);
         }
 
@@ -304,18 +304,8 @@ internal static class Model
         // when removing for all users, any provisioned packages will also be removed
         await RemoveBatchAsync(packageRecords.Where(p => !p.Package.IsFramework));
 
-        // now for the frameworks, this is more complicated because there may be
-        // framework packages that depend on other frameworks (assuming that's even possible).
-        var query = from packageRecord in packageRecords
-                    where packageRecord.Package.IsFramework
-                    orderby packageRecord.Depth descending
-                    group packageRecord by packageRecord.Depth;
-
-        foreach (IGrouping<int, PackageData> batch in query)
-        {
-            // remove batches of framework packages in order of depth, deepest first
-            await RemoveBatchAsync(batch);
-        }
+        // now that the frameworks don't have any dependents
+        await RemoveBatchAsync(packageRecords.Where(p => p.Package.IsFramework));
 
         stopwatch.Stop();
         Trace.WriteLine($"{nameof(RemovePackagesAsync)}, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");

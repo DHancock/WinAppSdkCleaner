@@ -20,7 +20,45 @@ internal class PackageItem : ItemBase
 
     public Package Package => PackageRecord.Package;
 
-    public override string HeadingText => Package.DisplayName;
+    public override string HeadingText => IsNonSdkPackage ? Package.DisplayName : GetSdkPackageDisplayName();
+
+
+    private string GetSdkPackageDisplayName()
+    {
+        SdkItem? sdkItem = Parent as SdkItem;
+
+        if ((sdkItem is null) && (Parent is PackageItem package))
+        {
+            // it's dependent on a different sdk version
+            sdkItem = package.Parent as SdkItem;
+        }
+
+        Debug.Assert(sdkItem is not null);
+
+        if ((sdkItem is not null) && (sdkItem.SdkIdentifier == SdkId.WinAppSdk))
+        {
+            string text;
+
+            if (Package.Id.FullName.Contains("Main"))
+                text = "Main ";
+            else if (Package.Id.FullName.Contains("DDLM"))
+                text = "DDLM ";
+            else if (Package.Id.FullName.Contains("Singleton"))
+                text = "Singleton ";
+            else
+            {
+                Debug.Assert(Package.IsFramework);
+                text = "Framework ";
+            }
+
+            VersionRecord vr = Model.CategorizePackageVersionAsync(Package.Id.Version, sdkItem.SdkIdentifier).GetAwaiter().GetResult();
+            text += (vr.SemanticVersion.Length == 0) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
+
+            return text + $" - {Package.Id.Architecture.ToString().ToLower()}";
+        }
+
+        return Package.DisplayName;  // default for reunion packages
+    }
 
     public override string ToolTipText
     {
@@ -36,7 +74,7 @@ internal class PackageItem : ItemBase
 
     public override Visibility OtherAppsCountVisibity
     {
-        get => Children.Any() && (PackageRecord.OtherAppsCount > 0) ? Visibility.Visible : Visibility.Collapsed;
+        get => (Children.Count > 0) && (PackageRecord.OtherAppsCount > 0) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public override Visibility LogoVisibity => Visibility.Visible;
@@ -48,7 +86,7 @@ internal class PackageItem : ItemBase
 
     public override ImageSource? Logo => cachedLogo;
 
-    private ImageSource LoadPackageLogo()
+    private BitmapImage LoadPackageLogo()
     {
         try
         {

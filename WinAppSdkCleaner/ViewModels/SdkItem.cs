@@ -22,7 +22,7 @@ internal sealed class SdkItem : ItemBase
         get
         {
             if (SdkRecord.Version.SemanticVersion.Length == 0)
-                return $"{SdkRecord.Sdk.DispalyName} package version: {ConvertToString(Version.Release)}";
+                return $"{SdkRecord.Sdk.DispalyName} ({Version.PackageVersionStr})";
 
             if (SdkRecord.Version.VersionTag.Length > 0)
                 return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion} - {Version.VersionTag}";
@@ -43,14 +43,11 @@ internal sealed class SdkItem : ItemBase
 
     public override FontWeight HeadingFontWeight => FontWeights.Bold;
 
-    public override string ToolTipText => $"Package version: {ConvertToString(Version.Release)}";
+    public override string ToolTipText => Version.PackageVersionStr;
+
+    public SdkId SdkIdentifier => SdkRecord.Sdk.Id;
 
     private VersionRecord Version => SdkRecord.Version;
-
-    private static string ConvertToString(PackageVersion pv)
-    {
-        return $"{pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
-    }
 
     // ignores any children, it's only used to identify this tree node
     public static bool operator ==(SdkItem? x, SdkItem? y)
