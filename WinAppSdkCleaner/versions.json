@@ -801,5 +801,16 @@
       "Build": 156,
       "Revision": 0
     }
+  },
+  {
+    "SemanticVersion": "1.6.0",
+    "VersionTag": "experimental 1",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 152,
+      "Build": 7,
+      "Revision": 0
+    }
   }
 ]
