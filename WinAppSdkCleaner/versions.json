@@ -823,5 +823,16 @@
       "Build": 7,
       "Revision": 0
     }
+  },
+  {
+    "SemanticVersion": "1.6.0",
+    "VersionTag": "experimental 2",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 183,
+      "Build": 650,
+      "Revision": 0
+    }
   }
 ]
