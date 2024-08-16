@@ -726,6 +726,17 @@
     }
   },
   {
+    "SemanticVersion": "1.4.7",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 4000,
+      "Minor": 1309,
+      "Build": 2056,
+      "Revision": 0
+    }
+  },
+  {
     "SemanticVersion": "1.5.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
@@ -825,6 +836,17 @@
     }
   },
   {
+    "SemanticVersion": "1.5.6",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 5001,
+      "Minor": 214,
+      "Build": 1843,
+      "Revision": 0
+    }
+  },
+  {
     "SemanticVersion": "1.6.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
@@ -843,6 +865,17 @@
       "Major": 6000,
       "Minor": 183,
       "Build": 650,
+      "Revision": 0
+    }
+  },
+  {
+    "SemanticVersion": "1.6.0",
+    "VersionTag": "preview 1",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 219,
+      "Build": 2254,
       "Revision": 0
     }
   }
