@@ -10,4 +10,5 @@
  
  A typical scenario:
  
- ![Screenshot 2023-04-15 174436](https://user-images.githubusercontent.com/28826959/232238992-3df0bd4d-e373-45e0-9401-142a7c3eaa0b.png)
+![Untitled](https://github.com/user-attachments/assets/619c2091-d06c-4d85-ac53-86e0a4e52487)
+
