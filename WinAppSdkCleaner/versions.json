@@ -878,5 +878,27 @@
       "Build": 2254,
       "Revision": 0
     }
+  },
+  {
+    "SemanticVersion": "1.6.0",
+    "VersionTag": "preview 2",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 234,
+      "Build": 357,
+      "Revision": 0
+    }
+  },
+  {
+    "SemanticVersion": "1.6.0",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 242,
+      "Build": 101,
+      "Revision": 0
+    }
   }
 ]
