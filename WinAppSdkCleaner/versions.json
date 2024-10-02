@@ -900,5 +900,16 @@
       "Build": 101,
       "Revision": 0
     }
+  },
+  {
+    "SemanticVersion": "1.6.1",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 266,
+      "Build": 2241,
+      "Revision": 0
+    }
   }
 ]
