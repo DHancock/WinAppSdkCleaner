@@ -10,6 +10,7 @@
 	<FileVersion>1.5.0</FileVersion>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
 	<ApplicationIcon>Resources\app.ico</ApplicationIcon>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

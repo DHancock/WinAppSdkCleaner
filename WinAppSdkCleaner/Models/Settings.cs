@@ -1,6 +1,6 @@
 ﻿namespace WinAppSdkCleaner.Models;
 
-internal class Settings : ApplicationSettingsBase
+internal sealed partial class Settings : ApplicationSettingsBase
 {
     public static Settings Data = new Settings();
 

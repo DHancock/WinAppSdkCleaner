@@ -2,7 +2,7 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal class SdkList : List<ItemBase>
+internal sealed partial class SdkList : List<ItemBase>
 {
     public SdkList()
     {
