@@ -1,6 +1,6 @@
 ﻿namespace WinAppSdkCleaner.Views;
 
-internal sealed class ViewCommand : ICommand
+internal sealed partial class ViewCommand : ICommand
 {
     public Action<object?>? ExecuteProc { get; set; }
     public Func<object?, bool>? CanExecuteProc { get; set; }
