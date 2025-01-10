@@ -364,8 +364,26 @@ internal static class Model
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
-                return await httpClient.GetStringAsync(path);
+                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.zip";
+
+                using (HttpResponseMessage response = await httpClient.GetAsync(path))
+                {
+                    using (Stream s = await response.Content.ReadAsStreamAsync())
+                    {
+                        using (ZipArchive za = new ZipArchive(s))
+                        {
+                            ZipArchiveEntry? entry = za.GetEntry("versions.json");
+
+                            if (entry is not null)
+                            {
+                                using (StreamReader sr = new StreamReader(entry.Open()))
+                                {
+                                    return await sr.ReadToEndAsync();
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         catch (Exception ex)
