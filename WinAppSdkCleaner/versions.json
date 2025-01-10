@@ -2,243 +2,199 @@
   {
     "SemanticVersion": "0.1.0",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 0,
       "Minor": 12012,
-      "Build": 9000,
-      "Revision": 0
+      "Build": 9000
     }
   },
   {
     "SemanticVersion": "0.5.0",
     "VersionTag": "prerelease",
-    "SdkId": 0,
     "Release": {
       "Major": 0,
       "Minor": 52103,
-      "Build": 9000,
-      "Revision": 0
+      "Build": 9000
     }
   },
   {
     "SemanticVersion": "0.5.0",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 0,
       "Minor": 52103,
-      "Build": 25000,
-      "Revision": 0
+      "Build": 25000
     }
   },
   {
     "SemanticVersion": "0.5.5",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 0,
       "Minor": 52104,
-      "Build": 15000,
-      "Revision": 0
+      "Build": 15000
     }
   },
   {
     "SemanticVersion": "0.5.6",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 0,
       "Minor": 52104,
-      "Build": 23000,
-      "Revision": 0
+      "Build": 23000
     }
   },
   {
     "SemanticVersion": "0.5.7",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 0,
       "Minor": 52105,
-      "Build": 10000,
-      "Revision": 0
+      "Build": 10000
     }
   },
   {
     "SemanticVersion": "0.5.9",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 0,
       "Minor": 52107,
-      "Build": 26000,
-      "Revision": 0
+      "Build": 26000
     }
   },
   {
     "SemanticVersion": "0.8.0",
     "VersionTag": "preview",
-    "SdkId": 0,
     "Release": {
       "Major": 8000,
       "Minor": 146,
-      "Build": 628,
-      "Revision": 0
+      "Build": 628
     }
   },
   {
     "SemanticVersion": "0.8.0",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8000,
       "Minor": 167,
-      "Build": 1906,
-      "Revision": 0
+      "Build": 1906
     }
   },
   {
     "SemanticVersion": "0.8.1",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8001,
       "Minor": 186,
-      "Build": 2159,
-      "Revision": 0
+      "Build": 2159
     }
   },
   {
     "SemanticVersion": "0.8.2",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8002,
       "Minor": 222,
-      "Build": 1805,
-      "Revision": 0
+      "Build": 1805
     }
   },
   {
     "SemanticVersion": "0.8.3",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8003,
       "Minor": 236,
-      "Build": 617,
-      "Revision": 0
+      "Build": 617
     }
   },
   {
     "SemanticVersion": "0.8.4",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8004,
       "Minor": 256,
-      "Build": 1745,
-      "Revision": 0
+      "Build": 1745
     }
   },
   {
     "SemanticVersion": "0.8.5",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8005,
       "Minor": 278,
-      "Build": 2204,
-      "Revision": 0
+      "Build": 2204
     }
   },
   {
     "SemanticVersion": "0.8.6",
     "VersionTag": "preview 1",
-    "SdkId": 0,
     "Release": {
       "Major": 8006,
       "Minor": 312,
-      "Build": 210,
-      "Revision": 0
+      "Build": 210
     }
   },
   {
     "SemanticVersion": "0.8.6",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8006,
       "Minor": 337,
-      "Build": 137,
-      "Revision": 0
+      "Build": 137
     }
   },
   {
     "SemanticVersion": "0.8.7",
     "VersionTag": "preview 1",
-    "SdkId": 0,
     "Release": {
       "Major": 8007,
       "Minor": 392,
-      "Build": 1938,
-      "Revision": 0
+      "Build": 1938
     }
   },
   {
     "SemanticVersion": "0.8.7",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8007,
       "Minor": 444,
-      "Build": 1739,
-      "Revision": 0
+      "Build": 1739
     }
   },
   {
     "SemanticVersion": "0.8.8",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8008,
       "Minor": 474,
-      "Build": 6,
-      "Revision": 0
+      "Build": 6
     }
   },
   {
     "SemanticVersion": "0.8.10",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8010,
       "Minor": 517,
-      "Build": 1632,
-      "Revision": 0
+      "Build": 1632
     }
   },
   {
     "SemanticVersion": "0.8.11",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8011,
       "Minor": 562,
-      "Build": 1742,
-      "Revision": 0
+      "Build": 1742
     }
   },
   {
     "SemanticVersion": "0.8.12",
     "VersionTag": "",
-    "SdkId": 0,
     "Release": {
       "Major": 8012,
       "Minor": 576,
-      "Build": 2303,
-      "Revision": 0
+      "Build": 2303
     }
   },
   {
@@ -248,8 +204,7 @@
     "Release": {
       "Major": 0,
       "Minor": 218,
-      "Build": 840,
-      "Revision": 0
+      "Build": 840
     }
   },
   {
@@ -259,8 +214,7 @@
     "Release": {
       "Major": 0,
       "Minor": 258,
-      "Build": 2116,
-      "Revision": 0
+      "Build": 2116
     }
   },
   {
@@ -270,8 +224,7 @@
     "Release": {
       "Major": 0,
       "Minor": 272,
-      "Build": 1934,
-      "Revision": 0
+      "Build": 1934
     }
   },
   {
@@ -281,8 +234,7 @@
     "Release": {
       "Major": 0,
       "Minor": 297,
-      "Build": 2018,
-      "Revision": 0
+      "Build": 2018
     }
   },
   {
@@ -292,8 +244,7 @@
     "Release": {
       "Major": 0,
       "Minor": 319,
-      "Build": 455,
-      "Revision": 0
+      "Build": 455
     }
   },
   {
@@ -303,8 +254,7 @@
     "Release": {
       "Major": 1,
       "Minor": 440,
-      "Build": 209,
-      "Revision": 0
+      "Build": 209
     }
   },
   {
@@ -314,8 +264,7 @@
     "Release": {
       "Major": 2,
       "Minor": 460,
-      "Build": 358,
-      "Revision": 0
+      "Build": 358
     }
   },
   {
@@ -325,8 +274,7 @@
     "Release": {
       "Major": 3,
       "Minor": 469,
-      "Build": 1654,
-      "Revision": 0
+      "Build": 1654
     }
   },
   {
@@ -336,8 +284,7 @@
     "Release": {
       "Major": 4,
       "Minor": 528,
-      "Build": 1755,
-      "Revision": 0
+      "Build": 1755
     }
   },
   {
@@ -347,8 +294,7 @@
     "Release": {
       "Major": 1000,
       "Minor": 447,
-      "Build": 2307,
-      "Revision": 0
+      "Build": 2307
     }
   },
   {
@@ -358,8 +304,7 @@
     "Release": {
       "Major": 1000,
       "Minor": 468,
-      "Build": 658,
-      "Revision": 0
+      "Build": 658
     }
   },
   {
@@ -369,8 +314,7 @@
     "Release": {
       "Major": 1000,
       "Minor": 485,
-      "Build": 2229,
-      "Revision": 0
+      "Build": 2229
     }
   },
   {
@@ -380,8 +324,7 @@
     "Release": {
       "Major": 1000,
       "Minor": 516,
-      "Build": 2156,
-      "Revision": 0
+      "Build": 2156
     }
   },
   {
@@ -391,8 +334,7 @@
     "Release": {
       "Major": 1001,
       "Minor": 524,
-      "Build": 1918,
-      "Revision": 0
+      "Build": 1918
     }
   },
   {
@@ -402,8 +344,7 @@
     "Release": {
       "Major": 1002,
       "Minor": 543,
-      "Build": 1943,
-      "Revision": 0
+      "Build": 1943
     }
   },
   {
@@ -413,8 +354,7 @@
     "Release": {
       "Major": 1003,
       "Minor": 565,
-      "Build": 600,
-      "Revision": 0
+      "Build": 600
     }
   },
   {
@@ -424,8 +364,7 @@
     "Release": {
       "Major": 1004,
       "Minor": 584,
-      "Build": 2120,
-      "Revision": 0
+      "Build": 2120
     }
   },
   {
@@ -435,8 +374,7 @@
     "Release": {
       "Major": 1005,
       "Minor": 616,
-      "Build": 1651,
-      "Revision": 0
+      "Build": 1651
     }
   },
   {
@@ -446,8 +384,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 572,
-      "Build": 710,
-      "Revision": 0
+      "Build": 710
     }
   },
   {
@@ -457,8 +394,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 616,
-      "Build": 1852,
-      "Revision": 0
+      "Build": 1852
     }
   },
   {
@@ -468,8 +404,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 609,
-      "Build": 1413,
-      "Revision": 0
+      "Build": 1413
     }
   },
   {
@@ -479,8 +414,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 638,
-      "Build": 7,
-      "Revision": 0
+      "Build": 7
     }
   },
   {
@@ -490,8 +424,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 677,
-      "Build": 1750,
-      "Revision": 0
+      "Build": 1750
     }
   },
   {
@@ -501,8 +434,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 684,
-      "Build": 1510,
-      "Revision": 0
+      "Build": 1510
     }
   },
   {
@@ -512,8 +444,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 707,
-      "Build": 2303,
-      "Revision": 0
+      "Build": 2303
     }
   },
   {
@@ -523,8 +454,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 747,
-      "Build": 1945,
-      "Revision": 0
+      "Build": 1945
     }
   },
   {
@@ -534,8 +464,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 777,
-      "Build": 2143,
-      "Revision": 0
+      "Build": 2143
     }
   },
   {
@@ -545,8 +474,7 @@
     "Release": {
       "Major": 2000,
       "Minor": 802,
-      "Build": 31,
-      "Revision": 0
+      "Build": 31
     }
   },
   {
@@ -556,8 +484,7 @@
     "Release": {
       "Major": 3000,
       "Minor": 763,
-      "Build": 701,
-      "Revision": 0
+      "Build": 701
     }
   },
   {
@@ -567,8 +494,7 @@
     "Release": {
       "Major": 3000,
       "Minor": 788,
-      "Build": 1817,
-      "Revision": 0
+      "Build": 1817
     }
   },
   {
@@ -578,8 +504,7 @@
     "Release": {
       "Major": 3000,
       "Minor": 820,
-      "Build": 152,
-      "Revision": 0
+      "Build": 152
     }
   },
   {
@@ -589,8 +514,7 @@
     "Release": {
       "Major": 3000,
       "Minor": 851,
-      "Build": 1712,
-      "Revision": 0
+      "Build": 1712
     }
   },
   {
@@ -600,8 +524,7 @@
     "Release": {
       "Major": 3000,
       "Minor": 882,
-      "Build": 2207,
-      "Revision": 0
+      "Build": 2207
     }
   },
   {
@@ -611,8 +534,7 @@
     "Release": {
       "Major": 3000,
       "Minor": 934,
-      "Build": 1904,
-      "Revision": 0
+      "Build": 1904
     }
   },
   {
@@ -622,8 +544,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 868,
-      "Build": 150,
-      "Revision": 0
+      "Build": 150
     }
   },
   {
@@ -633,8 +554,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 908,
-      "Build": 1749,
-      "Revision": 0
+      "Build": 1749
     }
   },
   {
@@ -644,8 +564,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 952,
-      "Build": 1501,
-      "Revision": 0
+      "Build": 1501
     }
   },
   {
@@ -655,8 +574,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 964,
-      "Build": 11,
-      "Revision": 0
+      "Build": 11
     }
   },
   {
@@ -666,8 +584,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 986,
-      "Build": 611,
-      "Revision": 0
+      "Build": 611
     }
   },
   {
@@ -677,8 +594,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 1010,
-      "Build": 1349,
-      "Revision": 0
+      "Build": 1349
     }
   },
   {
@@ -688,8 +604,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 1049,
-      "Build": 117,
-      "Revision": 0
+      "Build": 117
     }
   },
   {
@@ -699,8 +614,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 1082,
-      "Build": 2259,
-      "Revision": 0
+      "Build": 2259
     }
   },
   {
@@ -710,8 +624,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 1136,
-      "Build": 2333,
-      "Revision": 0
+      "Build": 2333
     }
   },
   {
@@ -721,8 +634,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 1227,
-      "Build": 1637,
-      "Revision": 0
+      "Build": 1637
     }
   },
   {
@@ -732,8 +644,7 @@
     "Release": {
       "Major": 4000,
       "Minor": 1309,
-      "Build": 2056,
-      "Revision": 0
+      "Build": 2056
     }
   },
   {
@@ -743,8 +654,7 @@
     "Release": {
       "Major": 5000,
       "Minor": 1066,
-      "Build": 33,
-      "Revision": 0
+      "Build": 33
     }
   },
   {
@@ -754,8 +664,7 @@
     "Release": {
       "Major": 5000,
       "Minor": 23,
-      "Build": 1950,
-      "Revision": 0
+      "Build": 1950
     }
   },
   {
@@ -765,8 +674,7 @@
     "Release": {
       "Major": 5000,
       "Minor": 35,
-      "Build": 2034,
-      "Revision": 0
+      "Build": 2034
     }
   },
   {
@@ -776,8 +684,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 58,
-      "Build": 448,
-      "Revision": 0
+      "Build": 448
     }
   },
   {
@@ -787,8 +694,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 70,
-      "Build": 1338,
-      "Revision": 0
+      "Build": 1338
     }
   },
   {
@@ -798,8 +704,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 95,
-      "Build": 533,
-      "Revision": 0
+      "Build": 533
     }
   },
   {
@@ -809,8 +714,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 119,
-      "Build": 156,
-      "Revision": 0
+      "Build": 156
     }
   },
   {
@@ -820,8 +724,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 159,
-      "Build": 55,
-      "Revision": 0
+      "Build": 55
     }
   },
   {
@@ -831,8 +734,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 178,
-      "Build": 1908,
-      "Revision": 0
+      "Build": 1908
     }
   },
   {
@@ -842,8 +744,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 214,
-      "Build": 1843,
-      "Revision": 0
+      "Build": 1843
     }
   },
   {
@@ -853,8 +754,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 275,
-      "Build": 500,
-      "Revision": 0
+      "Build": 500
     }
   },
   {
@@ -864,8 +764,7 @@
     "Release": {
       "Major": 5001,
       "Minor": 311,
-      "Build": 2039,
-      "Revision": 0
+      "Build": 2039
     }
   },
   {
@@ -875,8 +774,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 152,
-      "Build": 7,
-      "Revision": 0
+      "Build": 7
     }
   },
   {
@@ -886,8 +784,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 183,
-      "Build": 650,
-      "Revision": 0
+      "Build": 650
     }
   },
   {
@@ -897,8 +794,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 219,
-      "Build": 2254,
-      "Revision": 0
+      "Build": 2254
     }
   },
   {
@@ -908,8 +804,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 234,
-      "Build": 357,
-      "Revision": 0
+      "Build": 357
     }
   },
   {
@@ -919,8 +814,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 242,
-      "Build": 101,
-      "Revision": 0
+      "Build": 101
     }
   },
   {
@@ -930,8 +824,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 266,
-      "Build": 2241,
-      "Revision": 0
+      "Build": 2241
     }
   },
   {
@@ -941,8 +834,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 311,
-      "Build": 13,
-      "Revision": 0
+      "Build": 13
     }
   },
   {
@@ -952,8 +844,7 @@
     "Release": {
       "Major": 6000,
       "Minor": 318,
-      "Build": 2304,
-      "Revision": 0
+      "Build": 2304
     }
   },
   {
@@ -963,8 +854,7 @@
     "Release": {
       "Major": 7000,
       "Minor": 319,
-      "Build": 425,
-      "Revision": 0
+      "Build": 425
     }
   },
   {
@@ -974,8 +864,7 @@
     "Release": {
       "Major": 7000,
       "Minor": 374,
-      "Build": 1654,
-      "Revision": 0
+      "Build": 1654
     }
   }
 ]
