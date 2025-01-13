@@ -72,12 +72,12 @@ internal class PackageItem : ItemBase
     }
     public override string OtherAppsCount => $"+{PackageRecord.OtherAppsCount}";
 
-    public override Visibility OtherAppsCountVisibity
+    public override Visibility OtherAppsCountVisibility
     {
         get => (Children.Count > 0) && (PackageRecord.OtherAppsCount > 0) ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    public override Visibility LogoVisibity => Visibility.Visible;
+    public override Visibility LogoVisibility => Visibility.Visible;
 
     public override FontWeight HeadingFontWeight
     {
@@ -101,8 +101,8 @@ internal class PackageItem : ItemBase
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"An exception was thrown retrieving the logo for package: {Package.DisplayName} ({Package.Id.FullName})");
-            Trace.WriteLine(ex.ToString());
+            Debug.WriteLine($"An exception was thrown retrieving the logo for package: {Package.DisplayName} ({Package.Id.FullName})");
+            Debug.WriteLine(ex.ToString());
         }
 
         return new BitmapImage(new Uri("pack://application:,,,/resources/unknown.png"));

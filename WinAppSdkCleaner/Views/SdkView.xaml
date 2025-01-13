@@ -51,9 +51,9 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Image Height="16" Source="{Binding Logo, Mode=OneTime}" Visibility="{Binding LogoVisibity, Mode=OneTime}"/>
+                        <Image Height="16" Source="{Binding Logo, Mode=OneTime}" Visibility="{Binding LogoVisibility, Mode=OneTime}"/>
                             <TextBlock Grid.Column="1" x:Name="HeadingTextBox" Text="{Binding HeadingText, Mode=OneTime}" ToolTip="{Binding ToolTipText, Mode=OneTime}" FontWeight="{Binding HeadingFontWeight}" Padding="4,0,2,0"/>
-                            <TextBlock Grid.Column="2" x:Name="OtherAppsTextBlock" Text="{Binding OtherAppsCount, Mode=OneTime}" Visibility="{Binding OtherAppsCountVisibity, Mode=OneTime}" FontWeight="SemiBold" Foreground="Crimson" Margin="4,0,2,0" />
+                            <TextBlock Grid.Column="2" x:Name="OtherAppsTextBlock" Text="{Binding OtherAppsCount, Mode=OneTime}" Visibility="{Binding OtherAppsCountVisibility, Mode=OneTime}" FontWeight="SemiBold" Foreground="Crimson" Margin="4,0,2,0" />
                         </Grid>
                         <HierarchicalDataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">

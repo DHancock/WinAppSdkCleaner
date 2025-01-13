@@ -35,9 +35,9 @@ internal sealed class SdkItem : ItemBase
 
     public bool HasOtherApps => SdkRecord.OtherAppsCount > 0;
 
-    public override Visibility OtherAppsCountVisibity => HasOtherApps ? Visibility.Visible : Visibility.Collapsed;
+    public override Visibility OtherAppsCountVisibility => HasOtherApps ? Visibility.Visible : Visibility.Collapsed;
 
-    public override Visibility LogoVisibity => Visibility.Collapsed;
+    public override Visibility LogoVisibility => Visibility.Collapsed;
 
     public override ImageSource? Logo => null;
 
