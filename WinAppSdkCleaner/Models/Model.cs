@@ -364,7 +364,7 @@ internal static class Model
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/Dev/WinAppSdkCleaner/versions.zip";
+                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.zip";
 
                 using (HttpResponseMessage response = await httpClient.GetAsync(path))
                 {
