@@ -37,5 +37,9 @@
     <Resource Include="Resources\normal.ico" />
     <Resource Include="Resources\unknown.png" />
   </ItemGroup>
+	
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="powershell Compress-Archive $(ProjectDir)versions.json $(ProjectDir)versions.zip -Update" />
+  </Target>
 
 </Project>
