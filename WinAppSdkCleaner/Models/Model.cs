@@ -358,12 +358,6 @@ internal static class Model
         return versionsList;
     }
 
-#if false
-    // Testing has shown that downloading a 1.5KB byte array (zip file) is at least 5 times slower than downloading a 15KB string.
-    // I'm not sure if it's being throttled by GitHub or just that strings are optimized.
-    // Processing the zip archive took approx 1 ms, downloading the byte array took 320 ms.
-    // And after all 15KB is still quite a small html web page
-
     private static async Task<string> ReadAllOnLineTextAsync()
     {
         try
@@ -384,31 +378,12 @@ internal static class Model
                             {
                                 using (StreamReader sr = new StreamReader(entry.Open()))
                                 {
-                                    return await sr.ReadToEndAsync();
+                                    return sr.ReadToEnd();
                                 }
                             }
                         }
                     }
                 }
-            }
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine(ex.ToString());
-        }
-
-        return string.Empty;
-    }
-#endif
-
-    private static async Task<string> ReadAllOnLineTextAsync()
-    {
-        try
-        {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.json";
-                return await httpClient.GetStringAsync(path);
             }
         }
         catch (Exception ex)
@@ -448,8 +423,10 @@ internal static class Model
         {
             string path = Path.Join(AppContext.BaseDirectory, "versions.json");
 
-            if (File.Exists(path))
-                return await File.ReadAllTextAsync(path);  
+            if (File.Exists(path)) // probably won't, it isn't installed by default
+            {
+                return await File.ReadAllTextAsync(path);
+            }
         }
         catch (Exception ex)
         {
