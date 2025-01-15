@@ -1,5 +1,4 @@
 ﻿using WinAppSdkCleaner.Models;
-using CsWin32Lib;
 
 namespace WinAppSdkCleaner.Views;
 
