@@ -1,4 +1,4 @@
-namespace CsWin32Lib;
+namespace WinAppSdkCleaner.Views;
 
 public static class Monitors
 {

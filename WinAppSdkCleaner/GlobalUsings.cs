@@ -25,3 +25,7 @@ global using System.Windows.Threading;
 
 global using Windows.ApplicationModel;
 global using Windows.Management.Deployment;
+
+global using Windows.Win32;
+global using Windows.Win32.Foundation;
+global using Windows.Win32.Graphics.Gdi;
