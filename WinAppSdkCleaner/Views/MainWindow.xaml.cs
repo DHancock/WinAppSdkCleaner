@@ -32,9 +32,13 @@ public partial class MainWindow : Window
                 Height = bounds.Height;
 
                 if (Settings.Data.WindowState == WindowState.Minimized)
+                {
                     WindowState = WindowState.Normal;
+                }
                 else
+                {
                     WindowState = Settings.Data.WindowState;
+                }
             }
         };
 
@@ -81,16 +85,24 @@ public partial class MainWindow : Window
                 Point topLeft = windowArea.TopLeft;
 
                 if ((topLeft.Y + windowArea.Height) > workingArea.Bottom)
+                {
                     topLeft.Y = workingArea.Bottom - windowArea.Height;
+                }
 
                 if (topLeft.Y < workingArea.Top)
+                {
                     topLeft.Y = workingArea.Top;
+                }
 
                 if ((topLeft.X + windowArea.Width) > workingArea.Right)
+                {
                     topLeft.X = workingArea.Right - windowArea.Width;
+                }
 
                 if (topLeft.X < workingArea.Left)
+                {
                     topLeft.X = workingArea.Left;
+                }
 
                 Point bottomRight = new Point(topLeft.X + Math.Min(windowArea.Width, workingArea.Width), 
                                                 topLeft.Y + Math.Min(windowArea.Height, workingArea.Height));

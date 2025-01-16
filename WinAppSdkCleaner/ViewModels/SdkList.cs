@@ -11,7 +11,9 @@ internal sealed partial class SdkList : List<ItemBase>
     public SdkList(IEnumerable<SdkData> sdks) : base()
     {
         foreach (SdkData sdk in sdks)
+        {
             Add(new SdkItem(sdk));
+        }
 
         Sort();
     }
@@ -21,12 +23,16 @@ internal sealed partial class SdkList : List<ItemBase>
         foreach (ItemBase item in items)
         {
             if (item.IsSelected)
+            {
                 return item;
+            }
 
             ItemBase? selected = GetSelectedItem(item.Children);
 
             if (selected is not null)
+            {
                 return selected;
+            }
         }
 
         return null;
@@ -41,10 +47,14 @@ internal sealed partial class SdkList : List<ItemBase>
             if (item is not null)
             {
                 if (item is PackageItem packageItem)
+                {
                     packages.Add(packageItem.PackageRecord);
+                }
 
                 foreach (ItemBase child in item.Children)
+                {
                     packages.AddRange(GetSelectedPackages(child));
+                }
             }
 
             return packages;
@@ -91,12 +101,16 @@ internal sealed partial class SdkList : List<ItemBase>
         foreach (ItemBase item in list)
         {
             if (item.Equals(other))
+            {
                 return item;
+            }
 
             ItemBase? foundItem = FindItem(item.Children, other);
 
             if (foundItem is not null)
+            {
                 return foundItem;
+            }
         }
 
         return null;

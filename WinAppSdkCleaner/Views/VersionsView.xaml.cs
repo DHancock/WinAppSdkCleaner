@@ -53,11 +53,15 @@ public partial class VersionsView : UserControl
             Debug.Assert(item is DisplayVersion);
 
             if (item is DisplayVersion displayVersion)
+            {
                 sb.AppendLine($"{displayVersion.SemanticVersion}\t{displayVersion.PackageVersion}");
+            }
         } 
 
         if (sb.Length > 0)
+        {
             Clipboard.SetText(sb.ToString());
+        }
     }
 
     private static bool CanCopy(ListView list) => list.SelectedItems.Count > 0;

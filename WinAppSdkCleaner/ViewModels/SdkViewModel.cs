@@ -65,7 +65,9 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
         string data = SdkList.GetCopyData();
 
         if (!string.IsNullOrEmpty(data))
+        {
             Clipboard.SetText(data);
+        }
     }
 
     public bool CanCopy() => sdkList.CanCopy();

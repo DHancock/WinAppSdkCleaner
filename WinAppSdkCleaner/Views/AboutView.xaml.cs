@@ -14,7 +14,9 @@ public partial class AboutView : UserControl
         NameTextBlock.Text = assemblyName.Name;
         
         if (assemblyName.Version is not null)
+        {
             VersionTextBlock.Text = ConvertToString(assemblyName.Version);
+        }
 
         Trace.WriteLine($"{NameTextBlock.Text} version: {VersionTextBlock.Text}");
     }

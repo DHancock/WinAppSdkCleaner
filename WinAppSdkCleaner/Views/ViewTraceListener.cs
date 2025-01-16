@@ -21,7 +21,9 @@ internal sealed partial class ViewTraceListener : TraceListener
             if (store is not null)
             {
                 if (store.Length > 0)
+                {
                     WriteInternal(store.ToString());
+                }
 
                 store = null;
             }
@@ -39,12 +41,16 @@ internal sealed partial class ViewTraceListener : TraceListener
             if (Consumer is null)
             {
                 if (store is null)
+                {
                     store = new StringBuilder();
+                }
 
                 store.Append(message);
 
                 if (store.Length > cMaxStoreLength)
+                {
                     store.Remove(0, cMaxStoreLength / 2);
+                }
             }
             else
             {
@@ -56,9 +62,13 @@ internal sealed partial class ViewTraceListener : TraceListener
                     Consumer.Text += message;
 
                     if (selectionLength > 0)
+                    {
                         Consumer.Select(selectionStart, selectionLength);
+                    }
                     else
+                    {
                         Consumer.CaretIndex = Consumer.Text.Length;
+                    }
                 },
                 DispatcherPriority.Background);
             }

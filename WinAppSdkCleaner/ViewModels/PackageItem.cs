@@ -13,7 +13,9 @@ internal class PackageItem : ItemBase
         cachedLogo = LoadPackageLogo();
 
         foreach (PackageData dependentPackage in packageRecord.PackagesDependentOnThis)
+        {
             Children.Add(new PackageItem(dependentPackage, this));
+        }
 
         Children.Sort();
     }
@@ -40,11 +42,17 @@ internal class PackageItem : ItemBase
             string text;
 
             if (Package.Id.FullName.Contains("Main"))
+            {
                 text = "Main ";
+            }
             else if (Package.Id.FullName.Contains("DDLM"))
+            {
                 text = "DDLM ";
+            }
             else if (Package.Id.FullName.Contains("Singleton"))
+            {
                 text = "Singleton ";
+            }
             else
             {
                 Debug.Assert(Package.IsFramework);
@@ -52,7 +60,7 @@ internal class PackageItem : ItemBase
             }
 
             VersionRecord vr = Model.CategorizePackageVersion(Package.Id.Version, sdkItem.SdkIdentifier);
-            text += (vr.SemanticVersion?.Length == 0) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
+            text += string.IsNullOrEmpty(vr.SemanticVersion) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
 
             return text + $" - {Package.Id.Architecture.ToString().ToLower()}";
         }
@@ -65,7 +73,9 @@ internal class PackageItem : ItemBase
         get
         {
             if (string.IsNullOrWhiteSpace(Package.Description))
+            {
                 return Package.Id.FullName;
+            }
 
             return Package.Description;
         }
@@ -112,10 +122,14 @@ internal class PackageItem : ItemBase
     public static bool operator ==(PackageItem? x, PackageItem? y)
     {
         if (ReferenceEquals(x, y))
+        {
             return true;
+        }
 
         if ((x is null) || (y is null))
+        {
             return false;
+        }
 
         if (string.Equals(x.Package.Id.FullName, y.Package.Id.FullName, StringComparison.Ordinal))
         {
@@ -137,10 +151,14 @@ internal class PackageItem : ItemBase
         const int cAfter = 1;
 
         if (item is not PackageItem other)
+        {
             throw new ArgumentException("incompatible type", nameof(item));
+        }
 
         if (IsNonSdkPackage != other.IsNonSdkPackage)
+        {
             return IsNonSdkPackage ? cBefore : cAfter;
+        }
 
         return base.CompareTo(item);
     }
