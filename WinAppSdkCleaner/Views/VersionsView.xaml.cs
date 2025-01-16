@@ -18,11 +18,6 @@ public partial class VersionsView : UserControl
 
         winAppSdkCopyCommand = InitialiseCommand("WinAppSdkCopy", ExecuteWinAppSdkCopy, CanWinAppSdkCopy);
         reunionCopyCommand = InitialiseCommand("ReunionCopy", ExecuteReunionCopy, CanReunionCopy);
-
-        Loaded += async (s, e) =>
-        {
-            await ((VersionsViewModel)DataContext).LoadVersionInfo();
-        };
     }
 
     private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)

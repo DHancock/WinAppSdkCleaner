@@ -51,7 +51,7 @@ internal class PackageItem : ItemBase
                 text = "Framework ";
             }
 
-            VersionRecord vr = Model.CategorizePackageVersionAsync(Package.Id.Version, sdkItem.SdkIdentifier).GetAwaiter().GetResult();
+            VersionRecord vr = Model.CategorizePackageVersion(Package.Id.Version, sdkItem.SdkIdentifier);
             text += (vr.SemanticVersion.Length == 0) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
 
             return text + $" - {Package.Id.Architecture.ToString().ToLower()}";

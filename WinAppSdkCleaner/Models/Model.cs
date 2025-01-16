@@ -5,18 +5,28 @@ namespace WinAppSdkCleaner.Models;
 
 internal static class Model
 {
-    internal static readonly AsyncLazy<IEnumerable<VersionRecord>> sVersionsProvider =
-        new AsyncLazy<IEnumerable<VersionRecord>>(async () => await GetVersionsListAsync());
+    private static readonly List<VersionRecord> versionsList = new List<VersionRecord>();
+
+    public static event EventHandler? VersionsLoaded;
+
+    private static void OnVersionsLoaded(EventArgs e)
+    {
+        VersionsLoaded?.Invoke(null, e);
+    }
 
     private static bool IsMicrosoftPublisher(PackageId id)
     {
         return string.Equals(id.PublisherId, "8wekyb3d8bbwe", StringComparison.Ordinal);
     }
 
-    public static async Task<VersionRecord> CategorizePackageVersionAsync(PackageVersion packageVersion, SdkId sdkId)
+    public static IEnumerable<VersionRecord> FilterVersionsList(SdkId sdkId)
     {
-        IEnumerable<VersionRecord> versions = await sVersionsProvider;
-        VersionRecord? versionRecord = versions.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
+        return versionsList.Where(v => v.SdkId == sdkId);
+    }
+
+    public static VersionRecord CategorizePackageVersion(PackageVersion packageVersion, SdkId sdkId)
+    {
+        VersionRecord? versionRecord = versionsList.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
 
         if (versionRecord is null)
             return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion);
@@ -54,8 +64,33 @@ internal static class Model
 
     public static async Task<IEnumerable<SdkData>> GetSDKsAsync()
     {
-        Trace.WriteLine($"{nameof(GetSDKsAsync)} entry, allUsers: {IntegrityLevel.IsElevated}");
-        Stopwatch stopwatch = Stopwatch.StartNew();
+        Task<List<SdkData>> sdksTask = Task.Run(GetSDKPackages);
+        Task versionsTask = Task.Run(GetVersionsListAsync);
+
+        await Task.WhenAll(sdksTask, versionsTask);
+
+        CategorizePackageVersions(sdksTask.Result);
+
+        Trace.WriteLine($"Found {sdksTask.Result.Count} SDKs, allUsers: {IntegrityLevel.IsElevated}");
+
+        return sdksTask.Result;
+    }
+
+    private static void CategorizePackageVersions(IEnumerable<SdkData> sdks)
+    {
+        foreach (SdkData sd in sdks)
+        {
+            VersionRecord? versionRecord = versionsList.FirstOrDefault(v => v.SdkId == sd.Version.SdkId && v.Release == sd.Version.Release);
+
+            if (versionRecord != null)
+            {
+                sd.Version = versionRecord;
+            }
+        }
+    }
+
+    private static List<SdkData> GetSDKPackages()
+    {
         List<SdkData> sdkList = new List<SdkData>();
         Dictionary<string, PackageData> lookUpTable = new Dictionary<string, PackageData>();
         IEnumerable<ISdk> sdkTypes = new List<ISdk>() { new ProjectReunion(), new WinAppSdk() };
@@ -93,21 +128,8 @@ internal static class Model
 
                 if (packageList.Count > 0)
                 {
-                    VersionRecord sdkVersion = await CategorizePackageVersionAsync(packageVersion: group.Key, sdk.Id);
-                    sdkList.Add(new SdkData(sdkVersion, sdk, packageList));
-
-                    Trace.WriteLine($"Found: {sdkVersion.SdkId} {sdkVersion.SemanticVersion}");
-
-                    foreach (PackageData packageData in packageList)
-                    {
-                        Trace.WriteLine($"{packageData.Package.Id.FullName}");
-
-                        if (packageData.Package.Dependencies.Count > 0)
-                        {
-                            foreach (Package dependency in packageData.Package.Dependencies)
-                                Trace.WriteLine($"\tdependent on: {dependency.Id.FullName}");
-                        }
-                    }
+                    VersionRecord version = new VersionRecord(string.Empty, string.Empty, sdk.Id, Release: group.Key);
+                    sdkList.Add(new SdkData(version, sdk, packageList));
                 }
             }
         }
@@ -118,8 +140,6 @@ internal static class Model
             CalculateDependentAppCounts(sdkTypes, sdkList);
         }
 
-        stopwatch.Stop();
-        Trace.WriteLine($"{nameof(GetSDKsAsync)} found {sdkList.Count} SDKs, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
         return sdkList;
     }
 
@@ -313,14 +333,14 @@ internal static class Model
 
     enum Location { FileSystem, OnLine, Resource };
 
-    private static async Task<IEnumerable<VersionRecord>> GetVersionsListAsync()
+    private static async Task GetVersionsListAsync()
     {
-        Trace.WriteLine($"\t{nameof(GetVersionsListAsync)} entry");
-        Stopwatch stopwatch = Stopwatch.StartNew();
-        List<VersionRecord> versionsList = new List<VersionRecord>();
-        JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true, };
+        if (versionsList.Count > 0)
+            return;
 
-        foreach(Location location in Enum.GetValues<Location>())
+        JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true };
+
+        foreach (Location location in Enum.GetValues<Location>())
         {
             try
             {
@@ -340,9 +360,10 @@ internal static class Model
                     if (versions is not null)
                     {
                         Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
-                        Trace.WriteLine($"\t{nameof(GetVersionsListAsync)} found {versions.Count} versions, from: {location}");
+                        
+                        versionsList.AddRange(versions);
 
-                        versionsList = versions;
+                        Trace.WriteLine($"Found {versionsList.Count} version records from: {location}");
                         break;
                     }
                 }
@@ -353,9 +374,10 @@ internal static class Model
             }
         }
 
-        stopwatch.Stop();
-        Trace.WriteLine($"\t{nameof(GetVersionsListAsync)} elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
-        return versionsList;
+        if (versionsList.Count > 0)
+        {
+            OnVersionsLoaded(new EventArgs());
+        }
     }
 
     private static async Task<string> ReadAllOnLineTextAsync()
@@ -366,20 +388,17 @@ internal static class Model
             {
                 const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.zip";
 
-                using (HttpResponseMessage response = await httpClient.GetAsync(path))
+                using (Stream s = await httpClient.GetStreamAsync(path))
                 {
-                    using (Stream s = await response.Content.ReadAsStreamAsync())
+                    using (ZipArchive za = new ZipArchive(s))
                     {
-                        using (ZipArchive za = new ZipArchive(s))
-                        {
-                            ZipArchiveEntry? entry = za.GetEntry("versions.json");
+                        ZipArchiveEntry? entry = za.GetEntry("versions.json");
 
-                            if (entry is not null)
+                        if (entry is not null)
+                        {
+                            using (StreamReader sr = new StreamReader(entry.Open()))
                             {
-                                using (StreamReader sr = new StreamReader(entry.Open()))
-                                {
-                                    return sr.ReadToEnd();
-                                }
+                                return sr.ReadToEnd();
                             }
                         }
                     }
@@ -434,23 +453,5 @@ internal static class Model
         }
 
         return string.Empty;
-    }
-
-    // Thread safe asynchronous lazy initialization 
-    // based on the following:
-    // https://devblogs.microsoft.com/pfxteam/asynclazyt/?WT.mc_id=DT-MVP-5000058
-    // https://blog.stephencleary.com/2012/08/asynchronous-lazy-initialization.html
-
-    internal sealed class AsyncLazy<T> : Lazy<Task<T>>
-    {
-        public AsyncLazy(Func<T> valueFactory) : base(() => Task.Run(valueFactory))
-        {
-        }
-
-        public AsyncLazy(Func<Task<T>> taskFactory) : base(() => Task.Run(taskFactory))
-        {
-        }
-
-        public TaskAwaiter<T> GetAwaiter() => Value.GetAwaiter();
     }
 }
