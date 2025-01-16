@@ -21,10 +21,10 @@ internal sealed class SdkItem : ItemBase
     {
         get
         {
-            if (SdkRecord.Version.SemanticVersion.Length == 0)
+            if (SdkRecord.Version.SemanticVersion?.Length == 0)
                 return $"{SdkRecord.Sdk.DispalyName} ({Version.PackageVersionStr})";
 
-            if (SdkRecord.Version.VersionTag.Length > 0)
+            if (SdkRecord.Version.VersionTag?.Length > 0)
                 return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion} - {Version.VersionTag}";
 
             return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion}";
