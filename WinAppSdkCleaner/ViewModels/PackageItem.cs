@@ -52,7 +52,7 @@ internal class PackageItem : ItemBase
             }
 
             VersionRecord vr = Model.CategorizePackageVersion(Package.Id.Version, sdkItem.SdkIdentifier);
-            text += (vr.SemanticVersion.Length == 0) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
+            text += (vr.SemanticVersion?.Length == 0) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
 
             return text + $" - {Package.Id.Architecture.ToString().ToLower()}";
         }
