@@ -15,7 +15,9 @@ internal sealed class PackageVersionComparer : IComparer<PackageVersion>
                 result = a.Build - b.Build;
 
                 if (result == 0)
+                {
                     result = a.Revision - b.Revision;
+                }
             }
         }
 

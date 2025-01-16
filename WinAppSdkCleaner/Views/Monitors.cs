@@ -1,4 +1,4 @@
-namespace WinAppSdkCleaner.Views;
+﻿namespace WinAppSdkCleaner.Views;
 
 public static class Monitors
 {
@@ -11,7 +11,9 @@ public static class Monitors
         monitorInfo.cbSize = (uint)Unsafe.SizeOf<MONITORINFO>();
 
         if (!PInvoke.GetMonitorInfo(hMonitor, ref monitorInfo))
+        {
             throw new Win32Exception(Marshal.GetLastPInvokeError());
+        }
 
         return new Rect(monitorInfo.rcWork.X, monitorInfo.rcWork.Y, monitorInfo.rcWork.Width, monitorInfo.rcWork.Height);
     }

@@ -13,7 +13,9 @@ internal sealed partial class ViewCommand : ICommand
     public void Execute(object? parameter)
     {
         if (ExecuteProc is null)
+        {
             throw new NotImplementedException(nameof(ExecuteProc));
+        }
 
         ExecuteProc(parameter);
     }

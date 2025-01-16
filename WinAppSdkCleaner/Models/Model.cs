@@ -29,7 +29,9 @@ internal static class Model
         VersionRecord? versionRecord = versionsList.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
 
         if (versionRecord is null)
+        {
             return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion);
+        }
 
         return versionRecord;
     }
@@ -52,14 +54,18 @@ internal static class Model
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
 
                         if (package.IsFramework)
+                        {
                             subLookUp[package.Id.FullName] = dependentPackage;
+                        }
                     }
                 }
             }
         });
 
         if (subLookUp.Count > 0)
+        {
             AddDependents(subLookUp, allPackages);
+        }
     }
 
     public static async Task<IEnumerable<SdkData>> GetSDKsAsync()
@@ -93,21 +99,27 @@ internal static class Model
     {
         List<SdkData> sdkList = new List<SdkData>();
         Dictionary<string, PackageData> lookUpTable = new Dictionary<string, PackageData>();
-        IEnumerable<ISdk> sdkTypes = new List<ISdk>() { new ProjectReunion(), new WinAppSdk() };
+        List<ISdk> sdkTypes = [new ProjectReunion(), new WinAppSdk()];
 
         PackageManager packageManager = new PackageManager();
         IEnumerable<Package> allPackages;
 
         if (IntegrityLevel.IsElevated)
+        {
             allPackages = packageManager.FindPackages();
+        }
         else
+        {
             allPackages = packageManager.FindPackagesForUser(string.Empty);
+        }
 
         foreach (ISdk sdk in sdkTypes)
         {
-            var query = from package in allPackages
-                        where (package.SignatureKind != PackageSignatureKind.System) && IsMicrosoftPublisher(package.Id) && sdk.Match(package.Id)
-                        group package by package.Id.Version;
+            IEnumerable<IGrouping<PackageVersion, Package>> query;
+            
+            query = from package in allPackages
+                    where (package.SignatureKind != PackageSignatureKind.System) && IsMicrosoftPublisher(package.Id) && sdk.Match(package.Id)
+                    group package by package.Id.Version;
 
             foreach (IGrouping<PackageVersion, Package> group in query)
             {
@@ -117,13 +129,17 @@ internal static class Model
                 {
                     // check that it's not a staged package
                     if (IntegrityLevel.IsElevated && !IsInstalled(package, packageManager.FindUsers(package.Id.FullName)))
+                    {
                         continue;
+                    }
 
                     PackageData packageData = new PackageData(package, new List<PackageData>());
                     packageList.Add(packageData);
 
                     if (package.IsFramework)
+                    {
                         lookUpTable[package.Id.FullName] = packageData; // used to find dependents
+                    }
                 }
 
                 if (packageList.Count > 0)
@@ -151,7 +167,9 @@ internal static class Model
         if (userInfo is not null)
         {
             if (userInfo.InstallState == PackageInstallState.Installed)
+            {
                 return true;
+            }
 
             // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
             // when it was removed for some (all?) users. Staged packages cannot be deleted by this program, so omit it from the results. 
@@ -173,7 +191,9 @@ internal static class Model
             foreach (SdkData sdkData in sdkList)
             {
                 if (sdkData.Sdk.Id == sdk.Id)
+                {
                     sdkData.OtherAppsCount = IdentifyOtherApps(sdk, sdkData.SdkPackages);
+                }
             }
         }
     }
@@ -187,10 +207,14 @@ internal static class Model
             int count = 0;
 
             if (!(sdk.Match(packageData.Package.Id) && IsMicrosoftPublisher(packageData.Package.Id)))
+            {
                 count += 1;
+            }
 
             if (packageData.PackagesDependentOnThis.Count > 0)
+            {
                 count += IdentifyOtherApps(sdk, packageData.PackagesDependentOnThis);
+            }
 
             total += count;
             packageData.OtherAppsCount = count;
@@ -211,9 +235,13 @@ internal static class Model
             using (ManualResetEventSlim opCompletedEvent = new ManualResetEventSlim(false))
             {
                 if (IntegrityLevel.IsElevated)
+                {
                     deploymentOperation = packageManager.RemovePackageAsync(fullName, RemovalOptions.RemoveForAllUsers);
+                }
                 else
+                {
                     deploymentOperation = packageManager.RemovePackageAsync(fullName);
+                }
 
                 deploymentOperation.Completed = (depProgress, status) =>
                 {
@@ -336,7 +364,9 @@ internal static class Model
     private static async Task GetVersionsListAsync()
     {
         if (versionsList.Count > 0)
+        {
             return;
+        }
 
         JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true };
 

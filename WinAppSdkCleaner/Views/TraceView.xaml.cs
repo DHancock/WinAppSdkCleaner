@@ -16,7 +16,9 @@ public partial class TraceView : UserControl
         ViewTraceListener? viewTraceListener = FindViewTraceListener();
 
         if (viewTraceListener is not null)
+        {
             viewTraceListener.RegisterConsumer(TraceTextBox);
+        }
         else
         {
             TraceTextBox.Text = $"Trace.Listeners doesn't contain {nameof(ViewTraceListener)}";
@@ -32,7 +34,9 @@ public partial class TraceView : UserControl
         foreach (TraceListener listener in Trace.Listeners)
         {
             if (listener is ViewTraceListener viewTraceListener)
+            {
                 return viewTraceListener;
+            }
         }
 
         return null;

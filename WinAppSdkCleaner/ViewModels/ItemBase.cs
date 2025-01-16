@@ -23,7 +23,9 @@ internal abstract class ItemBase : IComparable<ItemBase>
     public virtual int CompareTo(ItemBase? other)
     {
         if (other is null)
+        {
             return -1;
+        }
 
         return string.Compare(HeadingText, other.HeadingText, StringComparison.CurrentCulture);
     }

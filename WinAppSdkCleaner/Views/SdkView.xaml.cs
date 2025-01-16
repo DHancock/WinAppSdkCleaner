@@ -62,7 +62,9 @@ public partial class SdkView : UserControl
                 string message = $"This WinAppSdk has dependent applications.{Environment.NewLine}Are you sure that you want to remove it?";
 
                 if (MessageBox.Show(Application.Current.MainWindow, message, "Caution", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel)
+                {
                     return;
+                }
             }
 
             IsIdle = false;
