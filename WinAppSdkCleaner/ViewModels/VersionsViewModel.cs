@@ -6,36 +6,24 @@ internal sealed record DisplayVersion(string SemanticVersion, string PackageVers
 
 internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 {
-    private IEnumerable<VersionRecord>? versions;
-
-    public async Task LoadVersionInfo()
+    public VersionsViewModel()
     {
-        if (versions is null)
+        Model.VersionsLoaded += (s, e) =>
         {
-            versions = await Model.sVersionsProvider;
-
             RaisePropertyChanged(nameof(WinAppSdkList));
             RaisePropertyChanged(nameof(ReunionList));
-        }
+        };
     }
 
     public IEnumerable<DisplayVersion> WinAppSdkList => FilterVersionsList(SdkId.WinAppSdk);
 
     public IEnumerable<DisplayVersion> ReunionList => FilterVersionsList(SdkId.Reunion);
 
-    private IEnumerable<DisplayVersion> FilterVersionsList(SdkId sdkId)
+    private static IEnumerable<DisplayVersion> FilterVersionsList(SdkId sdkId)
     {
-        if (versions is null)
-            return new List<DisplayVersion>();
-
-        return versions.Where(v => v.SdkId == sdkId)
+        return Model.FilterVersionsList(sdkId)
                         .OrderByDescending(v => v.Release, new PackageVersionComparer())
-                        .Select(v => new DisplayVersion($"{v.SemanticVersion} {v.VersionTag}", ConvertToString(v.Release)));
-    }
-
-    private static string ConvertToString(PackageVersion pv)
-    {
-        return $"{pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
+                        .Select(v => new DisplayVersion($"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
     }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")

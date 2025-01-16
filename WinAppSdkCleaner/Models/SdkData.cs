@@ -2,11 +2,10 @@
 
 internal sealed class SdkData
 {
-    public VersionRecord Version { get; init; }
+    public VersionRecord Version { get; set; }
     public ISdk Sdk { get; init; }
     public List<PackageData> SdkPackages { get; init; }
     public int OtherAppsCount { get; set; }
-
 
     public SdkData(VersionRecord version, ISdk sdk, List<PackageData> sdkPackages)
     {
