@@ -5,7 +5,8 @@ namespace WinAppSdkCleaner.Models;
 
 internal static class Model
 {
-    private static readonly List<VersionRecord> versionsList = new List<VersionRecord>();
+    private static readonly Dictionary<ulong, VersionRecord> sVersionsLookUp = new();
+
 
     public static event EventHandler? VersionsLoaded;
 
@@ -21,19 +22,18 @@ internal static class Model
 
     public static IEnumerable<VersionRecord> FilterVersionsList(SdkId sdkId)
     {
-        return versionsList.Where(v => v.SdkId == sdkId);
+        return sVersionsLookUp.Values.Where(v => v.SdkId == sdkId);
     }
 
-    public static VersionRecord CategorizePackageVersion(PackageVersion packageVersion, SdkId sdkId)
+    public static VersionRecord CategorizePackageVersion(SdkId sdkId, PackageVersion packageVersion)
     {
-        VersionRecord? versionRecord = versionsList.FirstOrDefault(v => v.SdkId == sdkId && v.Release == packageVersion);
-
-        if (versionRecord is null)
+        if (sVersionsLookUp.TryGetValue(MakeKey(sdkId, packageVersion), out VersionRecord? versionRecord))
         {
-            return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion);
+            Debug.Assert(versionRecord is not null);
+            return versionRecord;
         }
 
-        return versionRecord;
+        return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion);
     }
 
     private static void AddDependents(Dictionary<string, PackageData> lookUpTable, IEnumerable<Package> allPackages)
@@ -82,15 +82,19 @@ internal static class Model
         return sdksTask.Result;
     }
 
+    private static ulong MakeKey(SdkId sdkId, PackageVersion version)
+    {
+        return (ulong)sdkId << 48 | (ulong)version.Major << 32 | (ulong)version.Minor << 16 | version.Build ;
+    }
+
     private static void CategorizePackageVersions(IEnumerable<SdkData> sdks)
     {
-        foreach (SdkData sd in sdks)
+        foreach (SdkData sdk in sdks)
         {
-            VersionRecord? versionRecord = versionsList.FirstOrDefault(v => v.SdkId == sd.Version.SdkId && v.Release == sd.Version.Release);
-
-            if (versionRecord != null)
+            if (sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.Version.Release), out VersionRecord? versionRecord))
             {
-                sd.Version = versionRecord;
+                Debug.Assert(versionRecord is not null);
+                sdk.Version = versionRecord;
             }
         }
     }
@@ -363,7 +367,9 @@ internal static class Model
 
     private static async Task GetVersionsListAsync()
     {
-        if (versionsList.Count > 0)
+        // This function is only called from code running on the ui thread. That code has a 
+        // reentrancy guard so the versions look up dictionary will only ever be empty or full.
+        if (sVersionsLookUp.Count > 0)
         {
             return;
         }
@@ -390,10 +396,15 @@ internal static class Model
                     if (versions is not null)
                     {
                         Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
-                        
-                        versionsList.AddRange(versions);
 
-                        Trace.WriteLine($"Found {versionsList.Count} version records from: {location}");
+                        foreach (VersionRecord versionRecord in versions)
+                        {
+                            Debug.Assert(!sVersionsLookUp.ContainsKey(MakeKey(versionRecord.SdkId, versionRecord.Release)));
+
+                            sVersionsLookUp.Add(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
+                        }
+
+                        Trace.WriteLine($"Found {sVersionsLookUp.Count} version records from: {location}");
                         break;
                     }
                 }
@@ -404,7 +415,7 @@ internal static class Model
             }
         }
 
-        if (versionsList.Count > 0)
+        if (sVersionsLookUp.Count > 0)
         {
             OnVersionsLoaded(new EventArgs());
         }
