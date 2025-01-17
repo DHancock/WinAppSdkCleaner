@@ -7,7 +7,6 @@ internal static class Model
 {
     private static readonly Dictionary<ulong, VersionRecord> sVersionsLookUp = new();
 
-
     public static event EventHandler? VersionsLoaded;
 
     private static void OnVersionsLoaded(EventArgs e)
@@ -404,7 +403,7 @@ internal static class Model
                             sVersionsLookUp.Add(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
                         }
 
-                        Trace.WriteLine($"Found {sVersionsLookUp.Count} version records from: {location}");
+                        Trace.WriteLine($"Retrieved {sVersionsLookUp.Count} version records from: {location}");
                         break;
                     }
                 }
