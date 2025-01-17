@@ -42,7 +42,7 @@
   </ItemGroup>
 	
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="powershell Compress-Archive $(ProjectDir)versions.json $(ProjectDir)versions.zip -Update" />
+    <Exec Command="powershell $(ProjectDir)post_build.ps1 $(ProjectDir)" />
   </Target>
 
 </Project>
