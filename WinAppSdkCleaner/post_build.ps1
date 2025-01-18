@@ -9,24 +9,30 @@ $zipPath = Join-Path "$ProjectDir" "versions.zip"
 if (Test-Path $zipPath) 
 {
     $sourcePath = Join-Path "$ProjectDir" "versions.json"
-    $tempPath = Join-Path "$env:temp" "D27A648C-896F-47CB-90E1-6D70E728C5FB.zip"
+    $tempDir = Join-Path "$env:temp" ([System.IO.Path]::GetRandomFileName())
+    $tempPath = Join-Path "$tempDir" "versions.json"
 
-    Compress-Archive $sourcePath $tempPath -Update
+    Expand-Archive $zipPath $tempDir
 
-    $zipHash = (Get-FileHash $zipPath).Hash
-    $tempHash = (Get-FileHash $tempPath).Hash
+    $source = Get-Content $sourcePath -raw
+    $zipped = Get-Content $tempPath -raw
 
-    if ($zipHash -ne $tempHash)
+    # Because the data comes from a trusted source it is sufficient to
+    # just compare the file contents, not the json objects that they contain
+    $diff = Compare-Object $source $zipped
+
+    if ($diff)
     {
-        Move-Item $tempPath $zipPath -Force
+        Compress-Archive $sourcePath $zipPath -Update
     }
-    else
-    {
-        Remove-Item $tempPath
-    }
+
+    Remove-Item $tempDir -Recurse
 } 
 else 
 {
+    # The zip file contains file metadata as well as the file's contents.
+    # If the unchanged json is simply zipped again, the binary zip file will most likely differ
+    # The user has to revert deleted zip file, unless it's intensional
     Write-Host "ERROR: post build event failed, versions.zip cannot be found"
     exit 1
 }
