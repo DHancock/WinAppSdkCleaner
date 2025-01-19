@@ -426,7 +426,7 @@ internal static class Model
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/dev/WinAppSdkCleaner/versions.dat";
+                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.dat";
 
                 using (Stream s = await httpClient.GetStreamAsync(path))
                 {
