@@ -373,39 +373,35 @@ internal static class Model
             return;
         }
 
-        JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true };
-
         foreach (Location location in Enum.GetValues<Location>())
         {
             try
             {
-                string text = string.Empty;
+                List<VersionRecord>? versions = null;
 
                 switch (location)
                 {
-                    case Location.FileSystem: text = await ReadAllFileSystemTextAsync(); break;
-                    case Location.OnLine: text = await ReadAllOnLineTextAsync(); break;
-                    case Location.Resource: text = await ReadAllResourceTextAsync(); break;
+#if DEBUG
+                    case Location.FileSystem: versions = await ReadFromFileSystemAsync(); break;
+#endif
+                    case Location.OnLine: versions = await ReadFromOnLineAsync(); break;
+                    case Location.Resource: versions = ReadFromResources(); break;
                 }
 
-                if (!string.IsNullOrEmpty(text))
+                if (versions is not null)
                 {
-                    List<VersionRecord>? versions = JsonSerializer.Deserialize<List<VersionRecord>>(text, jsOptions);
+                    Debug.Assert(versions.Count > 0);
+                    Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
 
-                    if (versions is not null)
+                    foreach (VersionRecord versionRecord in versions)
                     {
-                        Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
+                        Debug.Assert(!sVersionsLookUp.ContainsKey(MakeKey(versionRecord.SdkId, versionRecord.Release)));
 
-                        foreach (VersionRecord versionRecord in versions)
-                        {
-                            Debug.Assert(!sVersionsLookUp.ContainsKey(MakeKey(versionRecord.SdkId, versionRecord.Release)));
-
-                            sVersionsLookUp.Add(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
-                        }
-
-                        Trace.WriteLine($"Retrieved {sVersionsLookUp.Count} version records from: {location}");
-                        break;
+                        sVersionsLookUp.Add(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
                     }
+
+                    Trace.WriteLine($"Retrieved {sVersionsLookUp.Count} version records from: {location}");
+                    break;
                 }
             }
             catch (Exception ex)
@@ -420,7 +416,7 @@ internal static class Model
         }
     }
 
-    private static async Task<string> ReadAllOnLineTextAsync()
+    private static async Task<List<VersionRecord>?> ReadFromOnLineAsync()
     {
         try
         {
@@ -432,10 +428,7 @@ internal static class Model
                 {
                     using (DeflateStream stream = new DeflateStream(s, CompressionMode.Decompress))
                     {
-                        using (StreamReader sr = new StreamReader(stream))
-                        {
-                            return sr.ReadToEnd();
-                        }
+                        return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
                     }
                 }
             }
@@ -445,10 +438,10 @@ internal static class Model
             Trace.WriteLine(ex.ToString());
         }
 
-        return string.Empty;
+        return null;
     }
 
-    private static async Task<string> ReadAllResourceTextAsync()
+    private static List<VersionRecord>? ReadFromResources()
     {
         try
         {
@@ -456,10 +449,7 @@ internal static class Model
             {
                 if (stream is not null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        return await reader.ReadToEndAsync();
-                    }
+                    return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
                 }
             }
         }
@@ -468,10 +458,10 @@ internal static class Model
             Trace.WriteLine(ex.ToString());
         }
 
-        return string.Empty;
+        return null;
     }
 
-    private static async Task<string> ReadAllFileSystemTextAsync()
+    private static async Task<List<VersionRecord>?> ReadFromFileSystemAsync()
     {
         try
         {
@@ -479,7 +469,10 @@ internal static class Model
 
             if (File.Exists(path)) // probably won't, it isn't installed by default
             {
-                return await File.ReadAllTextAsync(path);
+                await using (FileStream stream = File.OpenRead(path))
+                {
+                    return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                }
             }
         }
         catch (Exception ex)
@@ -487,6 +480,18 @@ internal static class Model
             Trace.WriteLine(ex.ToString());
         }
 
-        return string.Empty;
+        return null;
     }
+}
+
+[JsonSourceGenerationOptions(IncludeFields = true)]
+[JsonSerializable(typeof(VersionRecord))]
+internal partial class VersionRecordJsonContext : JsonSerializerContext
+{
+}
+
+[JsonSourceGenerationOptions(IncludeFields = true)]
+[JsonSerializable(typeof(List<VersionRecord>))]
+internal partial class VersionRecordListJsonSerializerContext : JsonSerializerContext
+{ 
 }
