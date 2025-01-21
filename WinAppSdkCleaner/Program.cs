@@ -7,9 +7,9 @@ namespace WinAppSdkCleaner
         [STAThread]
         static int Main(string[] args)
         {
-            if ((args.Length == 2) && (args[0] == "/check_versions"))
+            if ((args.Length == 3) && (args[0] == "/check_versions"))
             {
-                return CheckCompressedVersionsFile(args[1]);
+                return CheckCompressedVersionsFile(args[1], args[2]);
             }
 
             App application = new App();
@@ -17,15 +17,12 @@ namespace WinAppSdkCleaner
             return application.Run();
         }
 
-        private static int CheckCompressedVersionsFile(string projectDir)
+        private static int CheckCompressedVersionsFile(string jsonPath, string dataPath)
         {
-             //Debugger.Launch();
+             Debugger.Launch();
       
             try
             {
-                string jsonPath = Path.Join(projectDir, "versions.json");
-                string dataPath = Path.Join(projectDir, "versions.dat");
-
                 List<VersionRecord> jsonVersions = ReadJsonFile(jsonPath);
 
                 if (File.Exists(dataPath))
