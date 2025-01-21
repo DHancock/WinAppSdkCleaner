@@ -43,7 +43,7 @@ namespace WinAppSdkCleaner
             }
             catch (Exception ex)
             {                     
-                Console.WriteLine($"ERROR: post build event failed {ex}");
+                Console.WriteLine($"ERROR: Post build event failed with {ex}");
             }
 
             return 1;
@@ -64,18 +64,18 @@ namespace WinAppSdkCleaner
         {
             using (FileStream fs = File.OpenRead(dataPath))
             {
-                using (DeflateStream stream = new DeflateStream(fs, CompressionMode.Decompress))
+                using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
                 {
-                    return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default) ?? new();
+                    return (List<VersionRecord>?)JsonSerializer.Deserialize(ds, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default) ?? new();
                 }
             }
         }
 
         private static List<VersionRecord> ReadJsonFile(string jsonPath)
         {
-            using (FileStream stream = File.OpenRead(jsonPath))
+            using (FileStream fs = File.OpenRead(jsonPath))
             {
-                return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default) ?? new();
+                return (List<VersionRecord>?)JsonSerializer.Deserialize(fs, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default) ?? new();
             }
         }
     }
