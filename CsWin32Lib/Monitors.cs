@@ -2,6 +2,9 @@
 
 public static class Monitors
 {
+    // This library is a workaround for https://github.com/dotnet/wpf/issues/7106
+    // Without the library wrapper the build is broken only when publishing, normal debug or
+    // release builds using CsWin32 compile just fine.
 
     public static Rect GetWorkingAreaOfClosestMonitor(Rect windowBounds)
     {
