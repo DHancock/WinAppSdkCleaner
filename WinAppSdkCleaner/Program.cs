@@ -19,7 +19,7 @@ namespace WinAppSdkCleaner
 
         private static int CheckCompressedVersionsFile(string jsonPath, string dataPath)
         {
-             Debugger.Launch();
+             //Debugger.Launch();
       
             try
             {
