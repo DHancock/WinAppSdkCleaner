@@ -1,4 +1,6 @@
-﻿namespace WinAppSdkCleaner
+﻿using WinAppSdkCleaner.Models;
+
+namespace WinAppSdkCleaner
 {
     class Program
     {
@@ -24,35 +26,19 @@
                 string jsonPath = Path.Join(projectDir, "versions.json");
                 string dataPath = Path.Join(projectDir, "versions.dat");
 
-                JsonSerializerOptions jsOptions = new JsonSerializerOptions() { IncludeFields = true, WriteIndented = false };
-
-                List<Models.VersionRecord> jsonVersions = ReadJsonFile(jsonPath, jsOptions);
+                List<VersionRecord> jsonVersions = ReadJsonFile(jsonPath);
 
                 if (File.Exists(dataPath))
                 {
-                    List<Models.VersionRecord> dataVersions = ReadDataFile(dataPath, jsOptions);
+                    List<VersionRecord> dataVersions = ReadDataFile(dataPath);
 
-                    if (jsonVersions.Count == dataVersions.Count)
+                    if (Enumerable.SequenceEqual(jsonVersions, dataVersions))
                     {
-                        bool equal = true;
-
-                        for (int index = 0; index < jsonVersions.Count; index++)
-                        {
-                            if ((jsonVersions[index] != dataVersions[index]) && !jsonVersions.Contains(dataVersions[index]))
-                            {
-                                equal = false;
-                                break;
-                            }
-                        }
-
-                        if (equal)
-                        {
-                            return 0;
-                        }
+                        return 0;
                     }
                 }
 
-                WriteDataFile(dataPath, jsonVersions, jsOptions);
+                WriteDataFile(dataPath, jsonVersions);
                 return 0;
             }
             catch (Exception ex)
@@ -63,39 +49,34 @@
             return 1;
         }
 
-        private static void WriteDataFile(string outputFile, List<Models.VersionRecord> versions, JsonSerializerOptions jsOptions)
+        private static void WriteDataFile(string outputFile, List<VersionRecord> versions)
         {
             using (FileStream fs = File.Create(outputFile))
             {
-                MemoryStream ms = new MemoryStream();
-                JsonSerializer.Serialize(ms, versions, jsOptions);
-
                 using (DeflateStream ds = new DeflateStream(fs, CompressionLevel.Optimal))
                 {
-                    ms.WriteTo(ds);
+                    JsonSerializer.Serialize(ds, versions, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
                 }
             }
         }
 
-        private static List<Models.VersionRecord> ReadDataFile(string dataPath, JsonSerializerOptions jsOptions)
+        private static List<VersionRecord> ReadDataFile(string dataPath)
         {
             using (FileStream fs = File.OpenRead(dataPath))
             {
                 using (DeflateStream stream = new DeflateStream(fs, CompressionMode.Decompress))
                 {
-                    using (StreamReader sr = new StreamReader(stream))
-                    {
-                        string text = sr.ReadToEnd();
-                        return JsonSerializer.Deserialize<List<Models.VersionRecord>>(text, jsOptions) ?? new();
-                    }
+                    return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default) ?? new();
                 }
             }
         }
 
-        private static List<Models.VersionRecord> ReadJsonFile(string jsonPath, JsonSerializerOptions jsOptions)
+        private static List<VersionRecord> ReadJsonFile(string jsonPath)
         {
-            string text = File.ReadAllText(jsonPath);
-            return JsonSerializer.Deserialize<List<Models.VersionRecord>>(text, jsOptions) ?? new();
+            using (FileStream stream = File.OpenRead(jsonPath))
+            {
+                return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default) ?? new();
+            }
         }
     }
 }
