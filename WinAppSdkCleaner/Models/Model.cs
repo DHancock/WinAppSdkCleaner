@@ -484,13 +484,13 @@ internal static class Model
     }
 }
 
-[JsonSourceGenerationOptions(IncludeFields = true)]
+[JsonSourceGenerationOptions(IncludeFields = true, WriteIndented = false)]
 [JsonSerializable(typeof(VersionRecord))]
 internal partial class VersionRecordJsonContext : JsonSerializerContext
 {
 }
 
-[JsonSourceGenerationOptions(IncludeFields = true)]
+[JsonSourceGenerationOptions(IncludeFields = true, WriteIndented = false)]
 [JsonSerializable(typeof(List<VersionRecord>))]
 internal partial class VersionRecordListJsonSerializerContext : JsonSerializerContext
 { 
