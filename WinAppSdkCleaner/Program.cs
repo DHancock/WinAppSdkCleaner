@@ -19,6 +19,9 @@ namespace WinAppSdkCleaner
 
         private static int CheckCompressedVersionsFile(string jsonPath, string dataPath)
         {
+            const int error_success = 0;
+            const int error_failure = 1;
+
              //Debugger.Launch();
       
             try
@@ -31,24 +34,24 @@ namespace WinAppSdkCleaner
 
                     if (Enumerable.SequenceEqual(jsonVersions, dataVersions))
                     {
-                        return 0;
+                        return error_success;
                     }
                 }
 
                 WriteDataFile(dataPath, jsonVersions);
-                return 0;
+                return error_success;
             }
             catch (Exception ex)
             {                     
                 Console.WriteLine($"ERROR: Post build event failed with {ex}");
             }
 
-            return 1;
+            return error_failure;
         }
 
-        private static void WriteDataFile(string outputFile, List<VersionRecord> versions)
+        private static void WriteDataFile(string dataPath, List<VersionRecord> versions)
         {
-            using (FileStream fs = File.Create(outputFile))
+            using (FileStream fs = File.Create(dataPath))
             {
                 using (DeflateStream ds = new DeflateStream(fs, CompressionLevel.Optimal))
                 {

@@ -5,7 +5,7 @@ namespace WinAppSdkCleaner.Models;
 
 internal static class Model
 {
-    private static readonly Dictionary<ulong, VersionRecord> sVersionsLookUp = new();
+    private static readonly Dictionary<int, VersionRecord> sVersionsLookUp = new();
 
     public static event EventHandler? VersionsLoaded;
 
@@ -81,9 +81,9 @@ internal static class Model
         return sdksTask.Result;
     }
 
-    private static ulong MakeKey(SdkId sdkId, PackageVersion version)
+    private static int MakeKey(SdkId sdkId, PackageVersion version)
     {
-        return (ulong)sdkId << 48 | (ulong)version.Major << 32 | (ulong)version.Minor << 16 | version.Build ;
+        return ((int)sdkId << 16 | version.Major) ^ (version.Minor << 16 | version.Build);
     }
 
     private static void CategorizePackageVersions(IEnumerable<SdkData> sdks)
@@ -381,23 +381,25 @@ internal static class Model
 
                 switch (location)
                 {
-#if DEBUG
                     case Location.FileSystem: versions = await ReadFromFileSystemAsync(); break;
-#endif
                     case Location.OnLine: versions = await ReadFromOnLineAsync(); break;
                     case Location.Resource: versions = ReadFromResources(); break;
                 }
 
                 if (versions is not null)
                 {
+                    // While I could serialize a json dictionary, for backward compatibility
+                    // the json array is still needed. Considering 99% of the time it will
+                    // be downloaded from git hub anyway the extra complexity isn't worth it.
                     Debug.Assert(versions.Count > 0);
                     Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
 
+                    sVersionsLookUp.EnsureCapacity(versions.Count);
+
                     foreach (VersionRecord versionRecord in versions)
                     {
-                        Debug.Assert(!sVersionsLookUp.ContainsKey(MakeKey(versionRecord.SdkId, versionRecord.Release)));
-
-                        sVersionsLookUp.Add(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
+                        bool success = sVersionsLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
+                        Debug.Assert(success);
                     }
 
                     Trace.WriteLine($"Retrieved {sVersionsLookUp.Count} version records from: {location}");
@@ -467,7 +469,7 @@ internal static class Model
         {
             string path = Path.Join(AppContext.BaseDirectory, "versions.json");
 
-            if (File.Exists(path)) // probably won't, it isn't installed by default
+            if (File.Exists(path)) // if this wasn't just a noddy little utility I'd validate this data
             {
                 await using (FileStream stream = File.OpenRead(path))
                 {
@@ -486,7 +488,7 @@ internal static class Model
 
 [JsonSourceGenerationOptions(IncludeFields = true, WriteIndented = false)]
 [JsonSerializable(typeof(VersionRecord))]
-internal partial class VersionRecordJsonContext : JsonSerializerContext
+internal partial class VersionRecordJsonSerializerContext : JsonSerializerContext
 {
 }
 

@@ -109,10 +109,10 @@ internal class PackageItem : ItemBase
 
             return bitmap;
         }
-        catch (Exception ex)
+        catch //(Exception ex)
         {
-            Debug.WriteLine($"An exception was thrown retrieving the logo for package: {Package.DisplayName} ({Package.Id.FullName})");
-            Debug.WriteLine(ex.ToString());
+            //Debug.WriteLine($"An exception was thrown retrieving the logo for package: {Package.DisplayName} ({Package.Id.FullName})");
+            //Debug.WriteLine(ex.ToString());
         }
 
         return new BitmapImage(new Uri("pack://application:,,,/resources/unknown.png"));
