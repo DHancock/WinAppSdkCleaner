@@ -2,9 +2,9 @@
 
 internal sealed partial class ViewTraceListener : TraceListener
 {
-    private readonly object lockObject = new object(); 
-    private StringBuilder? store = null;
-    private TextBox? Consumer { get; set; }
+    private readonly Lock lockObject = new(); 
+    private StringBuilder? store;
+    private TextBox? consumer;
 
     public ViewTraceListener() : base(nameof(ViewTraceListener))
     {
@@ -14,9 +14,9 @@ internal sealed partial class ViewTraceListener : TraceListener
     {
         lock (lockObject)
         {
-            Debug.Assert(Consumer is null && textBox.IsInitialized);
+            Debug.Assert(consumer is null && textBox.IsInitialized);
 
-            Consumer = textBox;
+            consumer = textBox;
 
             if (store is not null)
             {
@@ -38,7 +38,7 @@ internal sealed partial class ViewTraceListener : TraceListener
 
         try
         {
-            if (Consumer is null)
+            if (consumer is null)
             {
                 if (store is null)
                 {
@@ -54,20 +54,20 @@ internal sealed partial class ViewTraceListener : TraceListener
             }
             else
             {
-                Consumer.Dispatcher.BeginInvoke(() =>
+                consumer.Dispatcher.BeginInvoke(() =>
                 {
-                    int selectionStart = Consumer.SelectionStart;
-                    int selectionLength = Consumer.SelectionLength;
+                    int selectionStart = consumer.SelectionStart;
+                    int selectionLength = consumer.SelectionLength;
 
-                    Consumer.Text += message;
+                    consumer.Text += message;
 
                     if (selectionLength > 0)
                     {
-                        Consumer.Select(selectionStart, selectionLength);
+                        consumer.Select(selectionStart, selectionLength);
                     }
                     else
                     {
-                        Consumer.CaretIndex = Consumer.Text.Length;
+                        consumer.CaretIndex = consumer.Text.Length;
                     }
                 },
                 DispatcherPriority.Background);
