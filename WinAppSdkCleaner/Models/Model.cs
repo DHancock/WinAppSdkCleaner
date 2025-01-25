@@ -35,36 +35,26 @@ internal static class Model
         return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion);
     }
 
-    private static void AddDependents(Dictionary<string, PackageData> lookUpTable, IEnumerable<Package> allPackages)
+    private static void AddDependents(Dictionary<string, PackageData> sdkFrameworksLookUpTable, IEnumerable<Package> allPackages)
     {
-        object lockObject = new object();
-        Dictionary<string, PackageData> subLookUp = new Dictionary<string, PackageData>();
+        Lock lockObject = new();
 
         Parallel.ForEach(allPackages, package =>
         {
             foreach (Package dependency in package.Dependencies)
             {
                 // TryGetValue() is thread safe as long as the dictionary isn't modified by another thread
-                if (lookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentPackageRecord))
+                if (sdkFrameworksLookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentPackageRecord))
                 {
                     lock (lockObject)
                     {
                         PackageData dependentPackage = new PackageData(package, new List<PackageData>());
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
-
-                        if (package.IsFramework)
-                        {
-                            subLookUp[package.Id.FullName] = dependentPackage;
-                        }
+                        Debug.Assert(!package.IsFramework);  // framework packages cannot be dependent on other framework packages
                     }
                 }
             }
         });
-
-        if (subLookUp.Count > 0)
-        {
-            AddDependents(subLookUp, allPackages);
-        }
     }
 
     public static async Task<IEnumerable<SdkData>> GetSDKsAsync()
