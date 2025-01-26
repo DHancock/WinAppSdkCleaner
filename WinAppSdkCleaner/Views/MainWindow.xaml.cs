@@ -8,8 +8,6 @@ namespace WinAppSdkCleaner.Views;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private bool firstActivation = true;
-
     public MainWindow()
     {
         InitializeComponent();
@@ -50,18 +48,9 @@ public partial class MainWindow : Window
             Settings.Data.Save();
         };
 
-        Loaded += (s, e) =>
-        { 
-            sdkView.ExecuteSearch(); 
-        };
-
         Activated += (s, e) =>
         {
-            if (firstActivation)
-            {
-                firstActivation = false;
-            }
-            else if (sdkView.CanSearch())
+            if (sdkView.CanSearch())
             {
                 sdkView.ExecuteSearch();
             }
