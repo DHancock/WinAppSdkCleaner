@@ -39,8 +39,8 @@
     <Resource Include="Resources\unknown.png" />
   </ItemGroup>
 	
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="start /wait /b &quot;&quot; &quot;$(TargetDir)$(TargetName).exe&quot; /check_versions &quot;$(ProjectDir)versions.json&quot; &quot;$(ProjectDir)versions.dat&quot;" />
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SelfContained)' != 'true'">
+    <Exec Command="start /wait /b &quot;&quot; &quot;$(TargetDir)$(TargetName).exe&quot; /check_versions &quot;$(ProjectDir)versions.json&quot; &quot;$(ProjectDir)versions.dat&quot;" />
   </Target>
 
 </Project>
