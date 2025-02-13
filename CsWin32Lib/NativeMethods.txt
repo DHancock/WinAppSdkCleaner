@@ -1,3 +1,0 @@
-﻿MonitorFromRect
-GetMonitorInfo
-MONITOR_FROM_FLAGS

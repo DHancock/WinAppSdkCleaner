@@ -15,7 +15,10 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Style", "IDE0090:Use 'new(...)'")]
 [assembly: SuppressMessage("Style", "IDE0180:Use tuple to swap values")]
 [assembly: SuppressMessage("Style", "IDE0290:Use primary constructor")]
+[assembly: SuppressMessage("Style", "IDE0305:Simplify collection initialization")]
+[assembly: SuppressMessage("Style", "IDE0306:Simplify collection initialization")]
 
 [assembly: SuppressMessage("Warning", "VSSpell001:Correct spelling of XXX")]
 
 [assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
+

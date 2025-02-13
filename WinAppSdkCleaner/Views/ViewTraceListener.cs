@@ -1,90 +1,87 @@
-﻿namespace WinAppSdkCleaner.Views;
+﻿using WinAppSdkCleaner.Utils;
 
-internal sealed partial class ViewTraceListener : TraceListener
+namespace WinAppSdkCleaner.Views;
+
+internal partial class ViewTraceListener : TraceListener
 {
-    private readonly Lock lockObject = new(); 
-    private StringBuilder? store;
+    private readonly Lock lockObject;
+    private readonly StringBuilder store;
     private TextBox? consumer;
+    private ScrollViewer? scrollViewer;
+    private readonly DispatcherTimer dispatcherTimer;
 
     public ViewTraceListener() : base(nameof(ViewTraceListener))
     {
+        lockObject = new Lock();
+
+        dispatcherTimer = new DispatcherTimer();
+        dispatcherTimer.Interval = TimeSpan.FromMilliseconds(100);
+        dispatcherTimer.Tick += DispatcherTimer_Tick;
+
+        store = new StringBuilder(1000);
+    }
+
+    private void DispatcherTimer_Tick(object? sender, object e)
+    {
+        lock (lockObject)
+        {
+            if ((consumer is not null) && (scrollViewer is not null))
+            {
+                if (store.Length > 0)
+                {
+                    int start = consumer.SelectionStart;
+                    int length = consumer.SelectionLength;
+
+                    consumer.Text = string.Concat(consumer.Text.AsSpan(), store.ToString().AsSpan());
+
+                    consumer.SelectionStart = start;
+                    consumer.SelectionLength = length;
+
+                    store.Clear();
+                }
+
+                if (scrollViewer.ChangeView(0.0, scrollViewer.ExtentHeight, 1.0f))
+                {
+                    dispatcherTimer.Stop();
+                }
+            }
+        }
     }
 
     public void RegisterConsumer(TextBox textBox)
     {
         lock (lockObject)
         {
-            Debug.Assert(consumer is null && textBox.IsInitialized);
+            Debug.Assert(consumer is null);
+            Debug.Assert(textBox.IsLoaded);
 
             consumer = textBox;
+            scrollViewer = consumer.FindChild<ScrollViewer>();
 
-            if (store is not null)
+            if (store.Length > 0)
             {
-                if (store.Length > 0)
-                {
-                    WriteInternal(store.ToString());
-                }
-
-                store = null;
+                dispatcherTimer.Start();
             }
         }
     }
 
     public override bool IsThreadSafe { get; } = true;
 
-    private void WriteInternal(string message)
-    {
-        const int cMaxStoreLength = 1024 * 10;
-
-        try
-        {
-            if (consumer is null)
-            {
-                if (store is null)
-                {
-                    store = new StringBuilder();
-                }
-
-                store.Append(message);
-
-                if (store.Length > cMaxStoreLength)
-                {
-                    store.Remove(0, cMaxStoreLength / 2);
-                }
-            }
-            else
-            {
-                consumer.Dispatcher.BeginInvoke(() =>
-                {
-                    int selectionStart = consumer.SelectionStart;
-                    int selectionLength = consumer.SelectionLength;
-
-                    consumer.Text += message;
-
-                    if (selectionLength > 0)
-                    {
-                        consumer.Select(selectionStart, selectionLength);
-                    }
-                    else
-                    {
-                        consumer.CaretIndex = consumer.Text.Length;
-                    }
-                },
-                DispatcherPriority.Background);
-            }
-        }
-        catch 
-        {
-        }
-    }
-
     public override void Write(string? message)
     {
-        if (message is not null)
+        lock (lockObject)
         {
-            lock (lockObject)
+            try
             {
-                WriteInternal(message);
+                store.Append(message);
+
+                if (!dispatcherTimer.IsEnabled && (consumer is not null))
+                {
+                    dispatcherTimer.Start();
+                }
+            }
+            catch
+            {
             }
         }
     }

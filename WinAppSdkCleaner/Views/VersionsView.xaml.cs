@@ -1,57 +1,82 @@
-﻿using WinAppSdkCleaner.ViewModels;
+﻿using Microsoft.UI.Xaml.Data;
+
+using WinAppSdkCleaner.ViewModels;
 
 namespace WinAppSdkCleaner.Views;
 
 /// <summary>
 /// Interaction logic for VersionsView.xaml
 /// </summary>
-public partial class VersionsView : UserControl
+public partial class VersionsView : Page
 {
-    private readonly ViewCommand winAppSdkCopyCommand;
-    private readonly ViewCommand reunionCopyCommand;
+    private VersionsViewModel? viewModel;
+    private readonly CollectionViewSource viewSource = new() { IsSourceGrouped = true };
 
     public VersionsView()
     {
         InitializeComponent();
 
-        DataContext = new VersionsViewModel();
-
-        winAppSdkCopyCommand = InitialiseCommand("WinAppSdkCopy", ExecuteWinAppSdkCopy, CanWinAppSdkCopy);
-        reunionCopyCommand = InitialiseCommand("ReunionCopy", ExecuteReunionCopy, CanReunionCopy);
+        // this view may not have been created when the model notifies that data is available
+        VersionListView.Loaded += (s, e) => UpdateCollectionViewSource();
     }
 
-    private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)
+    internal VersionsViewModel? ViewModel
     {
-        ViewCommand command = (ViewCommand)FindResource(key);
-        command.CanExecuteProc = canExecute;
-        command.ExecuteProc = execute;
-        return command;
+        get => viewModel;
+
+        set
+        {
+            Debug.Assert(viewModel is null);
+            Debug.Assert(value is not null); 
+            
+            viewModel = value;
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        }
     }
 
-    private void ExecuteWinAppSdkCopy(object? param) => ExecuteCopy(WinAppSdkListView);
-    private bool CanWinAppSdkCopy(object? param) => CanCopy(WinAppSdkListView);
 
-    private void ExecuteReunionCopy(object? param) => ExecuteCopy(ReunionListView);
-    private bool CanReunionCopy(object? param) => CanCopy(ReunionListView);
-
-    private void WinAppSdkSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        winAppSdkCopyCommand.RaiseCanExecuteChanged();
+        if (e.PropertyName == nameof(VersionsViewModel.VersionsList))
+        {
+            // the model loads data on a non ui thread
+            DispatcherQueue.TryEnqueue(VersionListViewPropertyChanged);
+        }
     }
 
-    private void ReunionSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void VersionListViewPropertyChanged()
     {
-        reunionCopyCommand.RaiseCanExecuteChanged();
+        if (VersionListView.IsLoaded)
+        {
+            UpdateCollectionViewSource();
+        }
+        else
+        {
+            VersionListView.Loaded += VersionListView_Loaded;
+        }
+
+        void VersionListView_Loaded(object sender, RoutedEventArgs e)
+        {
+            VersionListView.Loaded -= VersionListView_Loaded;
+            UpdateCollectionViewSource();
+        }
     }
 
-    private static void ExecuteCopy(ListView list)
+    private void UpdateCollectionViewSource()
+    {
+        if (VersionListView.Items.Count == 0)
+        {
+            viewSource.Source = viewModel?.VersionsList;
+            VersionListView.ItemsSource = viewSource.View;
+        }
+    }
+
+    private static void ExecuteCopy(IList<object> selectedItems)
     {
         StringBuilder sb = new StringBuilder();
 
-        foreach (object item in list.SelectedItems)
+        foreach (object item in selectedItems)
         {
-            Debug.Assert(item is DisplayVersion);
-
             if (item is DisplayVersion displayVersion)
             {
                 sb.AppendLine($"{displayVersion.SemanticVersion}\t{displayVersion.PackageVersion}");
@@ -60,11 +85,23 @@ public partial class VersionsView : UserControl
 
         if (sb.Length > 0)
         {
-            Clipboard.SetText(sb.ToString());
+            DataPackage dp = new DataPackage();
+            dp.SetText(sb.ToString());
+            Clipboard.SetContent(dp);
         }
     }
 
-    private static bool CanCopy(ListView list) => list.SelectedItems.Count > 0;
+    private void CopyMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        DisplayVersion version = (DisplayVersion)((FrameworkElement)sender).DataContext;
+
+        if (VersionListView.SelectedItems.Contains(version))
+        {
+            ExecuteCopy(VersionListView.SelectedItems);
+        }
+        else
+        {
+            ExecuteCopy(new List<object>(1) { version });
+        }
+    }
 }
-
-

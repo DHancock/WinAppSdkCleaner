@@ -1,0 +1,17 @@
+﻿MessageBeep
+GetDpiForWindow
+MINMAXINFO
+SetWindowSubclass
+DefSubclassProc
+WM_GETMINMAXINFO
+WM_DPICHANGED
+WM_NCRBUTTONUP
+WM_NCLBUTTONDOWN
+PostMessage
+GetCursorPos
+ScreenToClient
+WM_SYSCOMMAND
+GetDoubleClickTime
+FindWindowEx
+EnableWindow
+WM_NCHITTEST

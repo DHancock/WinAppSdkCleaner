@@ -25,31 +25,31 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
     {
         try
         {
-            SdkList newList = new SdkList(await Model.GetSDKsAsync());
-            newList.RestoreState(sdkList);
-
-            SdkList = newList;
+            SdkList = new SdkList(await Model.GetSDKsAsync());
         }
         catch
         {
-            SdkList.Clear();
+            SdkList = new();
             throw;
         }
     }
 
-    public async Task ExecuteRemove()
+    public async Task ExecuteRemove(SdkItem sdk)
     {
         try
         {
-            // attempt to ensure the latest dependencies are used, a store
-            // application may have been installed in the background
-            await ExecuteSearch(); 
+            await ExecuteSearch();
 
-            IEnumerable<PackageData> packages = sdkList.GetDistinctSelectedPackages();
+            int index = SdkList.BinarySearch(sdk);
 
-            if (packages.Any())
+            if (index >= 0)
             {
-                await Model.RemovePackagesAsync(packages);
+                IEnumerable<PackageData> packages = SdkList.GetDistinctPackages(SdkList[index]);
+
+                if (packages.Any())
+                {
+                    await Model.RemovePackagesAsync(packages);
+                }
             }
         }
         catch 
@@ -58,22 +58,19 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool CanRemove() => sdkList.CanRemove();
-
-    public void ExecuteCopy()
+    public static void ExecuteCopy(ItemBase item)
     {
-        string data = SdkList.GetCopyData();
+        string data = SdkList.GetCopyData(item);
 
         if (!string.IsNullOrEmpty(data))
         {
-            Clipboard.SetText(data);
+            DataPackage dp = new DataPackage();
+            dp.SetText(data);
+            Clipboard.SetContent(dp);
         }
     }
 
-    public bool CanCopy() => sdkList.CanCopy();
-
-
-    private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
+    private void RaisePropertyChanged([CallerMemberName] string? propertyName = default)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

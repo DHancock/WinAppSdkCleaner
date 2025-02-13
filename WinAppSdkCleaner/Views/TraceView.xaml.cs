@@ -3,59 +3,50 @@
 /// <summary>
 /// Interaction logic for TraceView.xaml
 /// </summary>
-public partial class TraceView : UserControl
+public partial class TraceView : Page
 {
-    private readonly ViewCommand clearCommand;
+    private RelayCommand ClearCommand { get; }
 
     public TraceView()
     {
         InitializeComponent();
 
-        clearCommand = InitialiseCommand("Clear", ExecuteClear, CanClear);
+        ClearCommand = new RelayCommand(ExecuteClear, CanClear);
 
-        ViewTraceListener? viewTraceListener = FindViewTraceListener();
-
-        if (viewTraceListener is not null)
-        {
-            viewTraceListener.RegisterConsumer(TraceTextBox);
-        }
-        else
-        {
-            TraceTextBox.Text = $"Trace.Listeners doesn't contain {nameof(ViewTraceListener)}";
-            Debug.Fail(TraceTextBox.Text);
-        }
+        RegisterConsumer();
 
         Loaded += (s, a) => AdjustCommandsState();
     }
 
 
-    private static ViewTraceListener? FindViewTraceListener()
+    private void RegisterConsumer()
     {
-        foreach (TraceListener listener in Trace.Listeners)
+        TraceTextBox.Loaded += TraceTextBox_Loaded;
+
+        void TraceTextBox_Loaded(object sender, RoutedEventArgs e)
         {
-            if (listener is ViewTraceListener viewTraceListener)
+            TraceTextBox.Loaded -= TraceTextBox_Loaded;
+
+            foreach (TraceListener listener in Trace.Listeners)
             {
-                return viewTraceListener;
+                if (listener is ViewTraceListener viewTraceListener)
+                {
+                    viewTraceListener.RegisterConsumer(TraceTextBox);
+                    return;
+                }
             }
-        }
 
-        return null;
+            TraceTextBox.Text = "failed to find trace listener";
+        };
     }
 
 
-    private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)
-    {
-        ViewCommand command = (ViewCommand)FindResource(key);
-        command.CanExecuteProc = canExecute;
-        command.ExecuteProc = execute;
-        return command;
-    }
 
-    public void ExecuteClear(object? param) => TraceTextBox.Clear();
+    public void ExecuteClear(object? param) => TraceTextBox.Text = string.Empty;
 
     private bool CanClear(object? param) => TraceTextBox.Text.Length > 0;
 
-    private void AdjustCommandsState() => clearCommand.RaiseCanExecuteChanged();
+    private void AdjustCommandsState() => ClearCommand.RaiseCanExecuteChanged();
 
     private void TextChanged(object sender, TextChangedEventArgs e) => AdjustCommandsState();
 }

@@ -4,12 +4,11 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed class SdkItem : ItemBase
 {
-    private SdkData SdkRecord { get; init; }
+    private readonly SdkData sdkData;
 
     public SdkItem(SdkData sdkRecord) : base(null)
     {
-        IsExpanded = true;
-        SdkRecord = sdkRecord;
+        sdkData = sdkRecord;
 
         foreach (PackageData packageRecord in sdkRecord.SdkPackages)
         {
@@ -23,37 +22,26 @@ internal sealed class SdkItem : ItemBase
     {
         get
         {
-            if (string.IsNullOrEmpty(SdkRecord.Version.SemanticVersion))
+            if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion))
             {
-                return $"{SdkRecord.Sdk.DispalyName} ({Version.PackageVersionStr})";
+                return $"{sdkData.Sdk.DispalyName} ({Version.PackageVersionStr})";
             }
 
-            if (!string.IsNullOrEmpty(SdkRecord.Version.VersionTag))
+            if (!string.IsNullOrEmpty(sdkData.Version.VersionTag))
             {
-                return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion} - {Version.VersionTag}";
+                return $"{sdkData.Sdk.DispalyName} {Version.SemanticVersion} - {Version.VersionTag}";
             }
 
-            return $"{SdkRecord.Sdk.DispalyName} {Version.SemanticVersion}";
+            return $"{sdkData.Sdk.DispalyName} {Version.SemanticVersion}";
         }
     }
 
-    public override string OtherAppsCount => $"+{SdkRecord.OtherAppsCount}";
-
-    public bool HasOtherApps => SdkRecord.OtherAppsCount > 0;
-
-    public override Visibility OtherAppsCountVisibility => HasOtherApps ? Visibility.Visible : Visibility.Collapsed;
-
-    public override Visibility LogoVisibility => Visibility.Collapsed;
-
-    public override ImageSource? Logo => null;
-
-    public override FontWeight HeadingFontWeight => FontWeights.Bold;
-
+    public override int OtherAppsCount => sdkData.OtherAppsCount;
+    public override string OtherAppsCountStr => (OtherAppsCount > 0) ? $"+{OtherAppsCount}" : string.Empty;
     public override string ToolTipText => Version.PackageVersionStr;
+    public SdkId SdkIdentifier => sdkData.Sdk.Id;
 
-    public SdkId SdkIdentifier => SdkRecord.Sdk.Id;
-
-    private VersionRecord Version => SdkRecord.Version;
+    private VersionRecord Version => sdkData.Version;
 
     // ignores any children, it's only used to identify this tree node
     public static bool operator ==(SdkItem? x, SdkItem? y)

@@ -1,5 +1,4 @@
-﻿// for IAsyncOperationWithProgress, contains conflicts with Rect, Point etc.
-using Windows.Foundation;
+﻿using WinAppSdkCleaner.Utils;
 
 namespace WinAppSdkCleaner.Models;
 
@@ -19,10 +18,7 @@ internal static class Model
         return string.Equals(id.PublisherId, "8wekyb3d8bbwe", StringComparison.Ordinal);
     }
 
-    public static IEnumerable<VersionRecord> FilterVersionsList(SdkId sdkId)
-    {
-        return sVersionsLookUp.Values.Where(v => v.SdkId == sdkId);
-    }
+    public static IEnumerable<VersionRecord> VersionsList => sVersionsLookUp.Values;
 
     public static VersionRecord CategorizePackageVersion(SdkId sdkId, PackageVersion packageVersion)
     {
@@ -88,11 +84,12 @@ internal static class Model
         }
     }
 
+    public static IEnumerable<ISdk> SupportedSdks => [new ProjectReunion(), new WinAppSdk()];
+
     private static List<SdkData> GetSDKPackages()
     {
         List<SdkData> sdkList = new List<SdkData>();
         Dictionary<string, PackageData> lookUpTable = new Dictionary<string, PackageData>();
-        List<ISdk> sdkTypes = [new ProjectReunion(), new WinAppSdk()];
 
         PackageManager packageManager = new PackageManager();
         IEnumerable<Package> allPackages;
@@ -106,7 +103,7 @@ internal static class Model
             allPackages = packageManager.FindPackagesForUser(string.Empty);
         }
 
-        foreach (ISdk sdk in sdkTypes)
+        foreach (ISdk sdk in SupportedSdks)
         {
             IEnumerable<IGrouping<PackageVersion, Package>> query;
             
@@ -146,7 +143,7 @@ internal static class Model
         if (lookUpTable.Count > 0)
         {
             AddDependents(lookUpTable, allPackages);
-            CalculateDependentAppCounts(sdkTypes, sdkList);
+            CalculateDependentAppCounts(sdkList);
         }
 
         return sdkList;
@@ -177,9 +174,9 @@ internal static class Model
         return false;
     }
 
-    private static void CalculateDependentAppCounts(IEnumerable<ISdk> sdkTypes, IEnumerable<SdkData> sdkList)
+    private static void CalculateDependentAppCounts(IEnumerable<SdkData> sdkList)
     {
-        foreach (ISdk sdk in sdkTypes)
+        foreach (ISdk sdk in SupportedSdks)
         {
             foreach (SdkData sdkData in sdkList)
             {
@@ -371,16 +368,17 @@ internal static class Model
 
                 switch (location)
                 {
+#if DEBUG
                     case Location.FileSystem: versions = await ReadFromFileSystemAsync(); break;
+#endif
                     case Location.OnLine: versions = await ReadFromOnLineAsync(); break;
                     case Location.Resource: versions = ReadFromResources(); break;
                 }
 
                 if (versions is not null)
                 {
-                    // While I could serialize a json dictionary, for backward compatibility
-                    // the json array is still needed. Considering 99% of the time it will
-                    // be downloaded from git hub anyway the extra complexity isn't worth it.
+                    // While I could serialize a compressed json dictionary, for backward compatibility
+                    // the json array is still needed. The extra complexity isn't worth it.
                     Debug.Assert(versions.Count > 0);
                     Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
 

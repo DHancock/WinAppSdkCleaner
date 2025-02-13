@@ -1,18 +1,13 @@
-﻿<UserControl x:Class="WinAppSdkCleaner.Views.TraceView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WinAppSdkCleaner.Views"
-             mc:Ignorable="d" 
-             d:DesignHeight="450"
-             d:DesignWidth="800">
+﻿<Page 
+    x:Class="WinAppSdkCleaner.Views.TraceView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WinAppSdkCleaner.Views"
+    NavigationCacheMode="Required">
 
-    <UserControl.Resources>
-        <local:ViewCommand x:Key="Clear"/>
-    </UserControl.Resources>
-
-    <Grid Margin="15" SnapsToDevicePixels="true">
+    <!-- left, top, right, bottom -->
+    
+    <Grid Margin="15,3,15,15">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition MinWidth="110" Width="Auto"/>
@@ -21,11 +16,27 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.RowSpan="2" BorderBrush="Gray" BorderThickness="1">
-            <TextBox x:Name="TraceTextBox" BorderThickness="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" IsReadOnly="true" IsReadOnlyCaretVisible="true" TextChanged="TextChanged" FontFamily="Consolas"/>
+        <Grid.Resources>
+            <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
+            <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+            
+            <Style x:Key="TextBoxBorderStyle" TargetType="Border">
+                <Setter Property="Padding" Value="4,1,1,1"/>
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="Background" Value="{ThemeResource ControlFillColorDefaultBrush}"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefault}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+        </Grid.Resources>
+
+        <Border Style="{StaticResource TextBoxBorderStyle}">
+            <TextBox x:Name="TraceTextBox" AcceptsReturn="True" IsReadOnly="True" TextChanged="TextChanged"
+                     FontFamily="Consolas" MaxLength="10240" 
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
         </Border>
 
-        <Button Margin="25,0,5,20" Grid.Column="1" VerticalAlignment="Bottom" Content="Clear" Command="{StaticResource Clear}"/>
-
+        <Button Margin="25,0,5,0" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" Content="Clear" Command="{x:Bind ClearCommand}"/>
     </Grid>
-</UserControl>
+</Page>
