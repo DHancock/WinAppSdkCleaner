@@ -24,7 +24,6 @@ internal class PackageItem : ItemBase
 
     public override string HeadingText => IsNonSdkPackage ? Package.DisplayName : GetSdkPackageDisplayName();
 
-
     private string GetSdkPackageDisplayName()
     {
         SdkItem? sdkItem = Parent as SdkItem;
@@ -80,42 +79,34 @@ internal class PackageItem : ItemBase
             return Package.Description;
         }
     }
-    public override string OtherAppsCount => $"+{PackageRecord.OtherAppsCount}";
 
-    public override Visibility OtherAppsCountVisibility
+    public override int OtherAppsCount => PackageRecord.OtherAppsCount;
+    public override string OtherAppsCountStr => (!IsNonSdkPackage && (PackageRecord.OtherAppsCount > 0)) ? $"+{OtherAppsCount}" : string.Empty;
+
+    public FontWeight HeadingFontWeight
     {
-        get => (Children.Count > 0) && (PackageRecord.OtherAppsCount > 0) ? Visibility.Visible : Visibility.Collapsed;
+        get => IsNonSdkPackage ? FontWeights.SemiBold : FontWeights.Normal;
     }
 
-    public override Visibility LogoVisibility => Visibility.Visible;
+    public bool IsNonSdkPackage => (Children.Count == 0) && (PackageRecord.OtherAppsCount == 1);
 
-    public override FontWeight HeadingFontWeight
-    {
-        get => IsNonSdkPackage ? FontWeights.SemiBold : FontWeights.Regular;
-    }
-
-    public override ImageSource? Logo => cachedLogo;
+    public ImageSource Logo => cachedLogo;
 
     private BitmapImage LoadPackageLogo()
     {
-        try
+        try                                        
         {
-            BitmapImage bitmap = new BitmapImage();
-
-            bitmap.BeginInit();
-            bitmap.DecodePixelHeight = 16;
-            bitmap.UriSource = Package.Logo;
-            bitmap.EndInit();
-
-            return bitmap;
+            return new BitmapImage()
+            {
+                DecodePixelHeight = 20,
+                UriSource = Package.Logo,
+            };
         }
-        catch //(Exception ex)
+        catch  // expected, especially for VS deployed packages
         {
-            //Debug.WriteLine($"An exception was thrown retrieving the logo for package: {Package.DisplayName} ({Package.Id.FullName})");
-            //Debug.WriteLine(ex.ToString());
         }
 
-        return new BitmapImage(new Uri("pack://application:,,,/resources/unknown.png"));
+        return new BitmapImage(new Uri("ms-appx:///Resources/missing.png"));
     }
 
     // ignores any children, it's only used to identify this tree node
@@ -143,8 +134,6 @@ internal class PackageItem : ItemBase
     public override int GetHashCode() => Package.GetHashCode();
     public override bool Equals(object? obj) => this == (obj as PackageItem);
 
-    private bool IsNonSdkPackage => (Children.Count == 0) && (PackageRecord.OtherAppsCount == 1);
-
     public override int CompareTo(ItemBase? item)
     {
         const int cBefore = -1;
@@ -160,7 +149,14 @@ internal class PackageItem : ItemBase
             return IsNonSdkPackage ? cBefore : cAfter;
         }
 
-        return base.CompareTo(item);
+        int result = string.Compare(HeadingText, other.HeadingText, StringComparison.CurrentCulture);
+
+        if (result == 0)
+        {
+            result = string.Compare(Package.Id.FullName, other.Package.Id.FullName, StringComparison.Ordinal);
+        }
+
+        return result;
     }
 }
 

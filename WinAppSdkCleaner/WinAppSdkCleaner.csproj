@@ -1,46 +1,74 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-	<TargetFramework>net9.0-windows10.0.17763.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-	<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-	<AssemblyVersion>1.6.0</AssemblyVersion>
-	<FileVersion>1.6.0</FileVersion>
-	<ApplicationManifest>app.manifest</ApplicationManifest>
-	<ApplicationIcon>Resources\app.ico</ApplicationIcon>
-	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-	<StartupObject>WinAppSdkCleaner.Program</StartupObject>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Resources\app_64.png" />
-    <None Remove="Resources\elevated.ico" />
-    <None Remove="Resources\normal.ico" />
-    <None Remove="Resources\unknown.png" />
-    <None Remove="versions.json" />
-  </ItemGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<RootNamespace>WinAppSdkCleaner</RootNamespace>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<Platforms>x86;x64;ARM64</Platforms>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
+		<ApplicationIcon>Resources\app.ico</ApplicationIcon>
+		<UseWinUI>true</UseWinUI>
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<Nullable>enable</Nullable>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<WindowsPackageType>None</WindowsPackageType>
+		<Version>1.7.0</Version>
+	</PropertyGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="versions.json">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </EmbeddedResource>
+		<EmbeddedResource Include="versions.json">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\CsWin32Lib\CsWin32Lib.csproj" />
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
-	
-  <ItemGroup>
-    <Resource Include="Resources\app_64.png" />
-    <Resource Include="Resources\elevated.ico" />
-    <Resource Include="Resources\normal.ico" />
-    <Resource Include="Resources\unknown.png" />
-  </ItemGroup>
-	
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SelfContained)' != 'true'">
-    <Exec Command="start /wait /b &quot;&quot; &quot;$(TargetDir)$(TargetName).exe&quot; /check_versions &quot;$(ProjectDir)versions.json&quot; &quot;$(ProjectDir)versions.dat&quot;" />
-  </Target>
 
+	<ItemGroup>
+	  <None Update="Resources\app.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Resources\missing.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Platform)'!='ARM64'">
+		<Exec Command="start /wait /b &quot;&quot; &quot;$(TargetDir)$(TargetName).exe&quot; /check_versions &quot;$(ProjectDir)versions.json&quot; &quot;$(ProjectDir)versions.dat&quot;" />
+	</Target>
+
+	<PropertyGroup Label="Globals">
+	  <WebView2EnableCsWinRTProjection>False</WebView2EnableCsWinRTProjection>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+	</PropertyGroup>
+	
 </Project>

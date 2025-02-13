@@ -1,36 +1,137 @@
 ﻿using WinAppSdkCleaner.ViewModels;
+using WinAppSdkCleaner.Utils;
 
 namespace WinAppSdkCleaner.Views;
 
 /// <summary>
 /// Interaction logic for SdkView.xaml
 /// </summary>
-public partial class SdkView : UserControl
+public partial class SdkView : Page
 {
-    private readonly ViewCommand searchCommand;
-    private readonly ViewCommand removeCommand;
-    private readonly ViewCommand copyCommand;
-    private readonly SdkViewModel viewModel;
+    private RelayCommand SearchCommand { get; }
+    private RelayCommand RemoveCommand { get; }
 
     private bool isIdle = true;
+    private DateTime lastPointerTimeStamp;
+    private readonly SdkViewModel viewModel;
 
     public SdkView()
     {
         InitializeComponent();
 
-        searchCommand = InitialiseCommand("Search", ExecuteSearch, CanSearch);
-        removeCommand = InitialiseCommand("Remove", ExecuteRemove, CanRemove);
-        copyCommand = InitialiseCommand("Copy", ExecuteCopy, CanCopy);
+        SearchCommand = new RelayCommand(ExecuteSearch, CanSearch);
+        RemoveCommand = new RelayCommand(ExecuteRemove, CanRemove);
 
-        DataContext = viewModel = new SdkViewModel();
+        viewModel = new SdkViewModel();
+        viewModel.PropertyChanged += ViewModel_PropertyChanged;
     }
 
-    private ViewCommand InitialiseCommand(string key, Action<object?> execute, Func<object?, bool> canExecute)
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        ViewCommand command = (ViewCommand)FindResource(key);
-        command.CanExecuteProc = canExecute;
-        command.ExecuteProc = execute;
-        return command;
+        if (e.PropertyName == nameof(SdkList))
+        {
+            if (SdkTreeView.IsLoaded)
+            {
+                UpdateTree();
+            }
+            else
+            {
+                SdkTreeView.Loaded += SdkTreeView_Loaded;
+            }
+        }
+
+        void SdkTreeView_Loaded(object sender, RoutedEventArgs e)
+        {
+            SdkTreeView.Loaded -= SdkTreeView_Loaded;
+            UpdateTree();
+        }
+    }
+    
+    
+
+    private void UpdateTree()
+    {
+        UpdateTree(SdkTreeView.RootNodes, viewModel.SdkList, 0);
+
+        void UpdateTree(IList<TreeViewNode> nodes, List<ItemBase> newData, int depth)
+        {
+            int nodeIndex = 0;
+
+            while (nodeIndex < nodes.Count)
+            {
+                TreeViewNode node = nodes[nodeIndex];
+
+                int result = newData.BinarySearch((ItemBase)node.Content);
+
+                if (result < 0)
+                {
+                    nodes.RemoveAt(nodeIndex);
+                }
+                else
+                {
+                    int newNodeCount = result - nodeIndex;
+
+                    while (newNodeCount-- > 0)
+                    {
+                        TreeViewNode newNode = CreateTree(newData[nodeIndex + newNodeCount]);
+                        newNode.IsExpanded = depth == 0;
+                        nodes.Insert(nodeIndex, newNode);
+                    }
+
+                    nodeIndex = result;
+                    int previousCount = ((ItemBase)node.Content).OtherAppsCount;
+
+                    node.Content = newData[nodeIndex];
+
+                    if (previousCount != newData[nodeIndex].OtherAppsCount)
+                    {
+                        UpdateDependentAppsCount(node);
+                    }
+
+                    if ((newData[nodeIndex].Children.Count + node.Children.Count) > 0)
+                    {
+                        UpdateTree(node.Children, newData[nodeIndex].Children, depth + 1);
+                    }
+
+                    nodeIndex += 1;
+                }
+            }
+
+            while (nodeIndex < newData.Count)
+            {
+                TreeViewNode newNode = CreateTree(newData[nodeIndex++]);
+                newNode.IsExpanded = depth == 0;
+                nodes.Add(newNode);
+            }
+        }
+
+        static TreeViewNode CreateTree(ItemBase item)
+        {
+            TreeViewNode node = new() { Content = item };
+
+            foreach (ItemBase child in item.Children)
+            {
+                TreeViewNode childNode = CreateTree(child);
+                node.Children.Add(childNode);
+            }
+
+            return node;
+        }
+
+        void UpdateDependentAppsCount(TreeViewNode node)
+        {
+            TreeViewItem? tvi = (TreeViewItem)SdkTreeView.ContainerFromNode(node);
+
+            if (tvi is not null)
+            {
+                TextBlock? tb = tvi.FindChild<TextBlock>("OtherAppsCountTextBox");
+
+                if (tb is not null)
+                {
+                    tb.Text = ((ItemBase)node.Content).OtherAppsCountStr;
+                }
+            }
+        }
     }
 
     public async void ExecuteSearch(object? param = null)
@@ -39,15 +140,13 @@ public partial class SdkView : UserControl
         {
             IsIdle = false;
             await viewModel.ExecuteSearch();
+            IsIdle = true;
         }
         catch (Exception ex)
         {
             Trace.WriteLine(ex.ToString());
-            MessageBox.Show(Application.Current.MainWindow, ex.Message, "Search Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-        finally
-        {
             IsIdle = true;
+            await App.MainWindow.ContentDialogHelper.ShowErrorDialogAsync("An error occurred while searching.", ex.ToString());
         }
     }
 
@@ -55,47 +154,56 @@ public partial class SdkView : UserControl
 
     private async void ExecuteRemove(object? param)
     {
-        try
+        if (SdkTreeView.SelectedNode?.Content is SdkItem sdk)
         {
-            if (viewModel.SdkList.SelectedSdkHasDependentApps)
+            try
             {
-                string message = $"This WinAppSdk has dependent applications.{Environment.NewLine}Are you sure that you want to remove it?";
-
-                if (MessageBox.Show(Application.Current.MainWindow, message, "Caution", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel)
+                if (sdk.OtherAppsCount > 0)
                 {
-                    return;
+                    string message = $"{sdk.HeadingText} has dependent applications.{Environment.NewLine}Are you sure that you want to remove it?";
+
+                    ContentDialogResult result = await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message);
+                    
+                    if (result != ContentDialogResult.Primary)
+                    {
+                        return;
+                    }
                 }
+
+                IsIdle = false;
+                await viewModel.ExecuteRemove(sdk);
+                IsIdle = true;
             }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.ToString());
 
-            IsIdle = false;
-            await viewModel.ExecuteRemove();
-        }
-        catch (TimeoutException tex)
-        {
-            Trace.WriteLine(tex.ToString());
+                string message;
+                string details;
 
-            string message = $"{tex.Message}{Environment.NewLine}"
-                + "This can occur if an unpackaged application, "
-                + "that depends on this Windows App SDK is currently executing";
+                if (ex is TimeoutException)
+                {
+                    message = $"Removing {sdk.HeadingText} timed out.";
+                    details = "This can occur if an unpackaged, framework dependent application that is depending on this SDK is currently executing.";
+                }
+                else
+                {
+                    message = $"An error occurred removing {sdk.HeadingText}.";
+                    details = ex.ToString();
+                }
 
-            MessageBox.Show(Application.Current.MainWindow, message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine(ex.ToString());
-            MessageBox.Show(Application.Current.MainWindow, ex.Message, "Remove Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-        finally
-        {
-            ExecuteSearch();
+                ExecuteSearch();
+                await App.MainWindow.ContentDialogHelper.ShowErrorDialogAsync(message, details);
+            }
         }
     }
 
-    private bool CanRemove(object? param) => IsIdle && viewModel.CanRemove();
-
-    private void ExecuteCopy(object? param) => viewModel.ExecuteCopy();
-
-    private bool CanCopy(object? param) => IsIdle && viewModel.CanCopy();
+    private bool CanRemove(object? param)
+    {
+        bool canRemove = IsIdle && (SdkTreeView.SelectedNode?.Content is SdkItem);
+        RemoveIcon.Opacity = canRemove ? 1.0 : 0.4;
+        return canRemove;
+    }
 
     private bool IsIdle
     {
@@ -111,13 +219,65 @@ public partial class SdkView : UserControl
 
     private void AdjustCommandsState()
     {
-        searchCommand.RaiseCanExecuteChanged();
-        removeCommand.RaiseCanExecuteChanged();
-        copyCommand.RaiseCanExecuteChanged();
+        SearchCommand.RaiseCanExecuteChanged();
+        RemoveCommand.RaiseCanExecuteChanged();
     }
 
-    private void SelectedTreeViewItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+    private void SelectedTreeViewItemChanged(TreeView sender, TreeViewSelectionChangedEventArgs e)
     {
         AdjustCommandsState();
+    }
+
+    private void CopyMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        SdkViewModel.ExecuteCopy((ItemBase)((TreeViewNode)((FrameworkElement)sender).DataContext).Content);
+    }
+
+    private void SdkTreeView_KeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (IsControlKeyDown() && (e.Key == VirtualKey.C) && (SdkTreeView.SelectedItem is TreeViewNode node))
+        {
+            SdkViewModel.ExecuteCopy((ItemBase)node.Content);
+        }
+
+        static bool IsKeyDown(VirtualKey key)
+        {
+            return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
+        }
+
+        static bool IsControlKeyDown()
+        {
+            return IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl) || IsKeyDown(VirtualKey.Control);
+        }
+    }
+
+    private void SdkTreeView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
+    {
+        TimeSpan doubleClickTime = TimeSpan.FromMilliseconds(PInvoke.GetDoubleClickTime());
+        DateTime utcNow = DateTime.UtcNow;
+
+        if ((utcNow - lastPointerTimeStamp) < doubleClickTime)
+        {
+            TreeViewNode tvn = (TreeViewNode)args.InvokedItem;
+            tvn.IsExpanded = !tvn.IsExpanded;
+        }
+        else
+        {
+            lastPointerTimeStamp = utcNow;
+        }
+    }
+}
+
+internal partial class ItemTemplateSelector : DataTemplateSelector
+{
+    public DataTemplate? SdkTemplate { get; set; }
+    public DataTemplate? PackageTemplate { get; set; }
+
+    protected override DataTemplate? SelectTemplateCore(object item)
+    {
+        if (((TreeViewNode)item).Content is SdkItem)
+            return SdkTemplate;
+
+        return PackageTemplate;
     }
 }

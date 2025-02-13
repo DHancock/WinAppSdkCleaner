@@ -1,4 +1,5 @@
 ﻿using WinAppSdkCleaner.Models;
+using WinAppSdkCleaner.Utils;
 
 namespace WinAppSdkCleaner.ViewModels;
 
@@ -18,29 +19,9 @@ internal sealed partial class SdkList : List<ItemBase>
         Sort();
     }
 
-    private static ItemBase? GetSelectedItem(IEnumerable<ItemBase> items)
+    public static IEnumerable<PackageData> GetDistinctPackages(ItemBase item)
     {
-        foreach (ItemBase item in items)
-        {
-            if (item.IsSelected)
-            {
-                return item;
-            }
-
-            ItemBase? selected = GetSelectedItem(item.Children);
-
-            if (selected is not null)
-            {
-                return selected;
-            }
-        }
-
-        return null;
-    }
-
-    public IEnumerable<PackageData> GetDistinctSelectedPackages()
-    {
-        static List<PackageData> GetSelectedPackages(ItemBase? item)
+        static List<PackageData> GetPackages(ItemBase? item)
         {
             List<PackageData> packages = new List<PackageData>();
 
@@ -53,85 +34,60 @@ internal sealed partial class SdkList : List<ItemBase>
 
                 foreach (ItemBase child in item.Children)
                 {
-                    packages.AddRange(GetSelectedPackages(child));
+                    packages.AddRange(GetPackages(child));
                 }
             }
 
             return packages;
         }
 
-        return GetSelectedPackages(GetSelectedItem(this)).DistinctBy(p => p.Package.Id.FullName);
+        return GetPackages(item).DistinctBy(p => p.Package.Id.FullName);
     }
 
-    public bool CanRemove() => GetSelectedItem(this) is SdkItem;
-
-    public string GetCopyData()
+    public static string GetCopyData(ItemBase item)
     {
-        IEnumerable<PackageData> allPackages = GetDistinctSelectedPackages();
-        IEnumerable<string> frameworks = allPackages.Where(p => p.Package.IsFramework).Select(p => p.Package.Id.FullName);
-        IEnumerable<string> others = allPackages.Where(p => !p.Package.IsFramework).Select(p => p.Package.Id.FullName);
-
         StringBuilder sb = new StringBuilder();
 
-        if (frameworks.Any())
-        {
-            sb.AppendLine("Framework packages:");
-            sb.AppendJoin(Environment.NewLine, frameworks);
-            sb.Append(Environment.NewLine);
-        }
+        EnumerateTree (item, sb, 0);
+
+        sb.Append(Environment.NewLine);
+
+        IEnumerable<PackageData> allPackages = GetDistinctPackages(item);
+        IEnumerable<string> frameworks = allPackages.Where(p => p.Package.IsFramework).Select(p => BuildPS(p));
+        IEnumerable<string> others = allPackages.Where(p => !p.Package.IsFramework).Select(p => BuildPS(p));
 
         if (others.Any())
         {
-            if (frameworks.Any())
-            {
-                sb.Append(Environment.NewLine);
-                sb.AppendLine("Dependent packages:");
-            }
-
+            sb.AppendLine("# dependent packages:");
             sb.AppendJoin(Environment.NewLine, others);
+            sb.Append(Environment.NewLine);
+            sb.Append(Environment.NewLine);
+        }
+
+        if (frameworks.Any())
+        {
+            sb.AppendLine("# framework packages:");
+            sb.AppendJoin(Environment.NewLine, frameworks);
+            sb.Append(Environment.NewLine);
+            sb.Append(Environment.NewLine);
         }
 
         return sb.ToString();
-    }
 
-    public bool CanCopy() => GetSelectedItem(this) is not null;
-
-    private static ItemBase? FindItem(IEnumerable<ItemBase> list, ItemBase other)
-    {
-        foreach (ItemBase item in list)
+        static void EnumerateTree(ItemBase item, StringBuilder sb, int depth)
         {
-            if (item.Equals(other))
-            {
-                return item;
-            }
+            sb.AppendLine($"{new string('\t', depth)}{item.HeadingText}");
 
-            ItemBase? foundItem = FindItem(item.Children, other);
-
-            if (foundItem is not null)
+            foreach (ItemBase child in item.Children)
             {
-                return foundItem;
+                EnumerateTree(child, sb, depth + 1);
             }
         }
 
-        return null;
-    }
-
-    public void RestoreState(IEnumerable<ItemBase> otherList)
-    {
-        foreach (ItemBase otherItem in otherList)
+        static string BuildPS(PackageData p)
         {
-            ItemBase? thisItem = FindItem(this, otherItem);
-
-            if (thisItem is not null)
-            {
-                thisItem.IsSelected = otherItem.IsSelected;
-                thisItem.IsExpanded = otherItem.IsExpanded;
-                thisItem.IsEnabled = otherItem.IsEnabled;
-            }
-
-            RestoreState(otherItem.Children);
+            string allUsers = IntegrityLevel.IsElevated ? " -AllUsers" : string.Empty;
+            return $"Remove-AppxPackage -Package '{p.Package.Id.FullName}'{allUsers} -Verbose # {p.Package.DisplayName}";
         }
     }
-
-    public bool SelectedSdkHasDependentApps => (GetSelectedItem(this) is SdkItem item) && item.HasOtherApps;
 }

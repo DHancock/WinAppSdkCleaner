@@ -1,4 +1,4 @@
-﻿namespace WinAppSdkCleaner.Models;
+﻿namespace WinAppSdkCleaner.Utils;
 
 internal static class IntegrityLevel
 {

@@ -3,7 +3,7 @@
 /// <summary>
 /// Interaction logic for AboutView.xaml
 /// </summary>
-public partial class AboutView : UserControl
+internal partial class AboutView : Page
 {
     public AboutView()
     {
@@ -12,28 +12,9 @@ public partial class AboutView : UserControl
         AssemblyName assemblyName = typeof(App).Assembly.GetName();
 
         NameTextBlock.Text = assemblyName.Name;
-        
-        if (assemblyName.Version is not null)
-        {
-            VersionTextBlock.Text = ConvertToString(assemblyName.Version);
-        }
+        VersionTextBlock.Text = assemblyName.Version?.ToString(3);
 
-        Trace.WriteLine($"{NameTextBlock.Text} version: {VersionTextBlock.Text}");
-    }
-
-    private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
-    {
-        ProcessStartInfo psi = new ProcessStartInfo()
-        {
-            FileName = e.Uri.AbsoluteUri,
-            UseShellExecute = true,
-        };
-
-        Process.Start(psi);
-    }
-
-    private static string ConvertToString(Version version)
-    {
-        return $"{version.Major}.{version.Minor}.{version.Build}";
-    }
+        // Use the Tag to identify that this text block contains a hyperlink
+        HyperlinkTextBlock.Tag = HyperlinkTextBlock;
+    }                    
 }
