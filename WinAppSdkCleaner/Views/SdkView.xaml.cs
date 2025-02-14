@@ -172,6 +172,7 @@ public partial class SdkView : Page
 
                 IsIdle = false;
                 await viewModel.ExecuteRemove(sdk);
+                await viewModel.ExecuteSearch();
                 IsIdle = true;
             }
             catch (Exception ex)
