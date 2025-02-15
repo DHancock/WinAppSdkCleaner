@@ -4,8 +4,12 @@ namespace WinAppSdkCleaner.Views;
 
 internal class ContentDialogHelper
 {
-    private readonly MainWindow parentWindow;
+    internal record EventArgs(ContentDialog Dialog);
 
+    public event TypedEventHandler<ContentDialogHelper, EventArgs>? DialogOpened;
+    public event TypedEventHandler<ContentDialogHelper, EventArgs>? DialogClosed;
+
+    private readonly MainWindow parentWindow;
     private ContentDialog? currentDialog = null;
 
     public ContentDialogHelper(MainWindow window)
@@ -33,6 +37,7 @@ internal class ContentDialogHelper
         }
 
         currentDialog = dialog;
+        currentDialog.Opened += CurrentDialog_Opened;
         currentDialog.Closing += ContentDialog_Closing;
         currentDialog.Closed += ContentDialog_Closed;
         currentDialog.Loaded += CurrentDialog_Loaded;
@@ -50,6 +55,9 @@ internal class ContentDialogHelper
 
     private void EnableCaptionButtons(bool enable)
     {
+        // clearing the caption button regions using inputNonClientPointerSource.ClearRegionRects(NonClientRegionKind.Close)
+        // etc. will initially disable the buttons but if the window is moved the regions will be automatically set again.
+        
         HWND hWnd = PInvoke.FindWindowEx(parentWindow.WindowHandle, HWND.Null, "InputNonClientPointerSource", null);
         Debug.Assert(!hWnd.IsNull);
 
@@ -72,17 +80,19 @@ internal class ContentDialogHelper
 
     private void ContentDialog_Closing(ContentDialog sender, ContentDialogClosingEventArgs args)
     {
-        Debug.WriteLine("ContentDialog_Closing");
-
         EnableCaptionButtons(enable: true);
     }
 
     private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
     {
-        Debug.WriteLine("ContentDialog_Closed");
-
         currentDialog = null;
+        DialogClosed?.Invoke(this, new EventArgs(sender));
     }
-                                                       
+
+    private void CurrentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
+    {
+        DialogOpened?.Invoke(this, new EventArgs(sender));
+    }
+
     public bool IsContentDialogOpen => currentDialog is not null;
 }

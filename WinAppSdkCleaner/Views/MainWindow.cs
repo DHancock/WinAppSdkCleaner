@@ -61,6 +61,8 @@ internal sealed partial class MainWindow : Window
         inputNonClientPointerSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
 
         ContentDialogHelper = new ContentDialogHelper(this);
+        ContentDialogHelper.DialogOpened += ContentDialogHelper_DialogOpened;
+        ContentDialogHelper.DialogClosed += ContentDialogHelper_DialogClosed;
 
         dispatcherTimer = InitialiseDragRegionTimer();
 
@@ -344,7 +346,12 @@ internal sealed partial class MainWindow : Window
 
         try
         {
-            if ((Content is FrameworkElement layoutRoot) && layoutRoot.IsLoaded && AppWindowTitleBar.IsCustomizationSupported())
+            if (ContentDialogHelper.IsContentDialogOpen)
+            {
+                RectInt32 windowRect = new RectInt32(0, 0, AppWindow.ClientSize.Width, AppWindow.ClientSize.Height);
+                inputNonClientPointerSource.SetRegionRects(NonClientRegionKind.Passthrough, [windowRect]);
+            }
+            else if ((Content is FrameworkElement layoutRoot) && layoutRoot.IsLoaded && AppWindowTitleBar.IsCustomizationSupported())
             {
                 // as there is no clear distinction any more between the title bar region and the client area,
                 // just treat the whole window as a title bar, click anywhere on the backdrop to drag the window.
@@ -366,6 +373,7 @@ internal sealed partial class MainWindow : Window
         }
     }
 
+
     private record class ScrollViewerBounds(in Point Offset, in Vector2 Size)
     {
         public double Top => Offset.Y;
@@ -376,7 +384,7 @@ internal sealed partial class MainWindow : Window
         ScrollViewerBounds? parentBounds = bounds;
 
         foreach (UIElement child in LogicalTreeHelper.GetChildren(item))
-        {            
+        {
             switch (child)
             {
                 case Panel: break;
@@ -512,6 +520,17 @@ internal sealed partial class MainWindow : Window
         // defer setting the drag regions while still resizing the window or scrolling
         // it's content. If the timer is already running, this resets the interval.
         dispatcherTimer.Start();
+    }
+
+
+    private void ContentDialogHelper_DialogClosed(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
+    {
+        SetWindowDragRegionsInternal();
+    }
+
+    private void ContentDialogHelper_DialogOpened(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
+    {
+        SetWindowDragRegionsInternal();
     }
 
     private void DispatcherTimer_Tick(object? sender, object e)
