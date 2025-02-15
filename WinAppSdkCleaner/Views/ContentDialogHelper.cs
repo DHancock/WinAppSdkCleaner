@@ -38,7 +38,6 @@ internal class ContentDialogHelper
 
         currentDialog = dialog;
         currentDialog.Opened += CurrentDialog_Opened;
-        currentDialog.Closing += ContentDialog_Closing;
         currentDialog.Closed += ContentDialog_Closed;
         currentDialog.Loaded += CurrentDialog_Loaded;
 
@@ -48,23 +47,7 @@ internal class ContentDialogHelper
         currentDialog.RequestedTheme = ((FrameworkElement)parentWindow.Content).ActualTheme;
         currentDialog.FlowDirection = ((FrameworkElement)parentWindow.Content).FlowDirection;
 
-        EnableCaptionButtons(enable: false);
-
         return await currentDialog.ShowAsync();
-    }
-
-    private void EnableCaptionButtons(bool enable)
-    {
-        // clearing the caption button regions using inputNonClientPointerSource.ClearRegionRects(NonClientRegionKind.Close)
-        // etc. will initially disable the buttons but if the window is moved the regions will be automatically set again.
-        
-        HWND hWnd = PInvoke.FindWindowEx(parentWindow.WindowHandle, HWND.Null, "InputNonClientPointerSource", null);
-        Debug.Assert(!hWnd.IsNull);
-
-        if (!hWnd.IsNull)
-        {
-            PInvoke.EnableWindow(hWnd, enable);
-        }
     }
 
     private static void CurrentDialog_Loaded(object sender, RoutedEventArgs e)
@@ -76,11 +59,6 @@ internal class ContentDialogHelper
             // no lightweight styling, and size 20 is a bit loud
             contentControl.FontSize = 18;
         }
-    }
-
-    private void ContentDialog_Closing(ContentDialog sender, ContentDialogClosingEventArgs args)
-    {
-        EnableCaptionButtons(enable: true);
     }
 
     private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)

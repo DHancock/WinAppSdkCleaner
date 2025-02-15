@@ -12,6 +12,4 @@ GetCursorPos
 ScreenToClient
 WM_SYSCOMMAND
 GetDoubleClickTime
-FindWindowEx
-EnableWindow
 WM_NCHITTEST
