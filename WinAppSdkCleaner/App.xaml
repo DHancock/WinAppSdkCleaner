@@ -12,8 +12,6 @@
                 <ResourceDictionary Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <x:Int32 x:Key="LeftMargin">15</x:Int32>
-
         </ResourceDictionary>
     </Application.Resources>
 </Application>
