@@ -34,7 +34,6 @@ internal sealed partial class MainWindow : Window
     private RelayCommand? closeCommand;
 
     private readonly InputNonClientPointerSource inputNonClientPointerSource;
-    private readonly SUBCLASSPROC subClassDelegate;
     private readonly DispatcherTimer dispatcherTimer;
     private readonly ViewTraceListener traceListener;
     private bool cancelDragRegionTimerEvent = false;
@@ -47,15 +46,18 @@ internal sealed partial class MainWindow : Window
 
     public ContentDialogHelper ContentDialogHelper { get; }
 
+    private const nuint cSubClassID = 0;
+    private readonly GCHandle thisGCHandle;
+
     private MainWindow()
     {
         WindowHandle = (HWND)WindowNative.GetWindowHandle(this);
 
-        subClassDelegate = new SUBCLASSPROC(NewSubWindowProc);
+        thisGCHandle = GCHandle.Alloc(this);
 
-        if (!PInvoke.SetWindowSubclass(WindowHandle, subClassDelegate, 0, 0))
+        unsafe
         {
-            throw new Win32Exception(Marshal.GetLastPInvokeError());
+            PInvoke.SetWindowSubclass(WindowHandle, &NewSubWindowProc, cSubClassID, (nuint)GCHandle.ToIntPtr(thisGCHandle));
         }
 
         inputNonClientPointerSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
@@ -80,8 +82,20 @@ internal sealed partial class MainWindow : Window
             cancelDragRegionTimerEvent = true;
             dispatcherTimer.Stop();
             Trace.Listeners.Remove(traceListener);
+            RemoveSubClass();
         };
     }
+
+    private void RemoveSubClass() 
+    {
+        unsafe 
+        { 
+            PInvoke.RemoveWindowSubclass(WindowHandle, &NewSubWindowProc, cSubClassID);
+        }
+
+        thisGCHandle.Free();
+    }
+
 
     private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
     {
@@ -95,66 +109,74 @@ internal sealed partial class MainWindow : Window
         }
     }
 
-    private LRESULT NewSubWindowProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData)
+
+    [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvStdcall) })]
+    private static LRESULT NewSubWindowProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData)
     {
         const int VK_SPACE = 0x0020;
         const int HTCAPTION = 0x0002;
 
-        switch (uMsg)
+        GCHandle handle = GCHandle.FromIntPtr((nint)dwRefData);
+
+        if (handle.Target is MainWindow window)
         {
-            case PInvoke.WM_GETMINMAXINFO:
+
+            switch (uMsg)
             {
-                unsafe
+                case PInvoke.WM_GETMINMAXINFO:
                 {
-                    MINMAXINFO* mPtr = (MINMAXINFO*)lParam.Value;
-                    mPtr->ptMinTrackSize.X = scaledMinWidth;
-                    mPtr->ptMinTrackSize.Y = scaledMinHeight;
-                }
-                break;
-            }
-
-            case PInvoke.WM_DPICHANGED:
-            {
-                scaleFactor = (wParam & 0xFFFF) / 96.0;
-                scaledMinWidth = ConvertToDeviceSize(cMinWidth);
-                scaledMinHeight = ConvertToDeviceSize(cMinHeight);
-                break;
-            }
-
-            case PInvoke.WM_SYSCOMMAND when (lParam == VK_SPACE) && (AppWindow.Presenter.Kind != AppWindowPresenterKind.FullScreen):
-            {
-                HideSystemMenu();
-                ShowSystemMenu(viaKeyboard: true);
-                return (LRESULT)0;
-            }
-
-            case PInvoke.WM_NCHITTEST when ContentDialogHelper.IsContentDialogOpen:
-            {
-                LRESULT result = PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
-
-                const int HTNOWHERE = 0;
-                const int HTLEFT = 10;
-                const int HTBOTTOMRIGHT = 17;
-
-                if ((result >= HTLEFT) && (result <= HTBOTTOMRIGHT))
-                {
-                    return (LRESULT)HTNOWHERE;   // disable resize border
+                    unsafe
+                    {
+                        MINMAXINFO* mPtr = (MINMAXINFO*)lParam.Value;
+                        mPtr->ptMinTrackSize.X = window.scaledMinWidth;
+                        mPtr->ptMinTrackSize.Y = window.scaledMinHeight;
+                    }
+                    break;
                 }
 
-                return result;
-            }
+                case PInvoke.WM_DPICHANGED:
+                {
+                    window.scaleFactor = (wParam & 0xFFFF) / 96.0;
+                    window.scaledMinWidth = window.ConvertToDeviceSize(cMinWidth);
+                    window.scaledMinHeight = window.ConvertToDeviceSize(cMinHeight);
+                    break;
+                }
 
-            case PInvoke.WM_NCRBUTTONUP when wParam == HTCAPTION:
-            {
-                HideSystemMenu();
-                ShowSystemMenu(viaKeyboard: false);
-                return (LRESULT)0;
-            }
+                case PInvoke.WM_SYSCOMMAND when (lParam == VK_SPACE) && (window.AppWindow.Presenter.Kind != AppWindowPresenterKind.FullScreen):
+                {
+                    window.HideSystemMenu();
+                    window.ShowSystemMenu(viaKeyboard: true);
+                    return (LRESULT)0;
+                }
 
-            case PInvoke.WM_NCLBUTTONDOWN when wParam == HTCAPTION:
-            {
-                HideSystemMenu();
-                break;
+                case PInvoke.WM_NCHITTEST when window.ContentDialogHelper.IsContentDialogOpen:
+                {
+                    LRESULT result = PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
+
+                    const int HTNOWHERE = 0;
+                    const int HTLEFT = 10;
+                    const int HTBOTTOMRIGHT = 17;
+
+                    if ((result >= HTLEFT) && (result <= HTBOTTOMRIGHT))
+                    {
+                        return (LRESULT)HTNOWHERE;   // disable resize border
+                    }
+
+                    return result;
+                }
+
+                case PInvoke.WM_NCRBUTTONUP when wParam == HTCAPTION:
+                {
+                    window.HideSystemMenu();
+                    window.ShowSystemMenu(viaKeyboard: false);
+                    return (LRESULT)0;
+                }
+
+                case PInvoke.WM_NCLBUTTONDOWN when wParam == HTCAPTION:
+                {
+                    window.HideSystemMenu();
+                    break;
+                }
             }
         }
 
@@ -372,7 +394,6 @@ internal sealed partial class MainWindow : Window
             Debug.WriteLine(ex);
         }
     }
-
 
     private record class ScrollViewerBounds(in Point Offset, in Vector2 Size)
     {
