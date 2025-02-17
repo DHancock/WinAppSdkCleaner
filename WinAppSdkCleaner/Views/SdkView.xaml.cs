@@ -158,22 +158,26 @@ public partial class SdkView : Page
         {
             try
             {
+                string message;
+
                 if (sdk.OtherAppsCount > 0)
                 {
-                    string message = $"{sdk.HeadingText} has dependent applications.{Environment.NewLine}Are you sure that you want to remove it?";
-
-                    ContentDialogResult result = await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message);
-                    
-                    if (result != ContentDialogResult.Primary)
-                    {
-                        return;
-                    }
+                    message = $"{sdk.HeadingText} has dependent applications.{Environment.NewLine}Are you sure that you want to remove it?";
+                }
+                else
+                {
+                    message = $"Are you sure that you want to remove {sdk.HeadingText}?";
                 }
 
-                IsIdle = false;
-                await viewModel.ExecuteRemove(sdk);
-                await viewModel.ExecuteSearch();
-                IsIdle = true;
+                ContentDialogResult result = await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message);
+
+                if (result == ContentDialogResult.Primary)
+                {
+                    IsIdle = false;
+                    await viewModel.ExecuteRemove(sdk);
+                    await viewModel.ExecuteSearch();
+                    IsIdle = true;
+                }
             }
             catch (Exception ex)
             {

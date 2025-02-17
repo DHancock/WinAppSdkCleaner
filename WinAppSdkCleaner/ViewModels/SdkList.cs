@@ -19,46 +19,38 @@ internal sealed partial class SdkList : List<ItemBase>
         Sort();
     }
 
-    public static IEnumerable<PackageData> GetDistinctPackages(ItemBase item)
+    public static IEnumerable<Package> GetDistinctPackages(ItemBase item)
     {
-        static List<PackageData> GetPackages(ItemBase? item)
+        return GetPackages(item).DistinctBy(p => p.Id.FullName);
+
+        static List<Package> GetPackages(ItemBase item)
         {
-            List<PackageData> packages = new List<PackageData>();
+            List<Package> packages = new List<Package>();
 
-            if (item is not null)
+            if (item is PackageItem packageItem)
             {
-                if (item is PackageItem packageItem)
-                {
-                    packages.Add(packageItem.PackageRecord);
-                }
+                packages.Add(packageItem.Package);
+            }
 
-                foreach (ItemBase child in item.Children)
-                {
-                    packages.AddRange(GetPackages(child));
-                }
+            foreach (ItemBase child in item.Children)
+            {
+                packages.AddRange(GetPackages(child));
             }
 
             return packages;
         }
-
-        return GetPackages(item).DistinctBy(p => p.Package.Id.FullName);
     }
 
     public static string GetCopyData(ItemBase item)
     {
         StringBuilder sb = new StringBuilder();
 
-        EnumerateTree (item, sb, 0);
-
-        sb.Append(Environment.NewLine);
-
-        IEnumerable<PackageData> allPackages = GetDistinctPackages(item);
-        IEnumerable<string> frameworks = allPackages.Where(p => p.Package.IsFramework).Select(p => BuildPS(p));
-        IEnumerable<string> others = allPackages.Where(p => !p.Package.IsFramework).Select(p => BuildPS(p));
+        IEnumerable<Package> packages = GetDistinctPackages(item);
+        IEnumerable<string> frameworks = packages.Where(p => p.IsFramework).Select(p => BuildPS(p));
+        IEnumerable<string> others = packages.Where(p => !p.IsFramework).Select(p => BuildPS(p));
 
         if (others.Any())
         {
-            sb.AppendLine("# dependent packages:");
             sb.AppendJoin(Environment.NewLine, others);
             sb.Append(Environment.NewLine);
             sb.Append(Environment.NewLine);
@@ -66,7 +58,6 @@ internal sealed partial class SdkList : List<ItemBase>
 
         if (frameworks.Any())
         {
-            sb.AppendLine("# framework packages:");
             sb.AppendJoin(Environment.NewLine, frameworks);
             sb.Append(Environment.NewLine);
             sb.Append(Environment.NewLine);
@@ -74,20 +65,10 @@ internal sealed partial class SdkList : List<ItemBase>
 
         return sb.ToString();
 
-        static void EnumerateTree(ItemBase item, StringBuilder sb, int depth)
-        {
-            sb.AppendLine($"{new string('\t', depth)}{item.HeadingText}");
-
-            foreach (ItemBase child in item.Children)
-            {
-                EnumerateTree(child, sb, depth + 1);
-            }
-        }
-
-        static string BuildPS(PackageData p)
+        static string BuildPS(Package p)
         {
             string allUsers = IntegrityLevel.IsElevated ? " -AllUsers" : string.Empty;
-            return $"Remove-AppxPackage -Package '{p.Package.Id.FullName}'{allUsers} -Verbose # {p.Package.DisplayName}";
+            return $"Remove-AppxPackage -Package '{p.Id.FullName}'{allUsers} -Verbose # {p.DisplayName}";
         }
     }
 }
