@@ -44,7 +44,7 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
 
             if (index >= 0)
             {
-                IEnumerable<PackageData> packages = SdkList.GetDistinctPackages(SdkList[index]);
+                IEnumerable<Package> packages = SdkList.GetDistinctPackages(SdkList[index]);
 
                 if (packages.Any())
                 {

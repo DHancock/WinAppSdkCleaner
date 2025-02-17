@@ -304,20 +304,20 @@ internal static class Model
 
 
 
-    private async static Task RemoveBatchAsync(IEnumerable<PackageData> packageRecords)
+    private async static Task RemoveBatchAsync(IEnumerable<Package> packages)
     {
         const int cTimeoutPerPackage = 10 * 1000; // milliseconds
 
-        if (packageRecords.Any())
+        if (packages.Any())
         {
             using (CancellationTokenSource cts = new CancellationTokenSource())
             {
                 int milliSeconds = 0;
                 List<Task> tasks = new List<Task>();
 
-                foreach (PackageData packageRecord in packageRecords)
+                foreach (Package package in packages)
                 {
-                    tasks.Add(RemoveAsync(packageRecord.Package.Id.FullName, cts.Token));
+                    tasks.Add(RemoveAsync(package.Id.FullName, cts.Token));
                     milliSeconds += cTimeoutPerPackage;
                 }
 
@@ -334,16 +334,16 @@ internal static class Model
         }
     }
 
-    public async static Task RemovePackagesAsync(IEnumerable<PackageData> packageRecords)
+    public async static Task RemovePackagesAsync(IEnumerable<Package> packages)
     {
         Trace.WriteLine($"{nameof(RemovePackagesAsync)} entry");
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         // when removing for all users, any provisioned packages will also be removed
-        await RemoveBatchAsync(packageRecords.Where(p => !p.Package.IsFramework));
+        await RemoveBatchAsync(packages.Where(p => !p.IsFramework));
 
         // now that the frameworks don't have any dependents
-        await RemoveBatchAsync(packageRecords.Where(p => p.Package.IsFramework));
+        await RemoveBatchAsync(packages.Where(p => p.IsFramework));
 
         stopwatch.Stop();
         Trace.WriteLine($"{nameof(RemovePackagesAsync)}, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
