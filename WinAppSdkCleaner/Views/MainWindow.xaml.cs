@@ -221,6 +221,15 @@ internal sealed partial class MainWindow : Window
             lastPointerTimeStamp = utcNow;
         }
     }
+
+    private void LayoutRoot_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.Escape)
+        {
+            PostCloseMessage();
+            e.Handled = true;
+        }
+    }
 }
 
 
