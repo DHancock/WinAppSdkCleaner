@@ -10,7 +10,7 @@
 
     <!-- left, top, right, bottom -->
     
-    <Grid x:Name="LayoutRoot">
+    <Grid x:Name="LayoutRoot" KeyDown="LayoutRoot_KeyDown">
         <Grid.Resources>
             <!--required to make the NavigationView transparent, at least in top mode-->
             <SolidColorBrush x:Key="NavigationViewTopPaneBackground" Color="Transparent" />
