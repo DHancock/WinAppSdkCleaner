@@ -470,14 +470,14 @@ internal sealed partial class MainWindow : Window
             GeneralTransform gt = e.TransformToVisual(null);
             return gt.TransformPoint(new Point(0, 0));
         }
-    }
 
-    private static RectInt32 ScaledRect(in Point location, in Vector2 size, double scale)
-    {
-        return new RectInt32(Convert.ToInt32(location.X * scale),
-                             Convert.ToInt32(location.Y * scale),
-                             Convert.ToInt32(size.X * scale),
-                             Convert.ToInt32(size.Y * scale));
+        static RectInt32 ScaledRect(in Point location, in Vector2 size, double scale)
+        {
+            return new RectInt32(Convert.ToInt32(location.X * scale),
+                                 Convert.ToInt32(location.Y * scale),
+                                 Convert.ToInt32(size.X * scale),
+                                 Convert.ToInt32(size.Y * scale));
+        }
     }
 
     private void AddDragRegionEventHandlers(UIElement item)
@@ -543,6 +543,15 @@ internal sealed partial class MainWindow : Window
         dispatcherTimer.Start();
     }
 
+    private void DispatcherTimer_Tick(object? sender, object e)
+    {
+        dispatcherTimer.Stop();
+
+        if (!cancelDragRegionTimerEvent)
+        {
+            SetWindowDragRegionsInternal();
+        }
+    }
 
     private void ContentDialogHelper_DialogClosed(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
     {
@@ -552,15 +561,5 @@ internal sealed partial class MainWindow : Window
     private void ContentDialogHelper_DialogOpened(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
     {
         SetWindowDragRegionsInternal();
-    }
-
-    private void DispatcherTimer_Tick(object? sender, object e)
-    {
-        dispatcherTimer.Stop();
-
-        if (!cancelDragRegionTimerEvent)
-        {
-            SetWindowDragRegionsInternal();
-        }
     }
 }
