@@ -4,13 +4,16 @@ using WinAppSdkCleaner.Models;
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal sealed record DisplayVersion(string SemanticVersion, string PackageVersion);
+internal sealed record DisplayVersion(string SdkName, string SdkVersion, string PackageVersion)
+{
+    public string AutomationName => $"{SdkName} version {SdkVersion} package version {PackageVersion}";
+};
 
 internal partial class GroupInfo : List<DisplayVersion>
 {
-    public GroupInfo(string headerName, IEnumerable<DisplayVersion> items) : base(items)
+    public GroupInfo(string sdkName, IEnumerable<DisplayVersion> items) : base(items)
     {
-        Name = headerName;
+        Name = $"{sdkName} package versions";
     }
 
     public string Name { get; }
@@ -49,28 +52,29 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 
             foreach (IGrouping<SdkId, VersionRecord> g in query)
             {
+                string sdkName = GetSdkName(g.Key);
 
-                IEnumerable<DisplayVersion> data = g.OrderByDescending(v => v.Release, new PackageVersionComparer())
-                    .Select(v => new DisplayVersion($"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
+                IEnumerable <DisplayVersion> data = g.OrderByDescending(v => v.Release, new PackageVersionComparer())
+                    .Select(v => new DisplayVersion(sdkName, $"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
 
-                groups.Add(new GroupInfo(BuildHeaderText(g.Key), data));
+                groups.Add(new GroupInfo(sdkName, data));
             }
 
             return groups;
         }
     }
 
-    private static string BuildHeaderText(SdkId sdkId)
+    private static string GetSdkName(SdkId sdkId)
     {
         foreach (ISdk sdk in Model.SupportedSdks)
         {
             if (sdk.Id == sdkId)
             {
-                return $"{sdk.DispalyName} package versions";
+                return sdk.DispalyName;
             }
         }
 
-        return $"{sdkId} package versions";
+        return sdkId.ToString();
     }
 
     private void RaisePropertyChanged([CallerMemberName] string? propertyName = default)

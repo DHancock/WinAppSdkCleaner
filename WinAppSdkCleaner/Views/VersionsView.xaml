@@ -11,13 +11,13 @@
     <Grid>
         <Grid.Resources>
             <DataTemplate x:Key="VersionItemTemplate" x:DataType="vm:DisplayVersion">
-                <Grid>
+                <Grid AutomationProperties.Name="{x:Bind AutomationName}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="{x:Bind SemanticVersion}"/>
+                    <TextBlock Grid.Column="0" Text="{x:Bind SdkVersion}"/>
                     <TextBlock Grid.Column="1" Text="{x:Bind PackageVersion}"/>
 
                     <Grid.ContextFlyout>

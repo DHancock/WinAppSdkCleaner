@@ -75,12 +75,10 @@ public partial class VersionsView : Page
     {
         StringBuilder sb = new StringBuilder();
 
-        foreach (object item in selectedItems)
+        foreach (object item in selectedItems.OrderByDescending(x => ((DisplayVersion)x).SdkName))
         {
-            if (item is DisplayVersion displayVersion)
-            {
-                sb.AppendLine($"{displayVersion.SemanticVersion}\t{displayVersion.PackageVersion}");
-            }
+            DisplayVersion displayVersion = (DisplayVersion)item;
+            sb.AppendLine($"{displayVersion.SdkName} {displayVersion.SdkVersion}\t{displayVersion.PackageVersion}");
         } 
 
         if (sb.Length > 0)
