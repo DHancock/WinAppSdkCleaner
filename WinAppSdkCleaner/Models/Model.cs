@@ -62,7 +62,7 @@ internal static class Model
 
         CategorizePackageVersions(sdksTask.Result);
 
-        Trace.WriteLine($"Found {sdksTask.Result.Count} SDKs, allUsers: {IntegrityLevel.IsElevated}");
+        Trace.WriteLine($"Found {sdksTask.Result.Count} SDKs, all users: {IntegrityLevel.IsElevated}");
 
         return sdksTask.Result;
     }
