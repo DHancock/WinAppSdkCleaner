@@ -36,6 +36,8 @@ public partial class SdkView : Page
             }
             else
             {
+                // a not very elegant way of ensuring there's only one update queued
+                SdkTreeView.Loaded -= SdkTreeView_Loaded;
                 SdkTreeView.Loaded += SdkTreeView_Loaded;
             }
         }

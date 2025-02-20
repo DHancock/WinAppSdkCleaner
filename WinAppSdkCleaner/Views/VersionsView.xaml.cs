@@ -71,15 +71,23 @@ public partial class VersionsView : Page
         }
     }
 
-    private static void ExecuteCopy(IList<object> selectedItems)
+    private void ExecuteCopy(IList<object> selectedItems)
     {
+        // the selected items are in the time order that they were selected in
+        // need to convert them back to sorted list ordering
+        List<(int index, DisplayVersion displayVersion)> indexedList = new(selectedItems.Count);
+
+        foreach (object item in selectedItems)
+        {
+            indexedList.Add((VersionListView.Items.IndexOf(item), (DisplayVersion)item));
+        }
+
         StringBuilder sb = new StringBuilder();
 
-        foreach (object item in selectedItems.OrderByDescending(x => ((DisplayVersion)x).SdkName))
+        foreach ((int index, DisplayVersion displayVersion) in indexedList.OrderBy(x => x.index))
         {
-            DisplayVersion displayVersion = (DisplayVersion)item;
             sb.AppendLine($"{displayVersion.SdkName} {displayVersion.SdkVersion}\t{displayVersion.PackageVersion}");
-        } 
+        }
 
         if (sb.Length > 0)
         {
@@ -99,7 +107,7 @@ public partial class VersionsView : Page
         }
         else
         {
-            ExecuteCopy(new List<object>(1) { version });
+            ExecuteCopy([version]);
         }
     }
 }
