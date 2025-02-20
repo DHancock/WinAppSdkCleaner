@@ -48,7 +48,6 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
                                                                          select g;
 
             List<GroupInfo> groups = new();
-            PackageVersionComparer comparer = new PackageVersionComparer();
 
             foreach (IGrouping<SdkId, VersionRecord> g in query)
             {
