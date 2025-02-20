@@ -15,6 +15,8 @@ internal partial class GroupInfo : List<DisplayVersion>
     }
 
     public string Name { get; }
+
+    public override string ToString() => Name;   // the narrator uses this to read the group headers
 }
 
 
