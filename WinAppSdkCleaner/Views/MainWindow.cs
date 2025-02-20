@@ -57,7 +57,8 @@ internal sealed partial class MainWindow : Window
 
         unsafe
         {
-            PInvoke.SetWindowSubclass(WindowHandle, &NewSubWindowProc, cSubClassID, (nuint)GCHandle.ToIntPtr(thisGCHandle));
+            bool success = PInvoke.SetWindowSubclass(WindowHandle, &NewSubWindowProc, cSubClassID, (nuint)GCHandle.ToIntPtr(thisGCHandle));
+            Debug.Assert(success);
         }
 
         inputNonClientPointerSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
@@ -79,23 +80,19 @@ internal sealed partial class MainWindow : Window
         
         Closed += (s, e) =>
         {
+            unsafe
+            {
+                bool success = PInvoke.RemoveWindowSubclass(WindowHandle, &NewSubWindowProc, cSubClassID);
+                Debug.Assert(success);
+            }
+
+            thisGCHandle.Free();
+
             cancelDragRegionTimerEvent = true;
             dispatcherTimer.Stop();
             Trace.Listeners.Remove(traceListener);
-            RemoveSubClass();
         };
     }
-
-    private void RemoveSubClass() 
-    {
-        unsafe 
-        { 
-            PInvoke.RemoveWindowSubclass(WindowHandle, &NewSubWindowProc, cSubClassID);
-        }
-
-        thisGCHandle.Free();
-    }
-
 
     private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
     {
@@ -108,7 +105,6 @@ internal sealed partial class MainWindow : Window
             }
         }
     }
-
 
     [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvStdcall) })]
     private static LRESULT NewSubWindowProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData)
