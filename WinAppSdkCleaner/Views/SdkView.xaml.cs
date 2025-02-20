@@ -6,7 +6,7 @@ namespace WinAppSdkCleaner.Views;
 /// <summary>
 /// Interaction logic for SdkView.xaml
 /// </summary>
-public partial class SdkView : Page
+internal sealed partial class SdkView : Page
 {
     private RelayCommand SearchCommand { get; }
     private RelayCommand RemoveCommand { get; }
@@ -275,7 +275,7 @@ public partial class SdkView : Page
     }
 }
 
-internal partial class ItemTemplateSelector : DataTemplateSelector
+internal sealed partial class ItemTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? SdkTemplate { get; set; }
     public DataTemplate? PackageTemplate { get; set; }

@@ -7,7 +7,7 @@ internal sealed record DisplayVersion(string SdkName, string SdkVersion, string 
     public string AutomationName => $"{SdkName} version {SdkVersion} package version {PackageVersion}";
 };
 
-internal partial class GroupInfo : List<DisplayVersion>
+internal sealed partial class GroupInfo : List<DisplayVersion>
 {
     public GroupInfo(string sdkName, IEnumerable<DisplayVersion> items) : base(items)
     {

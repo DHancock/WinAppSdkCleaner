@@ -68,6 +68,6 @@ internal sealed partial class Settings
 
 [JsonSourceGenerationOptions(IncludeFields = true)]
 [JsonSerializable(typeof(Settings))]
-internal partial class SettingsJsonContext : JsonSerializerContext
+internal sealed partial class SettingsJsonContext : JsonSerializerContext
 {
 }

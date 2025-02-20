@@ -2,7 +2,7 @@
 
 namespace WinAppSdkCleaner.Views;
 
-internal partial class ViewTraceListener : TraceListener
+internal sealed partial class ViewTraceListener : TraceListener
 {
     private readonly Lock lockObject;
     private readonly StringBuilder store;

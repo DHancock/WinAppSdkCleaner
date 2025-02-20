@@ -1,8 +1,8 @@
 ﻿namespace WinAppSdkCleaner.Views;
 
-internal class ContentDialogHelper
+internal sealed class ContentDialogHelper
 {
-    internal record EventArgs(ContentDialog Dialog);
+    internal sealed record EventArgs(ContentDialog Dialog);
 
     public event TypedEventHandler<ContentDialogHelper, EventArgs>? DialogOpened;
     public event TypedEventHandler<ContentDialogHelper, EventArgs>? DialogClosed;

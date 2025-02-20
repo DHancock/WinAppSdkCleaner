@@ -476,12 +476,12 @@ internal static class Model
 
 [JsonSourceGenerationOptions(IncludeFields = true, WriteIndented = false)]
 [JsonSerializable(typeof(VersionRecord))]
-internal partial class VersionRecordJsonSerializerContext : JsonSerializerContext
+internal sealed partial class VersionRecordJsonSerializerContext : JsonSerializerContext
 {
 }
 
 [JsonSourceGenerationOptions(IncludeFields = true, WriteIndented = false)]
 [JsonSerializable(typeof(List<VersionRecord>))]
-internal partial class VersionRecordListJsonSerializerContext : JsonSerializerContext
+internal sealed partial class VersionRecordListJsonSerializerContext : JsonSerializerContext
 { 
 }

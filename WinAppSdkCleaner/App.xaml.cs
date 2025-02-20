@@ -2,7 +2,7 @@
 
 namespace WinAppSdkCleaner;
 
-public partial class App : Application
+public sealed partial class App : Application
 {
     public const string cAppDisplayName = "WinAppSdk Cleaner";
     public static App Instance => (App)Current;

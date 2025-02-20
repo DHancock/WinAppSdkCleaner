@@ -3,7 +3,7 @@
 /// <summary>
 /// Interaction logic for AboutView.xaml
 /// </summary>
-internal partial class AboutView : Page
+internal sealed partial class AboutView : Page
 {
     public AboutView()
     {
