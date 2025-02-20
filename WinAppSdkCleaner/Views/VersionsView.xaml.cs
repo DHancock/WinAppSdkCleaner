@@ -1,6 +1,4 @@
-﻿using Microsoft.UI.Xaml.Data;
-
-using WinAppSdkCleaner.ViewModels;
+﻿using WinAppSdkCleaner.ViewModels;
 
 namespace WinAppSdkCleaner.Views;
 
