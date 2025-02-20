@@ -391,7 +391,7 @@ internal sealed partial class MainWindow : Window
         }
     }
 
-    private record class ScrollViewerBounds(in Point Offset, in Vector2 Size)
+    private sealed record class ScrollViewerBounds(in Point Offset, in Vector2 Size)
     {
         public double Top => Offset.Y;
     }

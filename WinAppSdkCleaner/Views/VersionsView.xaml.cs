@@ -5,7 +5,7 @@ namespace WinAppSdkCleaner.Views;
 /// <summary>
 /// Interaction logic for VersionsView.xaml
 /// </summary>
-public partial class VersionsView : Page
+internal sealed partial class VersionsView : Page
 {
     private VersionsViewModel? viewModel;
     private readonly CollectionViewSource viewSource = new() { IsSourceGrouped = true };

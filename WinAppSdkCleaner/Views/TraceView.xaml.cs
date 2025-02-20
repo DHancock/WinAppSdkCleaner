@@ -3,7 +3,7 @@
 /// <summary>
 /// Interaction logic for TraceView.xaml
 /// </summary>
-public partial class TraceView : Page
+internal sealed partial class TraceView : Page
 {
     private RelayCommand ClearCommand { get; }
 

@@ -2,7 +2,7 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal class PackageItem : ItemBase
+internal sealed class PackageItem : ItemBase
 {
     private readonly ImageSource cachedLogo;
     public PackageData PackageRecord { get; init; }
