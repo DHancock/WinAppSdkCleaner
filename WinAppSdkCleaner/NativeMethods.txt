@@ -12,5 +12,4 @@ GetCursorPos
 ScreenToClient
 WM_SYSCOMMAND
 GetDoubleClickTime
-WM_NCHITTEST
 RemoveWindowSubclass

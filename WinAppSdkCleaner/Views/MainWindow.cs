@@ -145,22 +145,6 @@ internal sealed partial class MainWindow : Window
                     return (LRESULT)0;
                 }
 
-                case PInvoke.WM_NCHITTEST when window.ContentDialogHelper.IsContentDialogOpen:
-                {
-                    LRESULT result = PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
-
-                    const int HTNOWHERE = 0;
-                    const int HTLEFT = 10;
-                    const int HTBOTTOMRIGHT = 17;
-
-                    if ((result >= HTLEFT) && (result <= HTBOTTOMRIGHT))
-                    {
-                        return (LRESULT)HTNOWHERE;   // disable resize border
-                    }
-
-                    return result;
-                }
-
                 case PInvoke.WM_NCRBUTTONUP when wParam == HTCAPTION:
                 {
                     window.HideSystemMenu();
@@ -551,11 +535,13 @@ internal sealed partial class MainWindow : Window
 
     private void ContentDialogHelper_DialogClosed(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
     {
+        ((OverlappedPresenter)AppWindow.Presenter).IsResizable = true;
         SetWindowDragRegionsInternal();
     }
 
     private void ContentDialogHelper_DialogOpened(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
     {
+        ((OverlappedPresenter)AppWindow.Presenter).IsResizable = false;
         SetWindowDragRegionsInternal();
     }
 }
