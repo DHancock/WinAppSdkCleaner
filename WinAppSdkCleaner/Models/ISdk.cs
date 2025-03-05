@@ -4,7 +4,7 @@ public enum SdkId { Reunion, WinAppSdk };
 
 internal interface ISdk
 {
-    string DispalyName { get; }
+    string DisplayName { get; }
 
     bool Match(PackageId pId);
 

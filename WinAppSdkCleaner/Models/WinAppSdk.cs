@@ -2,7 +2,7 @@
 
 internal sealed class WinAppSdk : ISdk
 {
-    public string DispalyName => "Win App SDK";
+    public string DisplayName => "Win App SDK";
 
     public bool Match(PackageId pId)
     {
