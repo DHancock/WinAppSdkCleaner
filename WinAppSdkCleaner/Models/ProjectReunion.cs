@@ -2,7 +2,7 @@
 
 internal sealed class ProjectReunion : ISdk
 {
-    public string DispalyName => "Project Reunion";
+    public string DisplayName => "Project Reunion";
 
     public bool Match(PackageId pId)
     {

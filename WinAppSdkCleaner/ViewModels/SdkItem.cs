@@ -24,15 +24,15 @@ internal sealed class SdkItem : ItemBase
         {
             if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion))
             {
-                return $"{sdkData.Sdk.DispalyName} ({Version.PackageVersionStr})";
+                return $"{sdkData.Sdk.DisplayName} ({Version.PackageVersionStr})";
             }
 
             if (!string.IsNullOrEmpty(sdkData.Version.VersionTag))
             {
-                return $"{sdkData.Sdk.DispalyName} {Version.SemanticVersion} - {Version.VersionTag}";
+                return $"{sdkData.Sdk.DisplayName} {Version.SemanticVersion} - {Version.VersionTag}";
             }
 
-            return $"{sdkData.Sdk.DispalyName} {Version.SemanticVersion}";
+            return $"{sdkData.Sdk.DisplayName} {Version.SemanticVersion}";
         }
     }
 

@@ -69,7 +69,7 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
         {
             if (sdk.Id == sdkId)
             {
-                return sdk.DispalyName;
+                return sdk.DisplayName;
             }
         }
 
