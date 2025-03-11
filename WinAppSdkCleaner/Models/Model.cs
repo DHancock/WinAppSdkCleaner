@@ -106,7 +106,7 @@ internal static class Model
         foreach (ISdk sdk in SupportedSdks)
         {
             IEnumerable<IGrouping<PackageVersion, Package>> query;
-            
+
             query = from package in allPackages
                     where (package.SignatureKind != PackageSignatureKind.System) && IsMicrosoftPublisher(package.Id) && sdk.Match(package.Id)
                     group package by package.Id.Version;
@@ -380,7 +380,6 @@ internal static class Model
                     // While I could serialize a compressed json dictionary, for backward compatibility
                     // the json array is still needed. The extra complexity isn't worth it.
                     Debug.Assert(versions.Count > 0);
-                    Debug.Assert(versions.DistinctBy(v => v.Release).Count() == versions.Count, "caution: duplicate package versions detected");
 
                     sVersionsLookUp.EnsureCapacity(versions.Count);
 
@@ -435,11 +434,14 @@ internal static class Model
     {
         try
         {
-            using (Stream? stream = typeof(App).Assembly.GetManifestResourceStream("WinAppSdkCleaner.versions.json"))
+            using (Stream? rs = typeof(App).Assembly.GetManifestResourceStream("WinAppSdkCleaner.versions.dat"))
             {
-                if (stream is not null)
+                if (rs is not null)
                 {
-                    return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                    using (DeflateStream ds = new DeflateStream(rs, CompressionMode.Decompress))
+                    {
+                        return (List<VersionRecord>?)JsonSerializer.Deserialize(ds, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                    }
                 }
             }
         }
@@ -455,13 +457,16 @@ internal static class Model
     {
         try
         {
-            string path = Path.Join(AppContext.BaseDirectory, "versions.json");
+            string path = Path.Join(AppContext.BaseDirectory, "versions.dat");
 
-            if (File.Exists(path)) // if this wasn't just a noddy little utility I'd validate this data
+            if (File.Exists(path))
             {
-                await using (FileStream stream = File.OpenRead(path))
+                await using (FileStream fs = File.OpenRead(path))
                 {
-                    return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                    using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
+                    {
+                        return (List<VersionRecord>?)JsonSerializer.Deserialize(ds, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                    }
                 }
             }
         }
@@ -472,16 +477,4 @@ internal static class Model
 
         return null;
     }
-}
-
-[JsonSourceGenerationOptions(IncludeFields = true, WriteIndented = false)]
-[JsonSerializable(typeof(VersionRecord))]
-internal sealed partial class VersionRecordJsonSerializerContext : JsonSerializerContext
-{
-}
-
-[JsonSourceGenerationOptions(IncludeFields = true, WriteIndented = false)]
-[JsonSerializable(typeof(List<VersionRecord>))]
-internal sealed partial class VersionRecordListJsonSerializerContext : JsonSerializerContext
-{ 
 }
