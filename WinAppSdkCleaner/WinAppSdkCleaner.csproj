@@ -19,9 +19,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="versions.json">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</EmbeddedResource>
+	  <EmbeddedResource Include="versions.dat">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -44,31 +44,7 @@
 	  </None>
 	</ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Platform)'!='ARM64'">
-		<Exec Command="start /wait /b &quot;&quot; &quot;$(TargetDir)$(TargetName).exe&quot; /check_versions &quot;$(ProjectDir)versions.json&quot; &quot;$(ProjectDir)versions.dat&quot;" />
-	</Target>
-
-	<PropertyGroup Label="Globals">
-	  <WebView2EnableCsWinRTProjection>False</WebView2EnableCsWinRTProjection>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	</PropertyGroup>
-	
+	<ItemGroup>
+		<InternalsVisibleTo Include="VersionsGenerator" />
+	</ItemGroup>
 </Project>

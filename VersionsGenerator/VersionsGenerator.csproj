@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+	<Nullable>enable</Nullable>
+	<SelfContained>true</SelfContained>
+	<GeneratedFilePath>$(SolutionDir)WinAppSdkCleaner\versions.dat</GeneratedFilePath>
+	<SourceFilePath>$(SolutionDir)WinAppSdkCleaner\versions.json</SourceFilePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\WinAppSdkCleaner\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+    <Compile Include="..\WinAppSdkCleaner\Models\SdkId.cs" Link="SdkId.cs" />
+    <Compile Include="..\WinAppSdkCleaner\Models\VersionRecord.cs" Link="VersionRecord.cs" />
+    <Compile Include="..\WinAppSdkCleaner\Models\VersionRecordJsonSerializerContext.cs" Link="VersionRecordJsonSerializerContext.cs" />
+    <Compile Include="..\WinAppSdkCleaner\Models\VersionRecordListJsonSerializerContext.cs" Link="VersionRecordListJsonSerializerContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<UpToDateCheckOutput Include="$(GeneratedFilePath)" />
+	<UpToDateCheckInput Include="$(SourceFilePath)" />
+  </ItemGroup>
+	
+  <Target Name="VersionsGeneratorCustomClean" BeforeTargets="CoreClean">
+	<Delete Files="$(GeneratedFilePath)" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	<Exec Command="start /wait /b &quot;&quot; &quot;$(TargetDir)$(TargetName).exe&quot; &quot;$(SourceFilePath)&quot; &quot;$(GeneratedFilePath)&quot; " />
+  </Target>
+</Project>
