@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<PropertyGroup Label="Globals">
+	  <WebView2EnableCsWinRTProjection>False</WebView2EnableCsWinRTProjection>
+	</PropertyGroup>
+
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
@@ -44,7 +48,4 @@
 	  </None>
 	</ItemGroup>
 
-	<ItemGroup>
-		<InternalsVisibleTo Include="VersionsGenerator" />
-	</ItemGroup>
 </Project>
