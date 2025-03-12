@@ -4,29 +4,14 @@ namespace VersionsGenerator;
 
 internal class Program
 {
-    private const int error_success = 0;
-    private const int error_failure = 1;
-
     static int Main(string[] args)
     {
-        if (args.Length == 2)
-        {
-            return CheckCompressedVersionsFile(args[0], args[1]);
-        }
-
-        return error_failure;
-    }
-
-    private static int CheckCompressedVersionsFile(string jsonPath, string dataPath)
-    {
-        //System.Diagnostics.Debugger.Launch();
+        const int error_success = 0;
+        const int error_failure = 1;
 
         try
         {
-            // Always write the data file, it allows the VS fast up to date check to work.
-            // That will limit the builds and hence the execution of this generator.
-            
-            WriteDataFile(dataPath, ReadJsonFile(jsonPath));
+            UpdateCompressedVersionsDataFile(args[0], args[1]);
             return error_success;
         }
         catch (Exception ex)
@@ -35,6 +20,17 @@ internal class Program
         }
 
         return error_failure;
+    }
+
+    private static void UpdateCompressedVersionsDataFile(string jsonPath, string dataPath)
+    {
+        //System.Diagnostics.Debugger.Launch();
+
+        // Always write the data file, it allows VS's fast up to date check to work.
+        // That will limit the builds and hence the execution of this generator.
+        // Github doesn't only rely on the file's modifcation date, it checks the file's contents.
+        
+        WriteDataFile(dataPath, ReadJsonFile(jsonPath));
     }
 
     private static void WriteDataFile(string dataPath, List<VersionRecord> versions)
