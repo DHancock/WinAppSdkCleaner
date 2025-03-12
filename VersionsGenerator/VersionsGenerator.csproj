@@ -24,10 +24,6 @@
 	<UpToDateCheckOutput Include="$(GeneratedFilePath)" />
 	<UpToDateCheckInput Include="$(SourceFilePath)" />
   </ItemGroup>
-	
-  <Target Name="VersionsGeneratorCustomClean" BeforeTargets="CoreClean">
-	<Delete Files="$(GeneratedFilePath)" />
-  </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
 	<Exec Command="start /wait /b &quot;&quot; &quot;$(TargetDir)$(TargetName).exe&quot; &quot;$(SourceFilePath)&quot; &quot;$(GeneratedFilePath)&quot; " />
