@@ -28,7 +28,7 @@ internal class Program
 
         // Always write the data file, it allows VS's fast up to date check to work.
         // That will limit the builds and hence the execution of this generator.
-        // Github doesn't only rely on the file's modifcation date, it checks the file's contents.
+        // GitHub doesn't only rely on the file's modification date, it checks the file's contents.
         
         WriteDataFile(dataPath, ReadJsonFile(jsonPath));
     }
