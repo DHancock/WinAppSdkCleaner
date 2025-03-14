@@ -16,7 +16,6 @@
     <Compile Include="..\WinAppSdkCleaner\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
     <Compile Include="..\WinAppSdkCleaner\Models\SdkId.cs" Link="SdkId.cs" />
     <Compile Include="..\WinAppSdkCleaner\Models\VersionRecord.cs" Link="VersionRecord.cs" />
-    <Compile Include="..\WinAppSdkCleaner\Models\VersionRecordJsonSerializerContext.cs" Link="VersionRecordJsonSerializerContext.cs" />
     <Compile Include="..\WinAppSdkCleaner\Models\VersionRecordListJsonSerializerContext.cs" Link="VersionRecordListJsonSerializerContext.cs" />
   </ItemGroup>
 
