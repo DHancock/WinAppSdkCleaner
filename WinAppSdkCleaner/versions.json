@@ -926,5 +926,15 @@
       "Minor": 405,
       "Build": 208
     }
+  },
+  {
+    "SemanticVersion": "1.7.0",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 7000,
+      "Minor": 435,
+      "Build": 154
+    }
   }
 ]
