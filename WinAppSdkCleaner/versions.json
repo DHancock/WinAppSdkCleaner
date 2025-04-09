@@ -888,6 +888,16 @@
     }
   },
   {
+    "SemanticVersion": "1.6.7",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 457,
+      "Build": 2140
+    }
+  },
+  {
     "SemanticVersion": "1.7.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
