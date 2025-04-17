@@ -946,5 +946,25 @@
       "Minor": 435,
       "Build": 154
     }
+  },
+  {
+    "SemanticVersion": "1.7.1",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 7000,
+      "Minor": 456,
+      "Build": 1632
+    }
+  },
+  {
+    "SemanticVersion": "1.8.0",
+    "VersionTag": "experimental 1",
+    "SdkId": 1,
+    "Release": {
+      "Major": 8000,
+      "Minor": 466,
+      "Build": 237
+    }
   }
 ]
