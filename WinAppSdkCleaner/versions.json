@@ -908,6 +908,16 @@
     }
   },
   {
+    "SemanticVersion": "1.6.9",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 6000,
+      "Minor": 519,
+      "Build": 329
+    }
+  },
+  {
     "SemanticVersion": "1.7.0",
     "VersionTag": "experimental 1",
     "SdkId": 1,
@@ -975,6 +985,16 @@
       "Major": 7000,
       "Minor": 498,
       "Build": 2246
+    }
+  },
+  {
+    "SemanticVersion": "1.7.3",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 7000,
+      "Minor": 522,
+      "Build": 1444
     }
   },
   {
