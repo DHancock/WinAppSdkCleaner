@@ -39,7 +39,7 @@ internal class Program
         {
             using (DeflateStream ds = new DeflateStream(fs, CompressionLevel.Optimal))
             {
-                JsonSerializer.Serialize(ds, versions, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                JsonSerializer.Serialize(ds, versions, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
             }
         }
     }
@@ -48,7 +48,7 @@ internal class Program
     {
         using (FileStream fs = File.OpenRead(jsonPath))
         {
-            return (List<VersionRecord>?)JsonSerializer.Deserialize(fs, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default) ?? new();
+            return JsonSerializer.Deserialize(fs, VersionRecordListJsonSerializerContext.Default.ListVersionRecord) ?? new();
         }
     }
 }

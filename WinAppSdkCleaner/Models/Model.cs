@@ -417,7 +417,7 @@ internal static class Model
                 {
                     using (DeflateStream stream = new DeflateStream(s, CompressionMode.Decompress))
                     {
-                        return (List<VersionRecord>?)JsonSerializer.Deserialize(stream, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                        return JsonSerializer.Deserialize(stream, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
                 }
             }
@@ -440,7 +440,7 @@ internal static class Model
                 {
                     using (DeflateStream ds = new DeflateStream(rs, CompressionMode.Decompress))
                     {
-                        return (List<VersionRecord>?)JsonSerializer.Deserialize(ds, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                        return JsonSerializer.Deserialize(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
                 }
             }
@@ -465,7 +465,7 @@ internal static class Model
                 {
                     using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
                     {
-                        return (List<VersionRecord>?)JsonSerializer.Deserialize(ds, typeof(List<VersionRecord>), VersionRecordListJsonSerializerContext.Default);
+                        return JsonSerializer.Deserialize(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
                 }
             }
