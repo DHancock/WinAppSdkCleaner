@@ -1026,5 +1026,15 @@
       "Minor": 526,
       "Build": 1808
     }
+  },
+  {
+    "SemanticVersion": "1.8.0",
+    "VersionTag": "experimental 4",
+    "SdkId": 1,
+    "Release": {
+      "Major": 8000,
+      "Minor": 548,
+      "Build": 2012
+    }
   }
 ]
