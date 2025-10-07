@@ -1079,7 +1079,7 @@
   },
   {
     "SemanticVersion": "2.0.0",
-    "VersionTag": "Experimental 1",
+    "VersionTag": "experimental 1",
     "SdkId": 1,
     "Release": {
       "Major": 0,
