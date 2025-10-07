@@ -71,13 +71,6 @@ internal sealed class SdkItem : ItemBase
             return -1;
         }
 
-        int result = Version.SdkId - other.Version.SdkId;
-
-        if (result == 0)
-        {
-            result = new PackageVersionComparer().Compare(Version.Release, other.Version.Release);
-        }
-
-        return result;
+        return VersionComparer.Comparer(Version, other.Version);
     }
 }
