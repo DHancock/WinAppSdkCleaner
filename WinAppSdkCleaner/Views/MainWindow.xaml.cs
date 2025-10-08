@@ -1,5 +1,5 @@
 ﻿using WinAppSdkCleaner.ViewModels;
-using WinAppSdkCleaner.Utils;
+using WinAppSdkCleaner.Utilites;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -23,8 +23,6 @@ internal sealed partial class MainWindow : Window
 
     public MainWindow(string title) : this()
     {
-        this.InitializeComponent();
-
         AssemblyName assemblyName = typeof(App).Assembly.GetName();
         Trace.WriteLine($"{assemblyName.Name} version: {assemblyName.Version?.ToString(3)}");
 
@@ -143,7 +141,7 @@ internal sealed partial class MainWindow : Window
 
         if (page.Tag is null)
         {
-            page.Tag = new Phase();
+            page.Tag = this;
 
             if (page is VersionsView versionsView)
             {
@@ -157,26 +155,17 @@ internal sealed partial class MainWindow : Window
                 sdkViewPage = view;
             }
 
-            page.Loaded += (s, e) =>
-            {
-                FrameworkElement fe = (FrameworkElement)s;
-                Phase phase = (Phase)fe.Tag;
+            page.Loaded += Page_Loaded;
 
-                if (phase.Current == 0)
-                {
-                    phase.Current = 1;
-                    AddDragRegionEventHandlers(fe);
-                }
+        }
 
-                SetWindowDragRegions();
-            };
+        void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            SetWindowDragRegions();
         }
     }
 
-    private sealed class Phase
-    {
-        public int Current { get; set; } = 0;
-    }
+    
 
     private void ContentFrame_SizeChanged(object sender, SizeChangedEventArgs e)
     {

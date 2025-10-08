@@ -1,12 +1,12 @@
 ﻿using WinAppSdkCleaner.ViewModels;
-using WinAppSdkCleaner.Utils;
+using WinAppSdkCleaner.Utilites;
 
 namespace WinAppSdkCleaner.Views;
 
 /// <summary>
 /// Interaction logic for SdkView.xaml
 /// </summary>
-internal sealed partial class SdkView : Page
+internal sealed partial class SdkView : Page, IPageItem
 {
     private RelayCommand SearchCommand { get; }
     private RelayCommand RemoveCommand { get; }
@@ -272,6 +272,15 @@ internal sealed partial class SdkView : Page
         {
             lastPointerTimeStamp = utcNow;
         }
+    }
+
+    public int PassthroughCount => 3;
+
+    public void AddPassthroughContent(in RectInt32[] rects)
+    {
+        rects[0] = Utils.GetPassthroughRect(SdkTreeView);
+        rects[1] = Utils.GetPassthroughRect(RefreshButton);
+        rects[2] = Utils.GetPassthroughRect(RemoveButton);
     }
 }
 

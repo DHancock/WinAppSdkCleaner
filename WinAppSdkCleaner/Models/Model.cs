@@ -1,4 +1,4 @@
-﻿using WinAppSdkCleaner.Utils;
+﻿using WinAppSdkCleaner.Utilites;
 
 namespace WinAppSdkCleaner.Models;
 

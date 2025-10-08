@@ -1,9 +1,11 @@
-﻿namespace WinAppSdkCleaner.Views;
+﻿using WinAppSdkCleaner.Utilites;
+
+namespace WinAppSdkCleaner.Views;
 
 /// <summary>
 /// Interaction logic for AboutView.xaml
 /// </summary>
-internal sealed partial class AboutView : Page
+internal sealed partial class AboutView : Page, IPageItem
 {
     public AboutView()
     {
@@ -16,5 +18,12 @@ internal sealed partial class AboutView : Page
 
         // Use the Tag to identify that this text block contains a hyperlink
         HyperlinkTextBlock.Tag = HyperlinkTextBlock;
-    }                    
+    }
+
+    public int PassthroughCount => 1;
+
+    public void AddPassthroughContent(in RectInt32[] rects)
+    {
+        rects[0] = Utils.GetPassthroughRect(HyperlinkTextBlock);
+    }
 }

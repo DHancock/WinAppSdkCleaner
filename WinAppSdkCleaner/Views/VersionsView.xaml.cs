@@ -1,11 +1,12 @@
-﻿using WinAppSdkCleaner.ViewModels;
+﻿using WinAppSdkCleaner.Utilites;
+using WinAppSdkCleaner.ViewModels;
 
 namespace WinAppSdkCleaner.Views;
 
 /// <summary>
 /// Interaction logic for VersionsView.xaml
 /// </summary>
-internal sealed partial class VersionsView : Page
+internal sealed partial class VersionsView : Page, IPageItem
 {
     private VersionsViewModel? viewModel;
     private readonly CollectionViewSource viewSource = new() { IsSourceGrouped = true };
@@ -107,5 +108,12 @@ internal sealed partial class VersionsView : Page
         {
             ExecuteCopy([version]);
         }
+    }
+
+    public int PassthroughCount => 1;
+
+    public void AddPassthroughContent(in RectInt32[] rects)
+    {
+        rects[0] = Utils.GetPassthroughRect(VersionListView);
     }
 }

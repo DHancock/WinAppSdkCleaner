@@ -17,11 +17,24 @@
             <SolidColorBrush x:Key="NavigationViewItemBackground" Color="Transparent" />
             <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
             <Thickness x:Key="TopNavigationViewContentGridBorderThickness">0</Thickness>
-        </Grid.Resources>
 
-        <Grid.BackgroundTransition>
-            <BrushTransition/>
-        </Grid.BackgroundTransition>
+            <MenuFlyout x:Key="SystemMenu" Opening="MenuFlyout_Opening" Closing="MenuFlyout_Closing" OverlayInputPassThroughElement="{x:Bind LayoutRoot}">
+
+                <MenuFlyoutItem Text="Restore" Command="{x:Bind restoreCommand}" AccessKey="R"/>
+                <MenuFlyoutItem Text="Move" Command="{x:Bind moveCommand}" AccessKey="M"/>
+                <MenuFlyoutItem Text="Size" Command="{x:Bind sizeCommand}" AccessKey="S"/>
+                <MenuFlyoutItem Text="Minimize" Command="{x:Bind minimizeCommand}" AccessKey="N"/>
+                <MenuFlyoutItem Text="Maximize" Command="{x:Bind maximizeCommand}" AccessKey="X"/>
+
+                <MenuFlyoutSeparator/>
+
+                <MenuFlyoutItem Text="Close" Command="{x:Bind closeWindowCommand}" AccessKey="C">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Menu" Key="F4"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+            </MenuFlyout>
+        </Grid.Resources>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

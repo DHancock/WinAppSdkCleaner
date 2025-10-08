@@ -1,9 +1,11 @@
-﻿namespace WinAppSdkCleaner.Views;
+﻿using WinAppSdkCleaner.Utilites;
+
+namespace WinAppSdkCleaner.Views;
 
 /// <summary>
 /// Interaction logic for TraceView.xaml
 /// </summary>
-internal sealed partial class TraceView : Page
+internal sealed partial class TraceView : Page, IPageItem
 {
     private RelayCommand ClearCommand { get; }
 
@@ -49,5 +51,13 @@ internal sealed partial class TraceView : Page
     private void AdjustCommandsState() => ClearCommand.RaiseCanExecuteChanged();
 
     private void TextChanged(object sender, TextChangedEventArgs e) => AdjustCommandsState();
+
+    public int PassthroughCount => 2;
+
+    public void AddPassthroughContent(in RectInt32[] rects)
+    {
+        rects[0] = Utils.GetPassthroughRect(TraceTextBox);
+        rects[1] = Utils.GetPassthroughRect(ClearButton);
+    }
 }
 

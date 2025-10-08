@@ -1,7 +1,8 @@
-﻿// included here due to name conflicts
-using Microsoft.UI.Xaml.Controls.Primitives;
+﻿using Microsoft.UI.Xaml.Controls.Primitives;
 
-using WinAppSdkCleaner.Utils;
+using WinAppSdkCleaner.Utilites;
+
+using WinRT;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -26,23 +27,23 @@ internal sealed partial class MainWindow : Window
 
     public HWND WindowHandle { get; }
 
-    private RelayCommand? restoreCommand;
-    private RelayCommand? moveCommand;
-    private RelayCommand? sizeCommand;
-    private RelayCommand? minimizeCommand;
-    private RelayCommand? maximizeCommand;
-    private RelayCommand? closeCommand;
+    private readonly RelayCommand restoreCommand;
+    private readonly RelayCommand moveCommand;
+    private readonly RelayCommand sizeCommand;
+    private readonly RelayCommand minimizeCommand;
+    private readonly RelayCommand maximizeCommand;
+    private readonly RelayCommand closeWindowCommand;
 
     private readonly InputNonClientPointerSource inputNonClientPointerSource;
     private readonly DispatcherTimer dispatcherTimer;
     private readonly ViewTraceListener traceListener;
-    private bool cancelDragRegionTimerEvent = false;
     private PointInt32 restorePosition;
     private SizeInt32 restoreSize;
-    private MenuFlyout? systemMenu;
+    private readonly MenuFlyout systemMenu;
     private int scaledMinWidth;
     private int scaledMinHeight;
     private double scaleFactor;
+    private UnhookWindowsHookExSafeHandle? hookSafeHandle;
 
     public ContentDialogHelper ContentDialogHelper { get; }
 
@@ -51,6 +52,11 @@ internal sealed partial class MainWindow : Window
 
     private MainWindow()
     {
+        this.InitializeComponent();
+
+        // work around for https://github.com/microsoft/CsWinRT/issues/1930
+        AppWindow.Presenter.As<OverlappedPresenter>();
+
         WindowHandle = (HWND)WindowNative.GetWindowHandle(this);
 
         thisGCHandle = GCHandle.Alloc(this);
@@ -76,19 +82,19 @@ internal sealed partial class MainWindow : Window
         scaledMinWidth = ConvertToDeviceSize(cMinWidth);
         scaledMinHeight = ConvertToDeviceSize(cMinHeight);
 
+        restoreCommand = new RelayCommand(o => PostSysCommandMessage(SC.RESTORE), CanRestore);
+        moveCommand = new RelayCommand(o => PostSysCommandMessage(SC.MOVE), CanMove);
+        sizeCommand = new RelayCommand(o => PostSysCommandMessage(SC.SIZE), CanSize);
+        minimizeCommand = new RelayCommand(o => PostSysCommandMessage(SC.MINIMIZE), CanMinimize);
+        maximizeCommand = new RelayCommand(o => PostSysCommandMessage(SC.MAXIMIZE), CanMaximize);
+        closeWindowCommand = new RelayCommand(o => PostSysCommandMessage(SC.CLOSE));
+
+        systemMenu = (MenuFlyout)LayoutRoot.Resources["SystemMenu"];
+
         AppWindow.Changed += AppWindow_Changed;
         
         Closed += (s, e) =>
         {
-            unsafe
-            {
-                bool success = PInvoke.RemoveWindowSubclass(WindowHandle, &NewSubWindowProc, cSubClassID);
-                Debug.Assert(success);
-            }
-
-            thisGCHandle.Free();
-
-            cancelDragRegionTimerEvent = true;
             dispatcherTimer.Stop();
             Trace.Listeners.Remove(traceListener);
         };
@@ -116,7 +122,6 @@ internal sealed partial class MainWindow : Window
 
         if (handle.Target is MainWindow window)
         {
-
             switch (uMsg)
             {
                 case PInvoke.WM_GETMINMAXINFO:
@@ -179,74 +184,102 @@ internal sealed partial class MainWindow : Window
             p.Y = AppWindow.TitleBar.Height;
         }
 
-        systemMenu ??= BuildSystemMenu();
         systemMenu.ShowAt(null, new Point(p.X / scaleFactor, p.Y / scaleFactor));
     }
 
     private void HideSystemMenu()
     {
-        if ((systemMenu is not null) && systemMenu.IsOpen)
+        if (systemMenu.IsOpen)
         {
             systemMenu.Hide();
         }
     }
 
-    private MenuFlyout BuildSystemMenu()
+    private void MenuFlyout_Closing(FlyoutBase sender, FlyoutBaseClosingEventArgs args)
     {
-        const string cStyleKey = "DefaultMenuFlyoutPresenterStyle";
-        const string cPaddingKey = "MenuFlyoutItemThemePaddingNarrow";
+        AccessKeyManager.ExitDisplayMode();
 
-        Debug.Assert(Content is FrameworkElement);
-        Debug.Assert(((FrameworkElement)Content).Resources.ContainsKey(cStyleKey));
-        Debug.Assert(((FrameworkElement)Content).Resources.ContainsKey(cPaddingKey));
+        hookSafeHandle?.Dispose(); // dispose calls UnhookWindowsHookEx() 
+        hookSafeHandle = null;
+    }
 
-        restoreCommand = new RelayCommand(o => PostSysCommandMessage(SC.RESTORE), CanRestore);
-        moveCommand = new RelayCommand(o => PostSysCommandMessage(SC.MOVE), CanMove);
-        sizeCommand = new RelayCommand(o => PostSysCommandMessage(SC.SIZE), CanSize);
-        minimizeCommand = new RelayCommand(o => PostSysCommandMessage(SC.MINIMIZE), CanMinimize);
-        maximizeCommand = new RelayCommand(o => PostSysCommandMessage(SC.MAXIMIZE), CanMaximize);
-        closeCommand = new RelayCommand(o => PostSysCommandMessage(SC.CLOSE));
+    private void MenuFlyout_Opening(object? sender, object e)
+    {
+        Debug.Assert(hookSafeHandle is null);
 
-        MenuFlyout menuFlyout = new MenuFlyout()
+        unsafe
         {
-            XamlRoot = Content.XamlRoot,
-            MenuFlyoutPresenterStyle = (Style)((FrameworkElement)Content).Resources[cStyleKey],
-            OverlayInputPassThroughElement = Content,
-        };
+            hookSafeHandle = PInvoke.SetWindowsHookEx(WINDOWS_HOOK_ID.WH_KEYBOARD, &KeyboardHookProc, null, PInvoke.GetCurrentThreadId());
+        }
+    }
 
-        // always use narrow padding (the first time the menu is opened it may use normal padding, other times narrow)
-        Thickness narrow = (Thickness)((FrameworkElement)Content).Resources[cPaddingKey];
+    [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvStdcall) })]
+    private static LRESULT KeyboardHookProc(int code, WPARAM wParam, LPARAM lParam)
+    {
+        MainWindow window = App.MainWindow;
 
-        menuFlyout.Items.Add(new MenuFlyoutItem() { Text = "Restore", Command = restoreCommand, Padding = narrow, AccessKey = "R" });
-        menuFlyout.Items.Add(new MenuFlyoutItem() { Text = "Move", Command = moveCommand, Padding = narrow, AccessKey = "M" });
-        menuFlyout.Items.Add(new MenuFlyoutItem() { Text = "Size", Command = sizeCommand, Padding = narrow, AccessKey = "S" });
-        menuFlyout.Items.Add(new MenuFlyoutItem() { Text = "Minimize", Command = minimizeCommand, Padding = narrow, AccessKey = "N" });
-        menuFlyout.Items.Add(new MenuFlyoutItem() { Text = "Maximize", Command = maximizeCommand, Padding = narrow, AccessKey = "X" });
-        menuFlyout.Items.Add(new MenuFlyoutSeparator());
+        Debug.Assert(window.systemMenu.IsOpen);
 
-        MenuFlyoutItem closeItem = new MenuFlyoutItem() { Text = "Close", Command = closeCommand, Padding = narrow, AccessKey = "C" };
-        // the accelerator is disabled to avoid two close messages (the original system menu still exists)
-        closeItem.KeyboardAccelerators.Add(new() { Modifiers = VirtualKeyModifiers.Menu, Key = VirtualKey.F4, IsEnabled = false });
-        menuFlyout.Items.Add(closeItem);
+        if (code >= 0)
+        {
+            VirtualKey key = (VirtualKey)(nuint)wParam;
+            bool isKeyDown = (lParam >>> 31) == 0;
 
-        return menuFlyout;
+            if (isKeyDown)
+            {
+                if (IsAcceleratorKeyModifier(key))
+                {
+                    window.systemMenu.Hide();
+                }
+                else if ((key != VirtualKey.Escape) && (key != VirtualKey.Enter) && (key != VirtualKey.Up) && (key != VirtualKey.Down))
+                {
+                    bool found = false;
+
+                    foreach (MenuFlyoutItemBase itemBase in window.systemMenu.Items)
+                    {
+                        if (itemBase.AccessKey == key.ToString())
+                        {
+                            window.systemMenu.Hide();
+                            found = true;
+
+                            if (itemBase.IsEnabled)
+                            {
+                                MenuFlyoutItem item = (MenuFlyoutItem)itemBase;
+                                item.Command.Execute(item.CommandParameter);
+                            }
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        Utils.PlayExclamation();
+                    }
+                }
+            }
+            else if (key == VirtualKey.Menu) // the menu is being opened via Alt+Space
+            {
+                AccessKeyManager.EnterDisplayMode(window.Content.XamlRoot);
+            }
+        }
+
+        return PInvoke.CallNextHookEx(null, code, wParam, lParam);
+    }
+
+    private static bool IsAcceleratorKeyModifier(VirtualKey key)
+    {
+        return (key == VirtualKey.Menu) || (key == VirtualKey.Control) || (key == VirtualKey.Shift) || (key == VirtualKey.LeftWindows) || (key == VirtualKey.RightWindows);
     }
 
     public void PostCloseMessage() => PostSysCommandMessage(SC.CLOSE);
 
     private bool CanRestore(object? param)
     {
-        return (AppWindow.Presenter is OverlappedPresenter op) && (op.State == OverlappedPresenterState.Maximized);
+        return ((OverlappedPresenter)AppWindow.Presenter).State == OverlappedPresenterState.Maximized;
     }
 
     private bool CanMove(object? param)
     {
-        if (AppWindow.Presenter is OverlappedPresenter op)
-        {
-            return op.State != OverlappedPresenterState.Maximized;
-        }
-
-        return AppWindow.Presenter.Kind == AppWindowPresenterKind.CompactOverlay;
+        return ((OverlappedPresenter)AppWindow.Presenter).State != OverlappedPresenterState.Maximized;
     }
 
     private bool CanSize(object? param)
@@ -324,28 +357,8 @@ internal sealed partial class MainWindow : Window
         return dpi / 96.0;
     }
 
-    private void ClearWindowDragRegions()
-    {
-        // Guard against race hazards. If a size changed event is generated the timer will be
-        // started. The drag regions could then be cleared when a context menu is opened, followed
-        // by the timer event which could then reset the drag regions while the menu was still open. Stopping
-        // the timer isn't enough because the tick event may have already been queued (on the same thread).
-        cancelDragRegionTimerEvent = true;
-
-        // allow mouse interaction with menu fly outs,  
-        // including clicks anywhere in the client area used to dismiss the menu
-        if (AppWindowTitleBar.IsCustomizationSupported())
-        {
-            inputNonClientPointerSource.ClearRegionRects(NonClientRegionKind.Caption);
-        }
-    }
-
     private void SetWindowDragRegionsInternal()
     {
-        const int cInitialCapacity = 8;
-
-        cancelDragRegionTimerEvent = false;
-
         try
         {
             RectInt32 windowRect = new RectInt32(0, 0, AppWindow.ClientSize.Width, AppWindow.ClientSize.Height);
@@ -361,151 +374,33 @@ internal sealed partial class MainWindow : Window
                 // just treat the whole window as a title bar, click anywhere on the backdrop to drag the window.
                 inputNonClientPointerSource.SetRegionRects(NonClientRegionKind.Caption, [windowRect]);
 
-                List<RectInt32> rects = new List<RectInt32>(cInitialCapacity);
-                LocatePassThroughContent(rects, layoutRoot);
-                Debug.Assert(rects.Count <= cInitialCapacity);
+                IPageItem page = (IPageItem)((Frame)RootNavigationView.Content).Content;
 
-                inputNonClientPointerSource.SetRegionRects(NonClientRegionKind.Passthrough, rects.ToArray());
+                int size = page.PassthroughCount + RootNavigationView.MenuItems.Count + 1;
+                RectInt32[] rects = new RectInt32[size];
+
+                page.AddPassthroughContent(rects);
+                AddStaticPassthroughContent(rects);
+
+                inputNonClientPointerSource.SetRegionRects(NonClientRegionKind.Passthrough, rects);
             }
         }
         catch (Exception ex)
         {
-            // accessing Window.Content can throw an object closed exception
             Debug.WriteLine(ex);
         }
     }
 
-    private sealed record class ScrollViewerBounds(in Point Offset, in Vector2 Size)
+    private void AddStaticPassthroughContent(in RectInt32[] rects)
     {
-        public double Top => Offset.Y;
-    }
+        int index = rects.Length - 1;
 
-    private void LocatePassThroughContent(List<RectInt32> rects, UIElement item, ScrollViewerBounds? bounds = null)
-    {
-        ScrollViewerBounds? parentBounds = bounds;
-
-        foreach (UIElement child in LogicalTreeHelper.GetChildren(item))
+        foreach (object menuItem in RootNavigationView.MenuItems)
         {
-            switch (child)
-            {
-                case Panel: break;
-
-                case Button:
-                case TreeView:
-                case ListView:
-                case NavigationViewItem:
-                case Expander:
-                case TextBox:
-                case TextBlock tb when ReferenceEquals(tb, tb.Tag): // it contains a hyperlink
-                {
-                    Point offset = GetOffsetFromXamlRoot(child);
-                    Vector2 actualSize = child.ActualSize;
-
-                    if ((parentBounds is not null) && (offset.Y < parentBounds.Top)) // top clip (for vertical scroll bars)
-                    {
-                        actualSize.Y -= (float)(parentBounds.Top - offset.Y);
-
-                        if (actualSize.Y < 0.1)
-                            continue;
-
-                        offset.Y = parentBounds.Top;
-                    }
-
-                    rects.Add(ScaledRect(offset, actualSize, scaleFactor));
-                    continue;
-                }
-
-                case ScrollViewer:
-                {
-                    // nested scroll viewers is not supported
-                    bounds = new ScrollViewerBounds(GetOffsetFromXamlRoot(child), child.ActualSize);
-
-                    if (((ScrollViewer)child).ComputedVerticalScrollBarVisibility == Visibility.Visible)
-                    {
-                        ScrollBar? scrollBar = child.FindChild<ScrollBar>("VerticalScrollBar");
-
-                        if (scrollBar is not null)
-                        {
-                            rects.Add(ScaledRect(GetOffsetFromXamlRoot(scrollBar), scrollBar.ActualSize, scaleFactor));
-                        }
-                    }
-
-                    break;
-                }
-
-                case CustomTitleBar ctb:
-                {
-                    rects.Add(ScaledRect(GetOffsetFromXamlRoot(ctb.WindowIconArea), ctb.WindowIconArea.ActualSize, scaleFactor));
-                    continue;
-                }
-
-                default: break;
-            }
-
-            LocatePassThroughContent(rects, child, bounds);
+            rects[index--] = Utils.GetPassthroughRect((UIElement)menuItem);
         }
 
-        static Point GetOffsetFromXamlRoot(UIElement e)
-        {
-            GeneralTransform gt = e.TransformToVisual(null);
-            return gt.TransformPoint(new Point(0, 0));
-        }
-
-        static RectInt32 ScaledRect(in Point location, in Vector2 size, double scale)
-        {
-            return new RectInt32(Convert.ToInt32(location.X * scale),
-                                 Convert.ToInt32(location.Y * scale),
-                                 Convert.ToInt32(size.X * scale),
-                                 Convert.ToInt32(size.Y * scale));
-        }
-    }
-
-    private void AddDragRegionEventHandlers(UIElement item)
-    {
-        foreach (UIElement child in LogicalTreeHelper.GetChildren(item))
-        {
-            switch (child)
-            {
-                case Panel: break;
-
-                case TreeView:
-                case ListView:
-                {
-                    if (child.ContextFlyout is not null)
-                    {
-                        child.ContextFlyout.Opened += Flyout_Opened;
-                        child.ContextFlyout.Closed += Flyout_Closed;
-                    }
-                    continue;
-                }
-
-                case Expander expander:
-                {
-                    expander.SizeChanged += Expander_SizeChanged;
-                    continue;
-                }
-
-                case ScrollViewer scrollViewer:
-                {
-                    scrollViewer.ViewChanged += ScrollViewer_ViewChanged;
-                    break;
-                }
-
-                case Button:
-                case TextBlock:
-                case CustomTitleBar:
-                case NavigationViewItem: continue;
-
-                default: break;
-            }
-
-            AddDragRegionEventHandlers(child);
-        }
-
-        void Flyout_Opened(object? sender, object e) => ClearWindowDragRegions();
-        void Flyout_Closed(object? sender, object e) => SetWindowDragRegionsInternal();
-        void Expander_SizeChanged(object sender, SizeChangedEventArgs e) => SetWindowDragRegionsInternal();
-        void ScrollViewer_ViewChanged(object? sender, ScrollViewerViewChangedEventArgs e) => SetWindowDragRegions();
+        rects[index] = Utils.GetPassthroughRect(customTitleBar.WindowIconArea);
     }
 
     private DispatcherTimer InitialiseDragRegionTimer()
@@ -526,22 +421,24 @@ internal sealed partial class MainWindow : Window
     private void DispatcherTimer_Tick(object? sender, object e)
     {
         dispatcherTimer.Stop();
-
-        if (!cancelDragRegionTimerEvent)
-        {
-            SetWindowDragRegionsInternal();
-        }
+        SetWindowDragRegionsInternal();
     }
 
     private void ContentDialogHelper_DialogClosed(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
     {
-        ((OverlappedPresenter)AppWindow.Presenter).IsResizable = true;
+        OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
+        op.IsResizable = true;
+        op.IsMinimizable = true;
+
         SetWindowDragRegionsInternal();
     }
 
     private void ContentDialogHelper_DialogOpened(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
     {
-        ((OverlappedPresenter)AppWindow.Presenter).IsResizable = false;
+        OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
+        op.IsResizable = false;
+        op.IsMinimizable = false;
+
         SetWindowDragRegionsInternal();
     }
 }

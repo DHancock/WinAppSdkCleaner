@@ -1,4 +1,4 @@
-﻿using WinAppSdkCleaner.Utils;
+﻿using WinAppSdkCleaner.Utilites;
 
 namespace WinAppSdkCleaner.Views;
 
@@ -11,7 +11,7 @@ internal sealed partial class ErrorDialog : ContentDialog
 
         Loaded += (s, e) =>
         {
-            User32Sound.PlayExclamation();
+            Utils.PlayExclamation();
             Content = $"{message}{Environment.NewLine}{Environment.NewLine}{details}";
         };
     }
