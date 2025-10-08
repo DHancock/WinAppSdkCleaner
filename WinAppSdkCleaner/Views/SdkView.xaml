@@ -89,8 +89,8 @@
                 </Style>
             </StackPanel.Resources>
 
-            <Button Content="Refresh" Command="{x:Bind SearchCommand}" HorizontalAlignment="Stretch"/>
-            <Button Command="{x:Bind RemoveCommand}" AutomationProperties.Name="Remove">
+            <Button x:Name="RefreshButton" Content="Refresh" Command="{x:Bind SearchCommand}" HorizontalAlignment="Stretch"/>
+            <Button x:Name="RemoveButton" Command="{x:Bind RemoveCommand}" AutomationProperties.Name="Remove">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon x:Name="RemoveIcon" Glyph="&#xE74D;" FontSize="12" Foreground="Green" VerticalAlignment="Center"/>
                     <TextBlock Text=" Remove"/>

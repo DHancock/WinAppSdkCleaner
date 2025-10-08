@@ -53,8 +53,8 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
             {
                 string sdkName = GetSdkName(g.Key);
 
-                IEnumerable <DisplayVersion> data = g.OrderByDescending(v => v, new VersionComparer())
-                    .Select(v => new DisplayVersion(sdkName, $"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
+                // the downloaded sdk file is already sorted
+                IEnumerable<DisplayVersion> data = g.Reverse().Select(v => new DisplayVersion(sdkName, $"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
 
                 groups.Add(new GroupInfo(sdkName, data));
             }

@@ -15,15 +15,6 @@ internal abstract class ItemBase : IComparable<ItemBase>
     public abstract string OtherAppsCountStr { get; }
     public string AutomationName => string.Concat(HeadingText, OtherAppsCountStr);
     public ItemBase? Parent { get; init; }
-
-    public virtual int CompareTo(ItemBase? other)
-    {
-        if (other is null)
-        {
-            return -1;
-        }
-
-        return string.Compare(HeadingText, other.HeadingText, StringComparison.CurrentCulture);
-    }
+    public abstract int CompareTo(ItemBase? other);
 }
 
