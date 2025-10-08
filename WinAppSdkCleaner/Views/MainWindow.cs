@@ -2,8 +2,6 @@
 
 using WinAppSdkCleaner.Utilites;
 
-using WinRT;
-
 namespace WinAppSdkCleaner.Views;
 
 internal enum WindowState { Normal, Minimized, Maximized }

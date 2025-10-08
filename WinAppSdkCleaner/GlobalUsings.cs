@@ -42,7 +42,7 @@ global using Windows.UI.Core;
 global using Windows.UI.Text;
 global using Windows.Win32;
 global using Windows.Win32.Foundation;
-//global using Windows.Win32.UI.Shell;
 global using Windows.Win32.UI.WindowsAndMessaging;
 
+global using WinRT;
 global using WinRT.Interop;
