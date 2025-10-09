@@ -26,7 +26,7 @@ internal sealed partial class Settings
 
             using (FileStream fs = File.Create(GetSettingsFilePath()))
             {
-                JsonSerializer.Serialize(fs, this, typeof(Settings), SettingsJsonContext.Default);
+                JsonSerializer.Serialize(fs, this, SettingsJsonContext.Default.Settings);
             }
         }
         catch (Exception ex)
@@ -43,7 +43,7 @@ internal sealed partial class Settings
         {
             using (FileStream fs = File.OpenRead(path))
             {
-                Settings? settings = (Settings?)JsonSerializer.Deserialize(fs, typeof(Settings), SettingsJsonContext.Default);
+                Settings? settings = JsonSerializer.Deserialize(fs, SettingsJsonContext.Default.Settings);
 
                 if (settings is not null)
                 {
