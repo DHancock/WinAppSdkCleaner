@@ -22,6 +22,11 @@
                 </Setter>
             </Style>
 
+            <Style TargetType="MenuFlyoutItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}">
+                <!-- auto isn't appropriate for vertical lists that may have disabled entries -->
+                <Setter Property="KeyTipPlacementMode" Value="Right"/>
+            </Style>
+            
         </ResourceDictionary>
     </Application.Resources>
 </Application>

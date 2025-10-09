@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-	<Nullable>enable</Nullable>
 	<SelfContained>true</SelfContained>
 	<GeneratedFilePath>$(SolutionDir)WinAppSdkCleaner\versions.dat</GeneratedFilePath>
 	<SourceFilePath>$(SolutionDir)WinAppSdkCleaner\versions.json</SourceFilePath>

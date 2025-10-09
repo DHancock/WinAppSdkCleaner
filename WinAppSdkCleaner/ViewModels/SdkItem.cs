@@ -40,37 +40,13 @@ internal sealed class SdkItem : ItemBase
     public override string OtherAppsCountStr => (OtherAppsCount > 0) ? $"+{OtherAppsCount}" : string.Empty;
     public override string ToolTipText => Version.PackageVersionStr;
     public SdkId SdkIdentifier => sdkData.Sdk.Id;
-
     private VersionRecord Version => sdkData.Version;
-
-    // ignores any children, it's only used to identify this tree node
-    public static bool operator ==(SdkItem? x, SdkItem? y)
-    {
-        if (ReferenceEquals(x, y))
-        {
-            return true;
-        }
-
-        if ((x is null) || (y is null))
-        {
-            return false;
-        }
-
-        return (x.Version.SdkId == y.Version.SdkId) &&
-                x.Version.Release.Equals(y.Version.Release);
-    }
-
-    public static bool operator !=(SdkItem? x, SdkItem? y) => !(x == y);
-    public override int GetHashCode() => Version.GetHashCode();
-    public override bool Equals(object? obj) => this == (obj as SdkItem);
 
     public override int CompareTo(ItemBase? item)
     {
-        if (item is not SdkItem other)
-        {
-            return -1;
-        }
+        Debug.Assert(item is not null);
+        Debug.Assert(item is SdkItem);
 
-        return VersionComparer.Comparer(Version, other.Version);
+        return VersionComparer.Comparer(Version, ((SdkItem)item).Version);
     }
 }

@@ -52,7 +52,7 @@
             SelectionChanged="RootNavigationView_SelectionChanged">
             
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="{x:Bind SdkTabTitle}" Tag="SdkView"/>
+                <NavigationViewItem Content="{x:Bind local:MainWindow.SdkTabTitle}" Tag="SdkView"/>
                 <NavigationViewItem Content="Output" Tag="TraceView"/>
                 <NavigationViewItem Content="Info" Tag="VersionsView"/>
                 <NavigationViewItem Content="About" Tag="AboutView"/>

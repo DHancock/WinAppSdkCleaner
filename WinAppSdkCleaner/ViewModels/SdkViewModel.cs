@@ -4,7 +4,7 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed partial class SdkViewModel : INotifyPropertyChanged
 {
-    private SdkList sdkList = new SdkList();
+    private SdkList? sdkList;
 
     public SdkViewModel()
     {
@@ -12,7 +12,7 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
 
     public SdkList SdkList
     {
-        get { return sdkList; }
+        get { return sdkList ?? new SdkList(); }
 
         set
         {
