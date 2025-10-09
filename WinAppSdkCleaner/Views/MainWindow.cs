@@ -110,10 +110,9 @@ internal sealed partial class MainWindow : Window
         }
     }
 
-    [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvStdcall) })]
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
     private static LRESULT NewSubWindowProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData)
     {
-        const int VK_SPACE = 0x0020;
         const int HTCAPTION = 0x0002;
 
         GCHandle handle = GCHandle.FromIntPtr((nint)dwRefData);
@@ -141,16 +140,14 @@ internal sealed partial class MainWindow : Window
                     break;
                 }
 
-                case PInvoke.WM_SYSCOMMAND when (lParam == VK_SPACE) && (window.AppWindow.Presenter.Kind != AppWindowPresenterKind.FullScreen):
+                case PInvoke.WM_SYSCOMMAND when (lParam == (int)VirtualKey.Space) && (window.AppWindow.Presenter.Kind != AppWindowPresenterKind.FullScreen):
                 {
-                    window.HideSystemMenu();
                     window.ShowSystemMenu(viaKeyboard: true);
                     return (LRESULT)0;
                 }
 
                 case PInvoke.WM_NCRBUTTONUP when wParam == HTCAPTION:
                 {
-                    window.HideSystemMenu();
                     window.ShowSystemMenu(viaKeyboard: false);
                     return (LRESULT)0;
                 }
@@ -211,7 +208,7 @@ internal sealed partial class MainWindow : Window
         }
     }
 
-    [UnmanagedCallersOnly(CallConvs = new Type[] { typeof(CallConvStdcall) })]
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
     private static LRESULT KeyboardHookProc(int code, WPARAM wParam, LPARAM lParam)
     {
         MainWindow window = App.MainWindow;
@@ -282,7 +279,7 @@ internal sealed partial class MainWindow : Window
 
     private bool CanSize(object? param)
     {
-        return (AppWindow.Presenter is OverlappedPresenter op) && op.IsResizable && (op.State != OverlappedPresenterState.Maximized) && !ContentDialogHelper.IsContentDialogOpen;
+        return (AppWindow.Presenter is OverlappedPresenter op) && op.IsResizable && (op.State != OverlappedPresenterState.Maximized);
     }
 
     private bool CanMinimize(object? param)
@@ -366,13 +363,13 @@ internal sealed partial class MainWindow : Window
                 // this also effectively disables the caption buttons
                 inputNonClientPointerSource.SetRegionRects(NonClientRegionKind.Passthrough, [windowRect]);
             }
-            else if ((Content is FrameworkElement layoutRoot) && layoutRoot.IsLoaded && AppWindowTitleBar.IsCustomizationSupported())
+            else
             {
                 // as there is no clear distinction any more between the title bar region and the client area,
                 // just treat the whole window as a title bar, click anywhere on the backdrop to drag the window.
                 inputNonClientPointerSource.SetRegionRects(NonClientRegionKind.Caption, [windowRect]);
 
-                IPageItem page = (IPageItem)((Frame)RootNavigationView.Content).Content;
+                IPageItem page = (IPageItem)ContentFrame.Content;
 
                 int size = page.PassthroughCount + RootNavigationView.MenuItems.Count + 1;
                 RectInt32[] rects = new RectInt32[size];

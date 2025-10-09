@@ -16,7 +16,7 @@ internal sealed partial class VersionsView : Page, IPageItem
         InitializeComponent();
 
         // this view may not have been created when the model notifies that data is available
-        VersionListView.Loaded += (s, e) => UpdateCollectionViewSource();
+        VersionListViewPropertyChanged();
     }
 
     internal VersionsViewModel? ViewModel

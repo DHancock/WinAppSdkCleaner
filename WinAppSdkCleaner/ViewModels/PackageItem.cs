@@ -109,40 +109,15 @@ internal sealed class PackageItem : ItemBase
         return new BitmapImage(new Uri("ms-appx:///Resources/missing.png"));
     }
 
-    // ignores any children, it's only used to identify this tree node
-    public static bool operator ==(PackageItem? x, PackageItem? y)
-    {
-        if (ReferenceEquals(x, y))
-        {
-            return true;
-        }
-
-        if ((x is null) || (y is null))
-        {
-            return false;
-        }
-
-        if (string.Equals(x.Package.Id.FullName, y.Package.Id.FullName, StringComparison.Ordinal))
-        {
-            // this node can occur in multiple places, check parents 
-            return x.Parent!.Equals(y.Parent);
-        }
-
-        return false;
-    }
-    public static bool operator !=(PackageItem? x, PackageItem? y) => !(x == y);
-    public override int GetHashCode() => Package.GetHashCode();
-    public override bool Equals(object? obj) => this == (obj as PackageItem);
-
     public override int CompareTo(ItemBase? item)
     {
         const int cBefore = -1;
         const int cAfter = 1;
 
-        if (item is not PackageItem other)
-        {
-            throw new ArgumentException("incompatible type", nameof(item));
-        }
+        Debug.Assert(item is not null);
+        Debug.Assert(item is PackageItem);
+
+        PackageItem other = (PackageItem)item;
 
         if (IsNonSdkPackage != other.IsNonSdkPackage)
         {

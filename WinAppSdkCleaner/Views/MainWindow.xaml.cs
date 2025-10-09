@@ -25,6 +25,7 @@ internal sealed partial class MainWindow : Window
     {
         AssemblyName assemblyName = typeof(App).Assembly.GetName();
         Trace.WriteLine($"{assemblyName.Name} version: {assemblyName.Version?.ToString(3)}");
+        Trace.WriteLine($"All users: {IntegrityLevel.IsElevated}");
 
         AppWindow.Closing += (s, a) =>
         {
@@ -32,20 +33,13 @@ internal sealed partial class MainWindow : Window
             Settings.Instance.Save();
         };
 
-        if (AppWindowTitleBar.IsCustomizationSupported())
-        {
-            customTitleBar.ParentAppWindow = AppWindow;
-            customTitleBar.UpdateThemeAndTransparency(App.Instance.RequestedTheme == ApplicationTheme.Light ? ElementTheme.Light : ElementTheme.Dark);
-            customTitleBar.Title = title;
-            customTitleBar.WindowIconArea.PointerPressed += WindowIconArea_PointerPressed;
-            Activated += customTitleBar.ParentWindow_Activated;
+        customTitleBar.ParentAppWindow = AppWindow;
+        customTitleBar.UpdateThemeAndTransparency(LayoutRoot.ActualTheme);
+        customTitleBar.Title = title;
+        customTitleBar.WindowIconArea.PointerPressed += WindowIconArea_PointerPressed;
+        Activated += customTitleBar.ParentWindow_Activated;
 
-            AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-        }
-        else
-        {
-            customTitleBar.Visibility = Visibility.Collapsed;
-        }
+        AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
 
         // always set the window icon and title, it's used in the task switcher
         AppWindow.SetIcon("Resources\\app.ico");
@@ -74,7 +68,7 @@ internal sealed partial class MainWindow : Window
         }
     }
 
-    private string SdkTabTitle => IntegrityLevel.IsElevated ? "All Users" : "User Scope";
+    public static string SdkTabTitle => IntegrityLevel.IsElevated ? "All Users" : "User Scope";
 
     private RectInt32 ValidateRestoreBounds(RectInt32 windowArea)
     {
@@ -141,14 +135,14 @@ internal sealed partial class MainWindow : Window
 
         if (page.Tag is null)
         {
-            page.Tag = this;
+            page.Tag = page;
 
             if (page is VersionsView versionsView)
             {
                 // now that the versions view has been created, set it's view model
                 versionsView.ViewModel = versionsViewModel;
             }
-            else if (ContentFrame.Content is SdkView view)
+            else if (page is SdkView view)
             {
                 // The SdkView is the initial page so it and it's view model already exist
                 // Take a reference so that the data can be refreshed on window activations
@@ -156,7 +150,6 @@ internal sealed partial class MainWindow : Window
             }
 
             page.Loaded += Page_Loaded;
-
         }
 
         void Page_Loaded(object sender, RoutedEventArgs e)
@@ -164,8 +157,6 @@ internal sealed partial class MainWindow : Window
             SetWindowDragRegions();
         }
     }
-
-    
 
     private void ContentFrame_SizeChanged(object sender, SizeChangedEventArgs e)
     {
@@ -195,7 +186,6 @@ internal sealed partial class MainWindow : Window
 
     private void WindowIconArea_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        HideSystemMenu();
         ShowSystemMenu(viaKeyboard: true); // open at keyboard location as not to obscure double clicks
 
         TimeSpan doubleClickTime = TimeSpan.FromMilliseconds(PInvoke.GetDoubleClickTime());
