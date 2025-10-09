@@ -16,3 +16,4 @@ RemoveWindowSubclass
 SetWindowsHookEx
 CallNextHookEx
 GetCurrentThreadId
+StrCmpLogical
