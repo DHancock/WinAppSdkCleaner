@@ -54,24 +54,6 @@ internal sealed class VersionComparer : IComparer<VersionRecord>
 
     private static int SemanticComparer(string a, string b)
     {
-        string[] splitA = a.Split('.');
-        string[] splitB = b.Split('.');
-
-        Debug.Assert(splitA.Length == 3);
-        Debug.Assert(splitB.Length == 3);
-
-        int result = Convert.ToInt32(splitA[0]) - Convert.ToInt32(splitB[0]);
-
-        if (result == 0)
-        {
-            result = Convert.ToInt32(splitA[1]) - Convert.ToInt32(splitB[1]);
-
-            if (result == 0)
-            {
-                result = Convert.ToInt32(splitA[2]) - Convert.ToInt32(splitB[2]);
-            }
-        }
-
-        return result;
+        return PInvoke.StrCmpLogical(a, b);
     }
 }
