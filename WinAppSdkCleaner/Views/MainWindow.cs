@@ -150,7 +150,7 @@ internal sealed partial class MainWindow : Window
                     return (LRESULT)0;
                 }
 
-                case PInvoke.WM_NCLBUTTONDOWN when wParam == HTCAPTION:
+                case PInvoke.WM_NCLBUTTONDOWN:
                 {
                     window.HideSystemMenu();
                     break;
