@@ -2,11 +2,6 @@
 
 internal sealed class ContentDialogHelper
 {
-    internal sealed record EventArgs(ContentDialog Dialog);
-
-    public event TypedEventHandler<ContentDialogHelper, EventArgs>? DialogOpened;
-    public event TypedEventHandler<ContentDialogHelper, EventArgs>? DialogClosed;
-
     private readonly MainWindow parentWindow;
     private ContentDialog? currentDialog = null;
 
@@ -49,12 +44,12 @@ internal sealed class ContentDialogHelper
     private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
     {
         currentDialog = null;
-        DialogClosed?.Invoke(this, new EventArgs(sender));
+        parentWindow.ContentDialogClosed();
     }
 
     private void CurrentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
     {
-        DialogOpened?.Invoke(this, new EventArgs(sender));
+        parentWindow.ContentDialogOpened();
     }
 
     public bool IsContentDialogOpen => currentDialog is not null;
