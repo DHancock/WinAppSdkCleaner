@@ -68,8 +68,6 @@ internal sealed partial class MainWindow : Window
         inputNonClientPointerSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
 
         ContentDialogHelper = new ContentDialogHelper(this);
-        ContentDialogHelper.DialogOpened += ContentDialogHelper_DialogOpened;
-        ContentDialogHelper.DialogClosed += ContentDialogHelper_DialogClosed;
 
         dispatcherTimer = InitialiseDragRegionTimer();
 
