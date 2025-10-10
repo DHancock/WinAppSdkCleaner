@@ -15,51 +15,62 @@ internal sealed partial class GroupInfo : List<DisplayVersion>
     }
 
     public string Name { get; }
-
     public override string ToString() => Name;   // the narrator uses this to read the group headers
 }
 
 
 internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 {
-    private bool dataAvailable = false;
+    private readonly CollectionViewSource viewSource = new() { IsSourceGrouped = true };
 
-    public VersionsViewModel()
+    public VersionsViewModel(Microsoft.UI.Dispatching.DispatcherQueue uiDispatcher)
     {
         Model.VersionsLoaded += (s, e) =>
         {
-            Interlocked.Exchange(ref dataAvailable, true);
-            RaisePropertyChanged(nameof(VersionsList));
+            // the model loads the versions on a non ui thread
+            uiDispatcher.TryEnqueue(() =>
+            {
+                if ((viewSource.View is null) || (viewSource.View.Count == 0))
+                {
+                    RaisePropertyChanged(nameof(VersionsView));
+                }
+            });
         };
     }
 
-    public IEnumerable<GroupInfo> VersionsList
+    public ICollectionView VersionsView
     {
         get
         {
-            if (!dataAvailable)
+            if (!Model.VersionListLoaded)  
             {
-                return new List<GroupInfo>();
+                // The page is being loaded before the model has retrived the versions.
+                // A VersionsLoaded event is going to be raised when the model has loaded them. 
+                viewSource.Source = new List<GroupInfo>();
+            }
+            else
+            {
+                IEnumerable<IGrouping<SdkId, VersionRecord>> query = from version in Model.VersionsList
+                                                                     group version by version.SdkId into g
+                                                                     orderby g.Key descending
+                                                                     select g;
+
+                List<GroupInfo> groups = new();
+
+                foreach (IGrouping<SdkId, VersionRecord> g in query)
+                {
+                    string sdkName = GetSdkName(g.Key);
+
+                    // the downloaded sdk file is already sorted
+                    IEnumerable<DisplayVersion> data = g.Reverse().Select(v => new DisplayVersion(sdkName, $"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
+
+                    groups.Add(new GroupInfo(sdkName, data));
+                }
+
+                viewSource.Source = groups;
             }
 
-            IEnumerable<IGrouping<SdkId, VersionRecord>> query = from version in Model.VersionsList
-                                                                         group version by version.SdkId into g
-                                                                         orderby g.Key descending
-                                                                         select g;
-
-            List<GroupInfo> groups = new();
-
-            foreach (IGrouping<SdkId, VersionRecord> g in query)
-            {
-                string sdkName = GetSdkName(g.Key);
-
-                // the downloaded sdk file is already sorted
-                IEnumerable<DisplayVersion> data = g.Reverse().Select(v => new DisplayVersion(sdkName, $"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
-
-                groups.Add(new GroupInfo(sdkName, data));
-            }
-
-            return groups;
+            return viewSource.View;
         }
     }
 

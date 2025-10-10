@@ -11,10 +11,6 @@ internal sealed partial class MainWindow : Window
     private DateTime lastPointerTimeStamp;
     private SdkView? sdkViewPage;
 
-    // The versions view model has to exist before it's view to track changes in the model
-    // The versions view won't be created until it's navigated too for the first time
-    private readonly VersionsViewModel versionsViewModel = new();
-
     private readonly FrameNavigationOptions frameNavigationOptions = new FrameNavigationOptions()
     {
         TransitionInfoOverride = new SuppressNavigationTransitionInfo(),
@@ -137,15 +133,9 @@ internal sealed partial class MainWindow : Window
         {
             page.Tag = page;
 
-            if (page is VersionsView versionsView)
+            if (page is SdkView view)
             {
-                // now that the versions view has been created, set it's view model
-                versionsView.ViewModel = versionsViewModel;
-            }
-            else if (page is SdkView view)
-            {
-                // The SdkView is the initial page so it and it's view model already exist
-                // Take a reference so that the data can be refreshed on window activations
+                // to refresh data on window activations
                 sdkViewPage = view;
             }
 

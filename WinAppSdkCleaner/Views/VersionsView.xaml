@@ -47,7 +47,7 @@
             </Style>
         </Grid.Resources> 
 
-        <ListView x:Name="VersionListView" Style="{StaticResource ListViewStyle}">
+        <ListView x:Name="VersionListView" Style="{StaticResource ListViewStyle}" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}">
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderTemplate>
