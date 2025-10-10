@@ -15,9 +15,6 @@ internal sealed partial class AboutView : Page, IPageItem
 
         NameTextBlock.Text = assemblyName.Name;
         VersionTextBlock.Text = assemblyName.Version?.ToString(3);
-
-        // Use the Tag to identify that this text block contains a hyperlink
-        HyperlinkTextBlock.Tag = HyperlinkTextBlock;
     }
 
     public int PassthroughCount => 1;
