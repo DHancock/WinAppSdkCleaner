@@ -7,6 +7,7 @@ internal static class Model
     private static readonly Dictionary<int, VersionRecord> sVersionsLookUp = new();
 
     public static event EventHandler? VersionsLoaded;
+    public static bool VersionListLoaded = false;
 
     private static void OnVersionsLoaded(EventArgs e)
     {
@@ -349,7 +350,7 @@ internal static class Model
         Trace.WriteLine($"{nameof(RemovePackagesAsync)}, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
-    enum Location { FileSystem, OnLine, Resource };
+    private enum Location { FileSystem, OnLine, Resource };
 
     private static async Task GetVersionsListAsync()
     {
@@ -372,7 +373,7 @@ internal static class Model
                     case Location.FileSystem: versions = await ReadFromFileSystemAsync(); break;
 #endif
                     case Location.OnLine: versions = await ReadFromOnLineAsync(); break;
-                    case Location.Resource: versions = ReadFromResources(); break;
+                    case Location.Resource: versions = await ReadFromResourcesAsync(); break;
                 }
 
                 if (versions is not null)
@@ -401,6 +402,10 @@ internal static class Model
 
         if (sVersionsLookUp.Count > 0)
         {
+            // used by the versions view model 
+            Interlocked.Exchange(ref VersionListLoaded, true);
+
+            // used in a similar fashion to an INotifyProtpertyChanged event
             OnVersionsLoaded(new EventArgs());
         }
     }
@@ -415,9 +420,9 @@ internal static class Model
 
                 using (Stream s = await httpClient.GetStreamAsync(path))
                 {
-                    using (DeflateStream stream = new DeflateStream(s, CompressionMode.Decompress))
+                    using (DeflateStream ds = new DeflateStream(s, CompressionMode.Decompress))
                     {
-                        return JsonSerializer.Deserialize(stream, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
+                        return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
                 }
             }
@@ -430,7 +435,7 @@ internal static class Model
         return null;
     }
 
-    private static List<VersionRecord>? ReadFromResources()
+    private static async Task<List<VersionRecord>?> ReadFromResourcesAsync()
     {
         try
         {
@@ -440,7 +445,7 @@ internal static class Model
                 {
                     using (DeflateStream ds = new DeflateStream(rs, CompressionMode.Decompress))
                     {
-                        return JsonSerializer.Deserialize(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
+                        return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
                 }
             }
@@ -465,7 +470,7 @@ internal static class Model
                 {
                     using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
                     {
-                        return JsonSerializer.Deserialize(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
+                        return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
                 }
             }

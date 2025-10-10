@@ -8,67 +8,16 @@ namespace WinAppSdkCleaner.Views;
 /// </summary>
 internal sealed partial class VersionsView : Page, IPageItem
 {
-    private VersionsViewModel? viewModel;
-    private readonly CollectionViewSource viewSource = new() { IsSourceGrouped = true };
+    private readonly VersionsViewModel viewModel;
 
     public VersionsView()
     {
         InitializeComponent();
 
-        // this view may not have been created when the model notifies that data is available
-        VersionListViewPropertyChanged();
+        viewModel = new VersionsViewModel(this.DispatcherQueue);
     }
 
-    internal VersionsViewModel? ViewModel
-    {
-        get => viewModel;
-
-        set
-        {
-            Debug.Assert(viewModel is null);
-            Debug.Assert(value is not null); 
-            
-            viewModel = value;
-            viewModel.PropertyChanged += ViewModel_PropertyChanged;
-        }
-    }
-
-
-    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(VersionsViewModel.VersionsList))
-        {
-            // the model loads data on a non ui thread
-            DispatcherQueue.TryEnqueue(VersionListViewPropertyChanged);
-        }
-    }
-
-    private void VersionListViewPropertyChanged()
-    {
-        if (VersionListView.IsLoaded)
-        {
-            UpdateCollectionViewSource();
-        }
-        else
-        {
-            VersionListView.Loaded += VersionListView_Loaded;
-        }
-
-        void VersionListView_Loaded(object sender, RoutedEventArgs e)
-        {
-            VersionListView.Loaded -= VersionListView_Loaded;
-            UpdateCollectionViewSource();
-        }
-    }
-
-    private void UpdateCollectionViewSource()
-    {
-        if (VersionListView.Items.Count == 0)
-        {
-            viewSource.Source = viewModel?.VersionsList;
-            VersionListView.ItemsSource = viewSource.View;
-        }
-    }
+    internal VersionsViewModel ViewModel => viewModel;
 
     private void ExecuteCopy(IList<object> selectedItems)
     {

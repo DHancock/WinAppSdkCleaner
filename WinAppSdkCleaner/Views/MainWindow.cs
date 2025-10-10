@@ -68,8 +68,6 @@ internal sealed partial class MainWindow : Window
         inputNonClientPointerSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
 
         ContentDialogHelper = new ContentDialogHelper(this);
-        ContentDialogHelper.DialogOpened += ContentDialogHelper_DialogOpened;
-        ContentDialogHelper.DialogClosed += ContentDialogHelper_DialogClosed;
 
         dispatcherTimer = InitialiseDragRegionTimer();
 
@@ -419,7 +417,7 @@ internal sealed partial class MainWindow : Window
         SetWindowDragRegionsInternal();
     }
 
-    private void ContentDialogHelper_DialogClosed(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
+    public void ContentDialogClosed()
     {
         OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
         op.IsResizable = true;
@@ -428,7 +426,7 @@ internal sealed partial class MainWindow : Window
         SetWindowDragRegionsInternal();
     }
 
-    private void ContentDialogHelper_DialogOpened(ContentDialogHelper sender, ContentDialogHelper.EventArgs args)
+    public void ContentDialogOpened()
     {
         OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
         op.IsResizable = false;
