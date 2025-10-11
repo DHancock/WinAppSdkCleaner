@@ -159,7 +159,7 @@ internal sealed partial class MainWindow : Window
                 case PInvoke.WM_ENDSESSION:
                 {
                     window.SaveSettings();
-                    break;
+                    return (LRESULT)0;
                 }
             }
         }
