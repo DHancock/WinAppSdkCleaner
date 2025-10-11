@@ -17,3 +17,4 @@ SetWindowsHookEx
 CallNextHookEx
 GetCurrentThreadId
 StrCmpLogical
+WM_ENDSESSION

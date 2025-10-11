@@ -25,8 +25,7 @@ internal sealed partial class MainWindow : Window
 
         AppWindow.Closing += (s, a) =>
         {
-            Settings.Instance.RestoreBounds = RestoreBounds;
-            Settings.Instance.Save();
+            SaveSettings();
         };
 
         customTitleBar.ParentAppWindow = AppWindow;
@@ -198,6 +197,12 @@ internal sealed partial class MainWindow : Window
             PostCloseMessage();
             e.Handled = true;
         }
+    }
+
+    private void SaveSettings()
+    {
+        Settings.Instance.RestoreBounds = RestoreBounds;
+        Settings.Instance.Save();
     }
 }
 

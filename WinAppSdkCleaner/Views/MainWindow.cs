@@ -155,6 +155,12 @@ internal sealed partial class MainWindow : Window
                     window.HideSystemMenu();
                     break;
                 }
+
+                case PInvoke.WM_ENDSESSION:
+                {
+                    window.SaveSettings();
+                    break;
+                }
             }
         }
 
