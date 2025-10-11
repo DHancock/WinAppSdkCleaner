@@ -155,6 +155,12 @@ internal sealed partial class MainWindow : Window
                     window.HideSystemMenu();
                     break;
                 }
+
+                case PInvoke.WM_ENDSESSION:
+                {
+                    window.SaveSettings();
+                    break;
+                }
             }
         }
 
@@ -216,7 +222,7 @@ internal sealed partial class MainWindow : Window
         if (code >= 0)
         {
             VirtualKey key = (VirtualKey)(nuint)wParam;
-            bool isKeyDown = (lParam >>> 31) == 0;
+            bool isKeyDown = (lParam & 0x80000000) == 0;
 
             if (isKeyDown)
             {
