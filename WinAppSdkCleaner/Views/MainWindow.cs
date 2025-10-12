@@ -75,8 +75,8 @@ internal sealed partial class MainWindow : Window
         Trace.Listeners.Add(traceListener);
 
         scaleFactor = IntialiseScaleFactor();
-        scaledMinWidth = ConvertToDeviceSize(cMinWidth);
-        scaledMinHeight = ConvertToDeviceSize(cMinHeight);
+        scaledMinWidth = Scale(cMinWidth);
+        scaledMinHeight = Scale(cMinHeight);
 
         restoreCommand = new RelayCommand(o => PostSysCommandMessage(SC.RESTORE), CanRestore);
         moveCommand = new RelayCommand(o => PostSysCommandMessage(SC.MOVE), CanMove);
@@ -133,8 +133,8 @@ internal sealed partial class MainWindow : Window
                 case PInvoke.WM_DPICHANGED:
                 {
                     window.scaleFactor = (wParam & 0xFFFF) / 96.0;
-                    window.scaledMinWidth = window.ConvertToDeviceSize(cMinWidth);
-                    window.scaledMinHeight = window.ConvertToDeviceSize(cMinHeight);
+                    window.scaledMinWidth = window.Scale(cMinWidth);
+                    window.scaledMinHeight = window.Scale(cMinHeight);
                     break;
                 }
 
@@ -348,7 +348,7 @@ internal sealed partial class MainWindow : Window
         get => new RectInt32(restorePosition.X, restorePosition.Y, restoreSize.Width, restoreSize.Height);
     }
 
-    private int ConvertToDeviceSize(double value) => Convert.ToInt32(value * scaleFactor);
+    private int Scale(double value) => (int)Math.FusedMultiplyAdd(value, scaleFactor, 0.5);
 
     private double IntialiseScaleFactor()
     {
