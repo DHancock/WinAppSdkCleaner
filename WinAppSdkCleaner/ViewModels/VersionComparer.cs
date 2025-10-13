@@ -16,17 +16,42 @@ internal sealed class VersionComparer : IComparer<VersionRecord>
     {
         int result = a.SdkId - b.SdkId;
 
-        if (result != 0)
+        if (result == 0)
         {
-            return result;
+            if (string.IsNullOrEmpty(a.SemanticVersion) || string.IsNullOrEmpty(b.SemanticVersion))
+            {
+                // one or both don't appear in the versions file
+                result = PackageVersionComparer(a.Release, b.Release);
+            }
+            else
+            {
+                result = SemanticComparer(a.SemanticVersion, b.SemanticVersion);
+
+                if (result == 0)
+                {
+                    bool aTagIsEmpty = string.IsNullOrEmpty(a.VersionTag);
+                    bool bTagIsEmpty = string.IsNullOrEmpty(b.VersionTag);
+
+                    if (aTagIsEmpty) // a is stable release
+                    {
+                        if (!bTagIsEmpty) // b is either experimental or preview release
+                        {
+                            result = 1;
+                        }
+                    }
+                    else if (bTagIsEmpty)
+                    {
+                        result = -1;
+                    }
+                    else
+                    {
+                        result = SemanticComparer(a.VersionTag, b.VersionTag);
+                    }
+                }
+            }
         }
 
-        if (string.IsNullOrEmpty(a.SemanticVersion) || string.IsNullOrEmpty(b.SemanticVersion) || a.SemanticVersion.Equals(b.SemanticVersion))
-        {
-            return PackageVersionComparer(a.Release, b.Release);
-        }
-
-        return SemanticComparer(a.SemanticVersion, b.SemanticVersion);
+        return result;
     }
 
 
