@@ -47,15 +47,25 @@ Name: desktopicon; Description: "{cm:CreateDesktopIcon}"
 [Run]
 Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent
 
+[InstallDelete]
+Type: files; Name: "{app}\*"
+
 [Code]
 
-// because "DisableReadyPage" and "DisableProgramGroupPage" are set to yes adjust the next/install button text
 procedure CurPageChanged(CurPageID: Integer);
 begin
+
+  // because "DisableReadyPage" and "DisableProgramGroupPage" are set to yes adjust the next/install button text
   if CurPageID = wpSelectTasks then
     WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall)
   else
     WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
+    
+  // if the app is already running don't allow the user to proceed without inno setup shutting it down
+  if CurPageID = wpPreparing then
+  begin
+    WizardForm.PreparingNoRadio.Enabled := false;
+  end;
 end;
 
 // A < B returns -ve
@@ -108,7 +118,7 @@ begin
   end;
 end;
 
-procedure UninatallAnyPreviousVersion();
+procedure UninstallAnyPreviousVersion();
 var
   ResultCode, Attempts: Integer;
   UninstallerPath: String; 
@@ -141,7 +151,7 @@ begin
   if (CurStep = ssInstall) then
   begin
     // when upgrading the remnants of an old install may cause the new version to fail to start. 
-    UninatallAnyPreviousVersion();
+    UninstallAnyPreviousVersion;
   end;
 end;
 
