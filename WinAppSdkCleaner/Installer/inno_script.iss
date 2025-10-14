@@ -21,7 +21,6 @@ SolidCompression=yes
 OutputBaseFilename={#appName}_v{#appVer}
 InfoBeforeFile="{#SourcePath}\unlicense.txt"
 PrivilegesRequired=lowest
-WizardStyle=classic
 WizardSizePercent=110,110
 DirExistsWarning=yes
 DisableWelcomePage=yes
@@ -49,6 +48,15 @@ Name: desktopicon; Description: "{cm:CreateDesktopIcon}"
 Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
+
+// because "DisableReadyPage" and "DisableProgramGroupPage" are set to yes adjust the next/install button text
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = wpSelectTasks then
+    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall)
+  else
+    WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
+end;
 
 // A < B returns -ve
 // A = B returns 0
@@ -99,3 +107,41 @@ begin
     Result := false;
   end;
 end;
+
+procedure UninatallAnyPreviousVersion();
+var
+  ResultCode, Attempts: Integer;
+  UninstallerPath: String; 
+begin    
+  if RegQueryStringValue(HKCU, GetUninstallRegKey, 'UninstallString', UninstallerPath) then
+  begin
+    Exec(RemoveQuotes(UninstallerPath), '/VERYSILENT', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    
+    if ResultCode = 0 then // wait until the uninstall has completed
+    begin
+      Attempts := 2 * 30 ; // timeout after approximately 30 seconds
+       
+      while FileExists(UninstallerPath) and (Attempts > 0) do
+      Begin
+        Sleep(500);
+        Attempts := Attempts - 1;
+      end;
+    end;
+  
+    if (ResultCode <> 0) or FileExists(UninstallerPath) then
+    begin
+      SuppressibleMsgBox('Setup failed to uninstall a previous version.', mbCriticalError, MB_OK, IDOK) ;
+      Abort;
+    end;
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if (CurStep = ssInstall) then
+  begin
+    // when upgrading the remnants of an old install will cause the new version to fail to start. 
+    UninatallAnyPreviousVersion();
+  end;
+end;
+
