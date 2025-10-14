@@ -22,10 +22,10 @@ OutputBaseFilename={#appName}_v{#appVer}
 InfoBeforeFile="{#SourcePath}\unlicense.txt"
 PrivilegesRequired=lowest
 WizardSizePercent=110,110
-DirExistsWarning=yes
 DisableWelcomePage=yes
 DisableProgramGroupPage=yes
 DisableReadyPage=yes
+DisableDirPage=yes
 MinVersion=10.0.17763
 AppPublisher=David
 AppUpdatesURL=https://github.com/DHancock/WinAppSdkCleaner/releases
@@ -140,7 +140,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if (CurStep = ssInstall) then
   begin
-    // when upgrading the remnants of an old install will cause the new version to fail to start. 
+    // when upgrading the remnants of an old install may cause the new version to fail to start. 
     UninatallAnyPreviousVersion();
   end;
 end;
