@@ -12,7 +12,6 @@ AppId={#appId}
 AppName={#appName}
 AppVersion={#appVer}
 AppVerName={cm:NameAndVersion,{#appName},{#appVer}}
-AppMutex=Global\4ACA5302-CE42-4882-AA6E-FC54667A934B
 DefaultDirName={autopf}\{#appName}
 DefaultGroupName={#appName}
 OutputDir={#SourcePath}\bin
@@ -74,7 +73,7 @@ begin
   else
     WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
     
-  // if the app is already running don't allow the user to avoid inno shutting it down
+  // if the app is already running don't allow the user to cancel inno setup shutting it down
   if CurPageID = wpPreparing then
   begin
     WizardForm.PreparingNoRadio.Enabled := false;
