@@ -7,7 +7,7 @@ public sealed partial class App : Application
     public const string cAppDisplayName = "WinAppSdk Cleaner";
     public static App Instance => (App)Current;
 
-
+    private readonly Mutex mutex;
     private MainWindow? m_window;
 
     /// <summary>
@@ -16,6 +16,7 @@ public sealed partial class App : Application
     /// </summary>
     public App()
     {
+        mutex = new Mutex(false, @"Global\4ACA5302-CE42-4882-AA6E-FC54667A934B");
         InitializeComponent();
     }
 
