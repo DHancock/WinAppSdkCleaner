@@ -1,6 +1,6 @@
 ; This script assumes that all release configurations have been published
 ; and that the WinAppSdk and .Net framework are self contained.
-; Inno 6.2.2
+; Inno 6.5.4
 
 #define appName "WinAppSdkCleaner"
 #define appExeName appName + ".exe"
@@ -16,26 +16,24 @@ DefaultDirName={autopf}\{#appName}
 DefaultGroupName={#appName}
 OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
-Compression=lzma2/ultra64 
+Compression=lzma2 
 SolidCompression=yes
 OutputBaseFilename={#appName}_v{#appVer}
 InfoBeforeFile="{#SourcePath}\unlicense.txt"
 PrivilegesRequired=lowest
-WizardSizePercent=110,110
-DisableWelcomePage=yes
+WizardStyle=modern
 DisableProgramGroupPage=yes
 DisableReadyPage=yes
 DisableDirPage=yes
 MinVersion=10.0.17763
 AppPublisher=David
 AppUpdatesURL=https://github.com/DHancock/WinAppSdkCleaner/releases
-ArchitecturesInstallIn64BitMode=x64 arm64
-ArchitecturesAllowed=x86 x64 arm64
+ArchitecturesInstallIn64BitMode=x64compatible or arm64
 
 [Files]
-Source: "..\bin\Release\win-x64\publish\*"; DestDir: "{app}"; Check: IsX64; Flags: recursesubdirs;
-Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: IsARM64; Flags: recursesubdirs solidbreak;
-Source: "..\bin\Release\win-x86\publish\*"; DestDir: "{app}"; Check: IsX86; Flags: recursesubdirs solidbreak;
+Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: PreferArm64Files; Flags: recursesubdirs;
+Source: "..\bin\Release\win-x64\publish\*"; DestDir: "{app}"; Check: PreferX64Files; Flags: recursesubdirs solidbreak;
+Source: "..\bin\Release\win-x86\publish\*"; DestDir: "{app}"; Check: PreferX86Files; Flags: recursesubdirs solidbreak;
 
 [Icons]
 Name: "{group}\{#appName}"; Filename: "{app}\{#appExeName}"
@@ -48,9 +46,23 @@ Name: desktopicon; Description: "{cm:CreateDesktopIcon}"
 Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent
 
 [InstallDelete]
-Type: files; Name: "{app}\*"
+Type: filesandordirs; Name: "{app}\*"
 
 [Code]
+function PreferArm64Files: Boolean;
+begin
+  Result := IsArm64;
+end;
+
+function PreferX64Files: Boolean;
+begin
+  Result := not PreferArm64Files and IsX64Compatible;
+end;
+
+function PreferX86Files: Boolean;
+begin
+  Result := not PreferArm64Files and not PreferX64Files;
+end;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin
@@ -61,7 +73,7 @@ begin
   else
     WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
     
-  // if the app is already running don't allow the user to proceed without inno setup shutting it down
+  // if the app is already running don't allow the user to cancel inno setup shutting it down
   if CurPageID = wpPreparing then
   begin
     WizardForm.PreparingNoRadio.Enabled := false;
@@ -121,7 +133,7 @@ end;
 procedure UninstallAnyPreviousVersion();
 var
   ResultCode, Attempts: Integer;
-  UninstallerPath: String; 
+  UninstallerPath: String;
 begin    
   if RegQueryStringValue(HKCU, GetUninstallRegKey, 'UninstallString', UninstallerPath) then
   begin
@@ -136,12 +148,12 @@ begin
         Sleep(500);
         Attempts := Attempts - 1;
       end;
-    end;
-  
-    if (ResultCode <> 0) or FileExists(UninstallerPath) then
-    begin
-      SuppressibleMsgBox('Setup failed to uninstall a previous version.', mbCriticalError, MB_OK, IDOK) ;
-      Abort;
+      
+      if FileExists(UninstallerPath) then
+      begin
+        SuppressibleMsgBox('Setup failed to uninstall a previous version.', mbCriticalError, MB_OK, IDOK) ;
+        Abort;
+      end;
     end;
   end;
 end;
@@ -150,7 +162,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if (CurStep = ssInstall) then
   begin
-    // when upgrading the remnants of an old install may cause the new version to fail to start. 
+    // when upgrading any remnants of an old install may cause the new version to fail to start. 
     UninstallAnyPreviousVersion;
   end;
 end;
