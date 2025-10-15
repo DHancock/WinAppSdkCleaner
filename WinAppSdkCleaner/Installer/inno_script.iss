@@ -32,8 +32,8 @@ ArchitecturesInstallIn64BitMode=x64compatible or arm64
 
 [Files]
 Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: PreferArm64Files; Flags: recursesubdirs;
-Source: "..\bin\Release\win-x64\publish\*"; DestDir: "{app}"; Check: PreferX64Files; Flags: recursesubdirs solidbreak;
-Source: "..\bin\Release\win-x86\publish\*"; DestDir: "{app}"; Check: PreferX86Files; Flags: recursesubdirs solidbreak;
+Source: "..\bin\Release\win-x64\publish\*";   DestDir: "{app}"; Check: PreferX64Files;   Flags: recursesubdirs solidbreak;
+Source: "..\bin\Release\win-x86\publish\*";   DestDir: "{app}"; Check: PreferX86Files;   Flags: recursesubdirs solidbreak;
 
 [Icons]
 Name: "{group}\{#appName}"; Filename: "{app}\{#appExeName}"
@@ -73,7 +73,7 @@ begin
   else
     WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
     
-  // if the app is already running don't allow the user to cancel inno setup shutting it down
+  // if the app is currently running don't allow the user to avoid inno setup shutting it down
   if CurPageID = wpPreparing then
   begin
     WizardForm.PreparingNoRadio.Enabled := false;
@@ -160,7 +160,7 @@ end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if (CurStep = ssInstall) then
+  if CurStep = ssInstall then
   begin
     // when upgrading any remnants of an old install may cause the new version to fail to start. 
     UninstallAnyPreviousVersion;
