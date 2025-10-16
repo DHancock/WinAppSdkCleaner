@@ -7,6 +7,7 @@
 #define appVer RemoveFileExt(GetVersionNumbersString("..\bin\Release\win-x64\publish\" + appExeName));
 #define appId "winappsdkcleaner.47345980516833259"
 #define appMutexName "4ACA5302-CE42-4882-AA6E-FC54667A934B"
+#define setupMutexName "47DBB18F-2BDF-4A04-AE5E-92342D63623A"
 
 [Setup]
 AppId={#appId}
@@ -18,7 +19,7 @@ DefaultGroupName={#appName}
 OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
 AppMutex={#appMutexName}
-SetupMutex={#appId},Global\{#appId}
+SetupMutex={#setupMutexName},Global\{#setupMutexName}
 Compression=lzma2 
 SolidCompression=yes
 OutputBaseFilename={#appName}_v{#appVer}
