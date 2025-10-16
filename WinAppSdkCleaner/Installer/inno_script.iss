@@ -6,6 +6,7 @@
 #define appExeName appName + ".exe"
 #define appVer RemoveFileExt(GetVersionNumbersString("..\bin\Release\win-x64\publish\" + appExeName));
 #define appId "winappsdkcleaner.47345980516833259"
+#define appMutexName "4ACA5302-CE42-4882-AA6E-FC54667A934B"
 
 [Setup]
 AppId={#appId}
@@ -16,6 +17,8 @@ DefaultDirName={autopf}\{#appName}
 DefaultGroupName={#appName}
 OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
+AppMutex={#appMutexName}
+SetupMutex={#appId},Global\{#appId}
 Compression=lzma2 
 SolidCompression=yes
 OutputBaseFilename={#appName}_v{#appVer}
@@ -149,11 +152,10 @@ begin
         Attempts := Attempts - 1;
       end;
       
-      if FileExists(UninstallerPath) then
-      begin
-        SuppressibleMsgBox('Setup failed to uninstall a previous version.', mbCriticalError, MB_OK, IDOK) ;
-        Abort;
-      end;
+      // If the file still exists then the uninstall failed. 
+      // There isn't much that can be done, informing the user or aborting 
+      // won't acheive much and could render it imposible to install this new version.
+      // Installing the new version will over write the registry and add a new uninstaller exe.
     end;
   end;
 end;
