@@ -104,12 +104,16 @@ end;
 
 function IsDowngradeInstall: Boolean;
 var
-  InstalledVersion: String;
+  InstalledVersion, UninstallerPath: String;
 begin
   Result := false;
   
-  if RegQueryStringValue(HKCU, GetUninstallRegKey, 'DisplayVersion', InstalledVersion) then
-    Result := VersionComparer(InstalledVersion, '{#appVer}') > 0;
+  if RegQueryStringValue(HKCU, GetUninstallRegKey, 'DisplayVersion', InstalledVersion) and 
+     RegQueryStringValue(HKCU, GetUninstallRegKey, 'UninstallString', UninstallerPath) then
+  begin   
+    // check both the app version and that it's possible to uninstall it 
+    Result := (VersionComparer(InstalledVersion, '{#appVer}') > 0) and FileExists(RemoveQuotes(UninstallerPath));
+  end;
 end;
 
 function NewLine: String;
@@ -156,7 +160,7 @@ begin
       // If the file still exists then the uninstall failed. 
       // There isn't much that can be done, informing the user or aborting 
       // won't acheive much and could render it imposible to install this new version.
-      // Installing the new version will over write the registry and add a new uninstaller exe.
+      // Installing the new version will over write the registry and add a new uninstaller exe etc.
     end;
   end;
 end;
@@ -165,7 +169,10 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssInstall then
   begin
-    // when upgrading any remnants of an old install may cause the new version to fail to start. 
+    // When upgrading the old version has to be uninstalled first.
+    // This is due to different builds of WinRT.Runtime.dll that have the same version number.
+    // As such inno won't replace it on upgrade, and the upgraded app will then trap on start up.
+    // There may be others, but one is too many.
     UninstallAnyPreviousVersion;
   end;
 end;
