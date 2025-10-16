@@ -149,11 +149,10 @@ begin
         Attempts := Attempts - 1;
       end;
       
-      if FileExists(UninstallerPath) then
-      begin
-        SuppressibleMsgBox('Setup failed to uninstall a previous version.', mbCriticalError, MB_OK, IDOK) ;
-        Abort;
-      end;
+      // If the file still exists then the uninstall failed. 
+      // There isn't much that can be done, informing the user or aborting 
+      // won't acheive much and could render it imposible to install this new version.
+      // Installing the new version will over write the registry and add a new uninstaller exe.
     end;
   end;
 end;
