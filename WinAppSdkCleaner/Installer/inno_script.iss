@@ -23,28 +23,23 @@ SetupMutex={#setupMutexName},Global\{#setupMutexName}
 Compression=lzma2 
 SolidCompression=yes
 OutputBaseFilename={#appName}_v{#appVer}
-InfoBeforeFile="{#SourcePath}\unlicense.txt"
 PrivilegesRequired=lowest
 WizardStyle=modern
 DisableProgramGroupPage=yes
-DisableReadyPage=yes
 DisableDirPage=yes
+DisableFinishedPage=yes
 MinVersion=10.0.17763
 AppPublisher=David
 AppUpdatesURL=https://github.com/DHancock/WinAppSdkCleaner/releases
 ArchitecturesInstallIn64BitMode=x64compatible or arm64
 
 [Files]
-Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: PreferArm64Files; Flags: recursesubdirs;
-Source: "..\bin\Release\win-x64\publish\*";   DestDir: "{app}"; Check: PreferX64Files;   Flags: recursesubdirs solidbreak;
-Source: "..\bin\Release\win-x86\publish\*";   DestDir: "{app}"; Check: PreferX86Files;   Flags: recursesubdirs solidbreak;
+Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: PreferArm64Files; Flags: ignoreversion recursesubdirs;
+Source: "..\bin\Release\win-x64\publish\*";   DestDir: "{app}"; Check: PreferX64Files;   Flags: ignoreversion recursesubdirs solidbreak;
+Source: "..\bin\Release\win-x86\publish\*";   DestDir: "{app}"; Check: PreferX86Files;   Flags: ignoreversion recursesubdirs solidbreak;
 
 [Icons]
-Name: "{group}\{#appName}"; Filename: "{app}\{#appExeName}"
-Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appExeName}"; Tasks: desktopicon
-
-[Tasks]
-Name: desktopicon; Description: "{cm:CreateDesktopIcon}"
+Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appExeName}"
 
 [Run]
 Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent
@@ -70,14 +65,7 @@ end;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin
-
-  // because "DisableReadyPage" and "DisableProgramGroupPage" are set to yes adjust the next/install button text
-  if CurPageID = wpSelectTasks then
-    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall)
-  else
-    WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
-    
-  // if the app is currently running don't allow the user to avoid inno setup shutting it down
+  // if an old version of the app is running ensure inno setup shuts it down
   if CurPageID = wpPreparing then
   begin
     WizardForm.PreparingNoRadio.Enabled := false;
@@ -169,10 +157,8 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssInstall then
   begin
-    // When upgrading the old version has to be uninstalled first.
-    // This is due to different builds of WinRT.Runtime.dll that have the same version number.
-    // As such inno won't replace it on upgrade, and the upgraded app will then trap on start up.
-    // There may be others, but one is too many.
+    // When upgrading uninstall first or the app may trap on start up.
+    // While some dll versions aren't incremented that isn't the only problem 
     UninstallAnyPreviousVersion;
   end;
 end;
