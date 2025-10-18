@@ -18,3 +18,4 @@ CallNextHookEx
 GetCurrentThreadId
 StrCmpLogical
 WM_ENDSESSION
+CreateMutex
