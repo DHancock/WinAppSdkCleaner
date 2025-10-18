@@ -20,7 +20,7 @@ OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
 AppMutex={#appMutexName},Global\{#appMutexName}
 SetupMutex={#setupMutexName},Global\{#setupMutexName}
-Compression=lzma2 
+Compression=lzma2/ultra64 
 SolidCompression=yes
 OutputBaseFilename={#appName}_v{#appVer}
 PrivilegesRequired=lowest
@@ -30,7 +30,6 @@ DisableDirPage=yes
 DisableFinishedPage=yes
 MinVersion=10.0.17763
 AppPublisher=David
-AppUpdatesURL=https://github.com/DHancock/WinAppSdkCleaner/releases
 ArchitecturesInstallIn64BitMode=x64compatible or arm64
 
 [Files]
