@@ -18,7 +18,7 @@ DefaultDirName={autopf}\{#appName}
 DefaultGroupName={#appName}
 OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
-AppMutex={#appMutexName}
+AppMutex={#appMutexName},Global\{#appMutexName}
 SetupMutex={#setupMutexName},Global\{#setupMutexName}
 Compression=lzma2 
 SolidCompression=yes
@@ -99,7 +99,7 @@ begin
   if RegQueryStringValue(HKCU, GetUninstallRegKey, 'DisplayVersion', InstalledVersion) and 
      RegQueryStringValue(HKCU, GetUninstallRegKey, 'UninstallString', UninstallerPath) then
   begin   
-    // check both the app version and that it's possible to uninstall it 
+    // check both the app version and that it (may be) possible to uninstall it 
     Result := (VersionComparer(InstalledVersion, '{#appVer}') > 0) and FileExists(RemoveQuotes(UninstallerPath));
   end;
 end;
@@ -126,7 +126,7 @@ begin
   end;
 end;
 
-procedure UninstallAnyPreviousVersion();
+procedure UninstallAnyPreviousVersion;
 var
   ResultCode, Attempts: Integer;
   UninstallerPath: String;
