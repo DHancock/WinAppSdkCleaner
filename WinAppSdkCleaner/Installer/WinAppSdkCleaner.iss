@@ -20,14 +20,13 @@ OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
 AppMutex={#appMutexName},Global\{#appMutexName}
 SetupMutex={#setupMutexName},Global\{#setupMutexName}
-Compression=lzma2/ultra64 
+Compression=lzma2/ultra64
 SolidCompression=yes
 OutputBaseFilename={#appName}_v{#appVer}
 PrivilegesRequired=lowest
 WizardStyle=modern
 DisableProgramGroupPage=yes
 DisableDirPage=yes
-DisableFinishedPage=yes
 MinVersion=10.0.17763
 AppPublisher=David
 ArchitecturesInstallIn64BitMode=x64compatible or arm64
@@ -124,41 +123,3 @@ begin
     Result := false;
   end;
 end;
-
-procedure UninstallAnyPreviousVersion;
-var
-  ResultCode, Attempts: Integer;
-  UninstallerPath: String;
-begin    
-  if RegQueryStringValue(HKCU, GetUninstallRegKey, 'UninstallString', UninstallerPath) then
-  begin
-    Exec(RemoveQuotes(UninstallerPath), '/VERYSILENT', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    
-    if ResultCode = 0 then // wait until the uninstall has completed
-    begin
-      Attempts := 2 * 30 ; // timeout after approximately 30 seconds
-       
-      while FileExists(UninstallerPath) and (Attempts > 0) do
-      Begin
-        Sleep(500);
-        Attempts := Attempts - 1;
-      end;
-      
-      // If the file still exists then the uninstall failed. 
-      // There isn't much that can be done, informing the user or aborting 
-      // won't acheive much and could render it imposible to install this new version.
-      // Installing the new version will over write the registry and add a new uninstaller exe etc.
-    end;
-  end;
-end;
-
-procedure CurStepChanged(CurStep: TSetupStep);
-begin
-  if CurStep = ssInstall then
-  begin
-    // When upgrading uninstall first or the app may trap on start up.
-    // While some dll versions aren't incremented that isn't the only problem 
-    UninstallAnyPreviousVersion;
-  end;
-end;
-
