@@ -40,7 +40,7 @@ Source: "..\bin\Release\win-x86\publish\*";   DestDir: "{app}"; Check: PreferX86
 Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appExeName}"
 
 [Run]
-Filename: "{app}\{#appExeName}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\*"
