@@ -2,10 +2,15 @@
 ; and that the WinAppSdk and .Net framework are self contained.
 ; Inno 6.5.4
 
+; Caution: There be dragons here. The only way I could get upgrades to work reliably with trimming
+; which rewrites dll's is to delete the install dir contents before copying the new stuff in.
+; To that end I specify a compulsory unique dir for the install in the users hidden AppData dir.
+; This makes the install experience similar to installing a store app, but I wouldn't recomend it.
+
 #define appName "WinAppSdkCleaner"
 #define appExeName appName + ".exe"
 #define appVer RemoveFileExt(GetVersionNumbersString("..\bin\Release\win-x64\publish\" + appExeName));
-#define appId "winappsdkcleaner.47345980516833259"
+#define appId "A5D88352-7B4A-44D2-B06A-3C15F3353E31"
 #define appMutexName "4ACA5302-CE42-4882-AA6E-FC54667A934B"
 #define setupMutexName "47DBB18F-2BDF-4A04-AE5E-92342D63623A"
 
@@ -14,8 +19,7 @@ AppId={#appId}
 AppName={#appName}
 AppVersion={#appVer}
 AppVerName={cm:NameAndVersion,{#appName},{#appVer}}
-DefaultDirName={code:GetDefaultDirName}
-UsePreviousAppDir=no
+DefaultDirName={autopf}\{#appId}
 OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
 AppMutex={#appMutexName},Global\{#appMutexName}
@@ -35,7 +39,6 @@ ArchitecturesInstallIn64BitMode=x64compatible or arm64
 [Files]
 Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: PreferArm64Files; Flags: ignoreversion recursesubdirs;
 Source: "..\bin\Release\win-x64\publish\*";   DestDir: "{app}"; Check: PreferX64Files;   Flags: ignoreversion recursesubdirs solidbreak;
-Source: "..\bin\Release\win-x86\publish\*";   DestDir: "{app}"; Check: PreferX86Files;   Flags: ignoreversion recursesubdirs solidbreak;
 
 [Icons]
 Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appExeName}"
@@ -57,83 +60,47 @@ begin
   Result := not PreferArm64Files and IsX64Compatible;
 end;
 
-function PreferX86Files: Boolean;
-begin
-  Result := not PreferArm64Files and not PreferX64Files;
-end;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin  
-  case CurPageID of
-    wpPreparing: // if an old version of the app is running ensure that inno setup shuts it down
-      begin   
-        WizardForm.PreparingNoRadio.Enabled := false;
-      end;
-    
-    wpInstalling: // hide the extracted file name, it's a bit busy
-      begin               
-        WizardForm.FilenameLabel.Visible := false;
-        WizardForm.StatusLabel.Visible := false;
-      end;
-  end;
-end;
-
-// A < B returns -ve
-// A = B returns 0
-// A > B returns +ve
-function VersionComparer(const A, B: String): Integer;
-var
-  X, Y: Int64;
-begin
-  if not (StrToVersion(A, X) and StrToVersion(B, Y)) then
-    RaiseException('StrToVersion(''' + A + ''', ''' + B + ''')');
-  
-  Result := ComparePackedVersion(X, Y);
-end;
-
-function GetUninstallRegKey: String;
-begin
-  Result := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#appId}_is1';
-end;
-
-function IsDowngradeInstall: Boolean;
-var
-  InstalledVersion, UninstallerPath: String;
-begin
-  Result := false;
-  
-  if RegQueryStringValue(HKCU, GetUninstallRegKey, 'DisplayVersion', InstalledVersion) and 
-     RegQueryStringValue(HKCU, GetUninstallRegKey, 'UninstallString', UninstallerPath) then
+  if CurPageID = wpInstalling then 
   begin   
-    // check both the app version and that it (may be) possible to uninstall it 
-    Result := (VersionComparer(InstalledVersion, '{#appVer}') > 0) and FileExists(RemoveQuotes(UninstallerPath));
+    // hide the extracted file name etc.          
+    WizardForm.FilenameLabel.Visible := false;
+    WizardForm.StatusLabel.Visible := false;
   end;
 end;
 
-function NewLine: String;
-begin
-  Result := #13#10;
-end;
 
-function InitializeSetup: Boolean;
-var 
-  Message: String;
+procedure UninstallIfRequired;
+var
+  Key, UninstallerPath, AppPath: String;
+  ErrorCode, ResultCode: Integer;
 begin
-  Result := true;
+  // Uninstalling an old version shouldn't have any side effects as this is a now a different app
+  Key := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\winappsdkcleaner.47345980516833259_is1';
   
-  try
-    if IsDowngradeInstall then
-      RaiseException('Downgrading isn''t supported.' + NewLine + 'Please uninstall the current version first.');
-
-  except
-    Message := 'An error occured when checking install prerequesites:' + NewLine + GetExceptionMessage;
-    SuppressibleMsgBox(Message, mbCriticalError, MB_OK, IDOK);
-    Result := false;
+  if RegQueryStringValue(HKCU, Key, 'UninstallString', UninstallerPath) and
+     RegQueryStringValue(HKCU, Key, 'InstallLocation', AppPath) then
+  begin  
+    // the new app has mutex guards
+    AppPath := RemoveBackSlash(RemoveQuotes(AppPath)) + '\{#AppExeName}' ;
+    
+    if not Exec('powershell.exe', 'gps | where path -eq ''' + AppPath + ''' | kill -force', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    Begin
+      Exec('taskkill.exe', '/t /f /im {#appExeName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    end;
+    
+    Exec(RemoveQuotes(UninstallerPath), '/VERYSILENT', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;
 end;
 
-function GetDefaultDirName(Param: string): String;
+
+procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  // construct a unique install dir
-  Result := ExpandConstant('{autopf}') + '\{#appName}.davidhancock.net'
+  if (CurStep = ssInstall) then
+  begin
+    // free disc space
+    UninstallIfRequired;
+  end;
 end;
