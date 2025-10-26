@@ -3,17 +3,13 @@
 // some what overkill just to save the window's position, but easily extendable
 internal sealed partial class Settings
 {
-    private static readonly Lazy<Settings> lazy = new Lazy<Settings>(() => 
-    {
-        Settings s = new Settings();
-        s.Load();
-        return s; 
-    });
+    private static readonly Lazy<Settings> lazy = new Lazy<Settings>(Load);
 
     public static Settings Instance => lazy.Value;
 
     public RectInt32 RestoreBounds { get; set; } = default;
-    
+    public bool SortAscending { get; set; } = true;
+
     public Settings()  // required by json code generator
     {
     }
@@ -35,7 +31,7 @@ internal sealed partial class Settings
         }
     }
 
-    private void Load()
+    private static Settings Load()
     {
         string path = GetSettingsFilePath();
 
@@ -47,17 +43,16 @@ internal sealed partial class Settings
 
                 if (settings is not null)
                 {
-                    RestoreBounds = settings.RestoreBounds;
+                    return settings;
                 }
             }
-        }
-        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
-        {
         }
         catch (Exception ex)
         {
             Debug.Fail(ex.Message);
         }
+
+        return new Settings();
     }
 
     private static string GetSettingsFilePath()
