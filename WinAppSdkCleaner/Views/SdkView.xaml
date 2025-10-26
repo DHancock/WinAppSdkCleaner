@@ -98,5 +98,8 @@
             </Button>
         </StackPanel>
 
+        <Button x:Name="SortButton" Grid.Row="0" Grid.Column="1" Click="SortButton_Click" IsEnabled="False" VerticalAlignment="Bottom" Margin="15,0,0,0" Padding="5">
+            <SymbolIcon Symbol="Sort"/>
+        </Button>
     </Grid>
 </Page>

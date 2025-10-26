@@ -47,6 +47,13 @@ internal sealed class SdkItem : ItemBase
         Debug.Assert(item is not null);
         Debug.Assert(item is SdkItem);
 
-        return VersionComparer.Comparer(Version, ((SdkItem)item).Version);
+        int result = VersionComparer.Comparer(Version, ((SdkItem)item).Version);
+
+        if (!Settings.Instance.SortAscending)
+        {
+            result *= -1; 
+        }
+
+        return result;
     }
 }

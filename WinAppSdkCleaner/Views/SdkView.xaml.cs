@@ -33,6 +33,7 @@ internal sealed partial class SdkView : Page, IPageItem
             if (SdkTreeView.IsLoaded)
             {
                 UpdateTree();
+                UpdateSortButtonIsEnabled();
             }
             else
             {
@@ -45,11 +46,11 @@ internal sealed partial class SdkView : Page, IPageItem
         void SdkTreeView_Loaded(object sender, RoutedEventArgs e)
         {
             SdkTreeView.Loaded -= SdkTreeView_Loaded;
+
             UpdateTree();
+            UpdateSortButtonIsEnabled();
         }
     }
-    
-    
 
     private void UpdateTree()
     {
@@ -134,6 +135,11 @@ internal sealed partial class SdkView : Page, IPageItem
                 }
             }
         }
+    }
+
+    private void UpdateSortButtonIsEnabled()
+    {
+        SortButton.IsEnabled = viewModel.SdkList.Count > 0;
     }
 
     public async void ExecuteSearch(object? param = null)
@@ -274,13 +280,29 @@ internal sealed partial class SdkView : Page, IPageItem
         }
     }
 
-    public int PassthroughCount => 3;
+    public int PassthroughCount => 4;
 
     public void AddPassthroughContent(in RectInt32[] rects)
     {
         rects[0] = Utils.GetPassthroughRect(SdkTreeView);
         rects[1] = Utils.GetPassthroughRect(RefreshButton);
         rects[2] = Utils.GetPassthroughRect(RemoveButton);
+        rects[3] = Utils.GetPassthroughRect(SortButton);
+    }
+
+    private void SortButton_Click(object sender, RoutedEventArgs e)
+    {
+        Settings.Instance.SortAscending = !Settings.Instance.SortAscending;
+
+        List<TreeViewNode> nodes = new(SdkTreeView.RootNodes);
+        nodes.Reverse();
+
+        SdkTreeView.RootNodes.Clear();
+
+        foreach (TreeViewNode node in nodes) 
+        {
+            SdkTreeView.RootNodes.Add(node);
+        }
     }
 }
 
