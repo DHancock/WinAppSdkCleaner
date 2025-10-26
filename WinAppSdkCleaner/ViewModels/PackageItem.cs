@@ -83,14 +83,14 @@ internal sealed class PackageItem : ItemBase
     public override int OtherAppsCount => PackageRecord.OtherAppsCount;
     public override string OtherAppsCountStr => (!IsNonSdkPackage && (PackageRecord.OtherAppsCount > 0)) ? $"+{OtherAppsCount}" : string.Empty;
 
-    public FontWeight HeadingFontWeight
+    public override FontWeight HeadingFontWeight
     {
         get => IsNonSdkPackage ? FontWeights.SemiBold : FontWeights.Normal;
     }
 
     public bool IsNonSdkPackage => (Children.Count == 0) && (PackageRecord.OtherAppsCount == 1);
 
-    public ImageSource Logo => cachedLogo;
+    public override ImageSource? Logo => cachedLogo;
 
     private BitmapImage LoadPackageLogo()
     {
