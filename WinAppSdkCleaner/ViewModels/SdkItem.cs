@@ -36,11 +36,16 @@ internal sealed class SdkItem : ItemBase
         }
     }
 
+    public override FontWeight HeadingFontWeight => FontWeights.SemiBold;
     public override int OtherAppsCount => sdkData.OtherAppsCount;
     public override string OtherAppsCountStr => (OtherAppsCount > 0) ? $"+{OtherAppsCount}" : string.Empty;
     public override string ToolTipText => Version.PackageVersionStr;
+    public override ImageSource? Logo => null;
+
     public SdkId SdkIdentifier => sdkData.Sdk.Id;
     private VersionRecord Version => sdkData.Version;
+
+    
 
     public override int CompareTo(ItemBase? item)
     {

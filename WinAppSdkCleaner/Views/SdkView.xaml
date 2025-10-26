@@ -28,56 +28,34 @@
                 <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefault}"/>
                 <Setter Property="BorderThickness" Value="1"/>
             </Style>
-
-            <DataTemplate x:Key="SdkTemplate" x:DataType="TreeViewNode">
-                <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.ContextFlyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Icon="Copy" Text="Copy" Click="CopyMenuFlyoutItem_Click"/>
-                            </MenuFlyout>
-                        </Grid.ContextFlyout>
-
-                        <TextBlock Text="{x:Bind ((vm:ItemBase)Content).HeadingText}" FontWeight="SemiBold" Padding="4,0,2,0"/>
-                        <TextBlock Grid.Column="1" x:Name="OtherAppsCountTextBox" Text="{x:Bind ((vm:ItemBase)Content).OtherAppsCountStr}" FontWeight="SemiBold" Foreground="Crimson" Margin="4,0,0,0" />
-                    </Grid>
-                </TreeViewItem>
-            </DataTemplate>
-
-            <DataTemplate x:Key="PackageTemplate" x:DataType="TreeViewNode">
-                <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.ContextFlyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Icon="Copy" Text="Copy" Click="CopyMenuFlyoutItem_Click"/>
-                            </MenuFlyout>
-                        </Grid.ContextFlyout>
-
-                        <Image Height="16" Source="{x:Bind ((vm:PackageItem)Content).Logo}"/>
-                        <TextBlock Grid.Column="1" Text="{x:Bind ((vm:ItemBase)Content).HeadingText}" FontWeight="{x:Bind ((vm:PackageItem)Content).HeadingFontWeight}" Padding="4,0,2,0"/>
-                        <TextBlock Grid.Column="2" x:Name="OtherAppsCountTextBox" Text="{x:Bind ((vm:ItemBase)Content).OtherAppsCountStr}" FontWeight="SemiBold" Foreground="Crimson" Margin="4,0,0,0"/>
-                    </Grid>
-                </TreeViewItem>
-            </DataTemplate>
-
-            <local:ItemTemplateSelector x:Key="TemplateSelector"
-                SdkTemplate="{StaticResource SdkTemplate}"
-                PackageTemplate="{StaticResource PackageTemplate}" />
         </Grid.Resources>
 
         <Border Style="{StaticResource TreeViewBorderStyle}">
-            <TreeView x:Name="SdkTreeView" ItemTemplateSelector="{StaticResource TemplateSelector}" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyUp="SdkTreeView_KeyUp"/>
+            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyUp="SdkTreeView_KeyUp">
+                <TreeView.ItemTemplate>
+                    <DataTemplate x:DataType="TreeViewNode">
+                        <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Icon="Copy" Text="Copy" Click="CopyMenuFlyoutItem_Click"/>
+                                    </MenuFlyout>
+                                </Grid.ContextFlyout>
+
+                                <Image Height="16" Source="{x:Bind ((vm:ItemBase)Content).Logo}"/>
+                                <TextBlock Grid.Column="1" Text="{x:Bind ((vm:ItemBase)Content).HeadingText}" FontWeight="{x:Bind ((vm:ItemBase)Content).HeadingFontWeight}" Padding="4,0,2,0"/>
+                                <TextBlock Grid.Column="2" x:Name="OtherAppsCountTextBox" Text="{x:Bind ((vm:ItemBase)Content).OtherAppsCountStr}" FontWeight="SemiBold" Foreground="Crimson" Margin="4,0,0,0"/>
+                            </Grid>
+                        </TreeViewItem>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
         </Border>
 
         <ProgressBar Grid.Row="1" Height="4" Margin="1" HorizontalAlignment="Stretch" x:Name="BusyIndicator" IsIndeterminate="false" Background="Transparent" BorderThickness="0" CornerRadius="2"/>

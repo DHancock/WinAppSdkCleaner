@@ -297,25 +297,18 @@ internal sealed partial class SdkView : Page, IPageItem
         List<TreeViewNode> nodes = new(SdkTreeView.RootNodes);
         nodes.Reverse();
 
+        TreeViewNode? selectedNode = SdkTreeView.SelectedNode;
+
         SdkTreeView.RootNodes.Clear();
 
-        foreach (TreeViewNode node in nodes) 
+        foreach (TreeViewNode node in nodes)
         {
             SdkTreeView.RootNodes.Add(node);
         }
-    }
-}
 
-internal sealed partial class ItemTemplateSelector : DataTemplateSelector
-{
-    public DataTemplate? SdkTemplate { get; set; }
-    public DataTemplate? PackageTemplate { get; set; }
-
-    protected override DataTemplate? SelectTemplateCore(object item)
-    {
-        if (((TreeViewNode)item).Content is SdkItem)
-            return SdkTemplate;
-
-        return PackageTemplate;
+        if (selectedNode is not null)
+        {
+            SdkTreeView.SelectedNode = selectedNode;
+        }
     }
 }
