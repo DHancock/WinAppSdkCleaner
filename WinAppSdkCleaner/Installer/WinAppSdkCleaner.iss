@@ -5,7 +5,7 @@
 ; Caution: There be dragons here. The only way I could get upgrades to work reliably with trimming
 ; which rewrites dll's is to delete the install dir contents before copying the new stuff in.
 ; To that end I specify a compulsory unique dir for the install in the users hidden AppData dir.
-; This makes the install experience similar to installing a store app, but I wouldn't recomend it.
+; I wouldn't recomend it. This makes the install experience similar to installing a store app. 
 
 #define appName "WinAppSdkCleaner"
 #define appExeName appName + ".exe"
@@ -72,12 +72,12 @@ begin
 end;
 
 
-procedure UninstallIfRequired;
+procedure UninstallOnUpgrade;
 var
   Key, UninstallerPath, AppPath: String;
-  ErrorCode, ResultCode: Integer;
+  ResultCode: Integer;
 begin
-  // Uninstalling an old version shouldn't have any side effects as this is a now a different app
+  // Uninstalling an old version shouldn't have any side effects as it's now a different app
   Key := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\winappsdkcleaner.47345980516833259_is1';
   
   if RegQueryStringValue(HKCU, Key, 'UninstallString', UninstallerPath) and
@@ -98,9 +98,8 @@ end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if (CurStep = ssInstall) then
+  if CurStep = ssInstall then
   begin
-    // free disc space
-    UninstallIfRequired;
+    UninstallOnUpgrade;
   end;
 end;
