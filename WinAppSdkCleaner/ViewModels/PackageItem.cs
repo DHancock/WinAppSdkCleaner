@@ -96,13 +96,9 @@ internal sealed class PackageItem : ItemBase
     {
         try                                        
         {
-            return new BitmapImage()
-            {
-                DecodePixelHeight = 20,
-                UriSource = Package.Logo,
-            };
+            return new BitmapImage(Package.Logo);
         }
-        catch  // expected, especially for VS deployed packages
+        catch  // expected, especially for VS deployed packages that have been orphaned
         {
         }
 
