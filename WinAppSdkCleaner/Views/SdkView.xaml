@@ -64,20 +64,34 @@
             <StackPanel.Resources>
                 <Style TargetType="Button">
                     <Setter Property="Margin" Value="25,0,5,15"/>
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                </Style>
+                <Style TargetType="FontIcon">
+                    <Setter Property="Margin" Value="0,0,8,0"/>
                 </Style>
             </StackPanel.Resources>
 
-            <Button x:Name="RefreshButton" Content="Refresh" Command="{x:Bind SearchCommand}" HorizontalAlignment="Stretch"/>
+            <Button x:Name="RefreshButton" Command="{x:Bind SearchCommand}" AutomationProperties.Name="Refresh">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon x:Name="RefreshIcon" Glyph="&#xE149;" FontSize="12" />
+                    <TextBlock Text="Refresh" />
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="SortButton" Command="{x:Bind SortCommand}" AutomationProperties.Name="Sort">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon x:Name="SortIcon" Glyph="&#xE174;" FontSize="13"/>
+                    <TextBlock Text="Sort" />
+                </StackPanel>
+            </Button>
+            
             <Button x:Name="RemoveButton" Command="{x:Bind RemoveCommand}" AutomationProperties.Name="Remove">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon x:Name="RemoveIcon" Glyph="&#xE74D;" FontSize="12" Foreground="Green" VerticalAlignment="Center"/>
-                    <TextBlock Text=" Remove"/>
+                    <FontIcon x:Name="RemoveIcon" Glyph="&#xE74D;" FontSize="13" Foreground="Green" />
+                    <TextBlock Text="Remove" />
                 </StackPanel>
             </Button>
         </StackPanel>
-
-        <Button x:Name="SortButton" Grid.Row="0" Grid.Column="1" Click="SortButton_Click" IsEnabled="False" VerticalAlignment="Bottom" Margin="15,0,0,0" Padding="5">
-            <SymbolIcon Symbol="Sort"/>
-        </Button>
     </Grid>
 </Page>

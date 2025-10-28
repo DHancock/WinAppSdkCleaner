@@ -34,6 +34,7 @@ DisableProgramGroupPage=yes
 DisableDirPage=yes
 MinVersion=10.0.17763
 AppPublisher=David
+ArchitecturesAllowed=x64compatible or arm64
 ArchitecturesInstallIn64BitMode=x64compatible or arm64
 
 [Files]
@@ -42,6 +43,7 @@ Source: "..\bin\Release\win-x64\publish\*";   DestDir: "{app}"; Check: PreferX64
 
 [Icons]
 Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appExeName}"
+Name: "{group}\{#appName}"; Filename: "{app}\{#appExeName}";
 
 [Run]
 Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent

@@ -10,6 +10,7 @@ internal sealed partial class SdkView : Page, IPageItem
 {
     private RelayCommand SearchCommand { get; }
     private RelayCommand RemoveCommand { get; }
+    private RelayCommand SortCommand { get; }
 
     private bool isIdle = true;
     private DateTime lastPointerTimeStamp;
@@ -21,6 +22,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
         SearchCommand = new RelayCommand(ExecuteSearch, CanSearch);
         RemoveCommand = new RelayCommand(ExecuteRemove, CanRemove);
+        SortCommand = new RelayCommand(ExecuteSort, CanSort);
 
         viewModel = new SdkViewModel();
         viewModel.PropertyChanged += ViewModel_PropertyChanged;
@@ -33,7 +35,6 @@ internal sealed partial class SdkView : Page, IPageItem
             if (SdkTreeView.IsLoaded)
             {
                 UpdateTree();
-                UpdateSortButtonIsEnabled();
             }
             else
             {
@@ -48,7 +49,6 @@ internal sealed partial class SdkView : Page, IPageItem
             SdkTreeView.Loaded -= SdkTreeView_Loaded;
 
             UpdateTree();
-            UpdateSortButtonIsEnabled();
         }
     }
 
@@ -137,11 +137,6 @@ internal sealed partial class SdkView : Page, IPageItem
         }
     }
 
-    private void UpdateSortButtonIsEnabled()
-    {
-        SortButton.IsEnabled = viewModel.SdkList.Count > 0;
-    }
-
     public async void ExecuteSearch(object? param = null)
     {
         try
@@ -158,7 +153,38 @@ internal sealed partial class SdkView : Page, IPageItem
         }
     }
 
-    public bool CanSearch(object? param = null) => IsIdle;
+    public bool CanSearch(object? param = null)
+    {
+        RefreshIcon.Opacity = IsIdle ? 1.0 : 0.4;
+        return IsIdle;
+    }
+
+
+    private void ExecuteSort(object? param)
+    {
+        Settings.Instance.SortAscending = !Settings.Instance.SortAscending;
+
+        List<TreeViewNode> nodes = new(SdkTreeView.RootNodes);
+        nodes.Reverse();
+
+        TreeViewNode? selectedNode = SdkTreeView.SelectedNode;
+
+        SdkTreeView.RootNodes.Clear();
+
+        foreach (TreeViewNode node in nodes)
+        {
+            SdkTreeView.RootNodes.Add(node);
+        }
+
+        SdkTreeView.SelectedNode = selectedNode;
+    }
+
+    public bool CanSort(object? param = null)
+    {
+        SortIcon.Opacity = IsIdle ? 1.0 : 0.4;
+        return IsIdle;
+    }
+
 
     private async void ExecuteRemove(object? param)
     {
@@ -234,6 +260,7 @@ internal sealed partial class SdkView : Page, IPageItem
     {
         SearchCommand.RaiseCanExecuteChanged();
         RemoveCommand.RaiseCanExecuteChanged();
+        SortCommand.RaiseCanExecuteChanged();
     }
 
     private void SelectedTreeViewItemChanged(TreeView sender, TreeViewSelectionChangedEventArgs e)
@@ -288,27 +315,5 @@ internal sealed partial class SdkView : Page, IPageItem
         rects[1] = Utils.GetPassthroughRect(RefreshButton);
         rects[2] = Utils.GetPassthroughRect(RemoveButton);
         rects[3] = Utils.GetPassthroughRect(SortButton);
-    }
-
-    private void SortButton_Click(object sender, RoutedEventArgs e)
-    {
-        Settings.Instance.SortAscending = !Settings.Instance.SortAscending;
-
-        List<TreeViewNode> nodes = new(SdkTreeView.RootNodes);
-        nodes.Reverse();
-
-        TreeViewNode? selectedNode = SdkTreeView.SelectedNode;
-
-        SdkTreeView.RootNodes.Clear();
-
-        foreach (TreeViewNode node in nodes)
-        {
-            SdkTreeView.RootNodes.Add(node);
-        }
-
-        if (selectedNode is not null)
-        {
-            SdkTreeView.SelectedNode = selectedNode;
-        }
     }
 }
