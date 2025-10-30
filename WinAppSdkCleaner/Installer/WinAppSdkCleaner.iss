@@ -42,7 +42,7 @@ Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: PreferArm
 Source: "..\bin\Release\win-x64\publish\*";   DestDir: "{app}"; Check: PreferX64Files;   Flags: ignoreversion recursesubdirs solidbreak;
 
 [Icons]
-Name: "{group}\{#appName}"; Filename: "{app}\{#appExeName}";
+Name: "{autostartmenu}\{#appName}"; Filename: "{app}\{#appExeName}";
 
 [Run]
 Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent
