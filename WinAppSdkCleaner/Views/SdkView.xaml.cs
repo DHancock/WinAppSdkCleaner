@@ -153,12 +153,7 @@ internal sealed partial class SdkView : Page, IPageItem
         }
     }
 
-    public bool CanSearch(object? param = null)
-    {
-        RefreshIcon.Opacity = IsIdle ? 1.0 : 0.4;
-        return IsIdle;
-    }
-
+    public bool CanSearch(object? param = null) => IsIdle;
 
     private void ExecuteSort(object? param)
     {
@@ -179,12 +174,7 @@ internal sealed partial class SdkView : Page, IPageItem
         SdkTreeView.SelectedNode = selectedNode;
     }
 
-    public bool CanSort(object? param = null)
-    {
-        SortIcon.Opacity = IsIdle ? 1.0 : 0.4;
-        return IsIdle;
-    }
-
+    public bool CanSort(object? param = null) => IsIdle;
 
     private async void ExecuteRemove(object? param)
     {

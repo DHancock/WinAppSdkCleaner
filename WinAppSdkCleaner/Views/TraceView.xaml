@@ -10,7 +10,7 @@
     <Grid Margin="15,3,15,15">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition MinWidth="110" Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -37,6 +37,11 @@
                      ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
         </Border>
 
-        <Button x:Name="ClearButton" Margin="25,0,5,0" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" Content="Clear" Command="{x:Bind ClearCommand}"/>
+        <Button x:Name="ClearButton" Margin="25,0,5,15" MinWidth="94.4" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{x:Bind ClearCommand}" AutomationProperties.Name="Clear">
+            <StackPanel Orientation="Horizontal">
+                <FontIcon Glyph="&#xE894;" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <TextBlock Text="Clear" />
+            </StackPanel>
+        </Button>
     </Grid>
 </Page>
