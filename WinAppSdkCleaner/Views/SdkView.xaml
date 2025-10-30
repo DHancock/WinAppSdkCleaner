@@ -74,14 +74,14 @@
 
             <Button x:Name="RefreshButton" Command="{x:Bind SearchCommand}" AutomationProperties.Name="Refresh">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon x:Name="RefreshIcon" Glyph="&#xE149;" FontSize="12" />
+                    <FontIcon Glyph="&#xE149;" FontSize="12" />
                     <TextBlock Text="Refresh" />
                 </StackPanel>
             </Button>
 
             <Button x:Name="SortButton" Command="{x:Bind SortCommand}" AutomationProperties.Name="Sort">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon x:Name="SortIcon" Glyph="&#xE174;" FontSize="13"/>
+                    <FontIcon Glyph="&#xE174;" FontSize="13"/>
                     <TextBlock Text="Sort" />
                 </StackPanel>
             </Button>
