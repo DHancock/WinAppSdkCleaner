@@ -11,10 +11,7 @@ internal sealed partial class AboutView : Page, IPageItem
     {
         InitializeComponent();
 
-        AssemblyName assemblyName = typeof(App).Assembly.GetName();
-
-        NameTextBlock.Text = assemblyName.Name;
-        VersionTextBlock.Text = assemblyName.Version?.ToString(3);
+        VersionTextBlock.Text = $"Version: {typeof(App).Assembly.GetName().Version?.ToString(3)}";
     }
 
     public int PassthroughCount => 1;
