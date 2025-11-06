@@ -7,6 +7,7 @@
 ; To that end I specify a compulsory unique dir for the install in the users hidden AppData dir.
 ; I wouldn't recomend it. This makes the install experience similar to installing a store app. 
 
+#define appDisplayName "WinAppSdk Cleaner"
 #define appName "WinAppSdkCleaner"
 #define appExeName appName + ".exe"
 #define appVer RemoveFileExt(GetVersionNumbersString("..\bin\Release\win-x64\publish\" + appExeName));
@@ -16,9 +17,9 @@
 
 [Setup]
 AppId={#appId}
-AppName={#appName}
+AppName={#appDisplayName}
 AppVersion={#appVer}
-AppVerName={cm:NameAndVersion,{#appName},{#appVer}}
+AppVerName={cm:NameAndVersion,{#appDisplayName},{#appVer}}
 DefaultDirName={autopf}\{#appId}
 OutputDir={#SourcePath}\bin
 UninstallDisplayIcon={app}\{#appExeName}
@@ -42,10 +43,10 @@ Source: "..\bin\Release\win-arm64\publish\*"; DestDir: "{app}"; Check: PreferArm
 Source: "..\bin\Release\win-x64\publish\*";   DestDir: "{app}"; Check: PreferX64Files;   Flags: ignoreversion recursesubdirs solidbreak;
 
 [Icons]
-Name: "{autoprograms}\{#appName}"; Filename: "{app}\{#appExeName}";
+Name: "{autoprograms}\{#appDisplayName}"; Filename: "{app}\{#appExeName}";
 
 [Run]
-Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appName}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#appDisplayName}}"; Flags: nowait postinstall skipifsilent
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\*"
