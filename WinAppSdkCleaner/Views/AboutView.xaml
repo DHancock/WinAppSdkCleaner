@@ -16,11 +16,8 @@
         <FontIcon Glyph="&#xE74D;" FontSize="42" Foreground="Green" VerticalAlignment="Center" HorizontalAlignment="Right"/>
 
         <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Vertical" Margin="20,0,0,0">
-            <TextBlock x:Name="NameTextBlock"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Version:"/>
-                <TextBlock x:Name="VersionTextBlock" TextAlignment="Left" Margin="7,0,0,0"/>
-            </StackPanel>
+            <TextBlock Text="WinAppSdk Cleaner"/>
+            <TextBlock x:Name="VersionTextBlock"/>
             <TextBlock x:Name="HyperlinkTextBlock">
                 <Hyperlink NavigateUri="https://github.com/DHancock/WinAppSdkCleaner">GitHub Repository</Hyperlink>
             </TextBlock>
