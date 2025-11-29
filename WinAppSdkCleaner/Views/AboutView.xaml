@@ -7,6 +7,14 @@
 
     <!-- left, top, right, bottom -->
     
+    <Page.Resources>
+        <TeachingTip x:Name="UpdateInfo" Title="A new version is available on GitHub" Closed="UpdateInfo_Closed" PreferredPlacement="BottomRight">
+            <TeachingTip.IconSource>
+                <SymbolIconSource Symbol="Download"/>
+            </TeachingTip.IconSource>
+        </TeachingTip>
+    </Page.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
