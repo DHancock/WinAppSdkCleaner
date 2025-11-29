@@ -9,6 +9,11 @@ internal static class Model
     public static event EventHandler? VersionsLoaded;
     public static bool VersionListLoaded = false;
 
+    private static readonly HttpClient sHttpClient = new()
+    {
+        BaseAddress = new Uri("https://raw.githubusercontent.com"),
+    };
+
     private static void OnVersionsLoaded(EventArgs e)
     {
         VersionsLoaded?.Invoke(null, e);
@@ -406,7 +411,7 @@ internal static class Model
             Interlocked.Exchange(ref VersionListLoaded, true);
 
             // used in a similar fashion to an INotifyProtpertyChanged event
-            OnVersionsLoaded(new EventArgs());
+            OnVersionsLoaded(EventArgs.Empty);
         }
     }
 
@@ -414,16 +419,13 @@ internal static class Model
     {
         try
         {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.dat";
+            const string path = "DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.dat";
 
-                using (Stream s = await httpClient.GetStreamAsync(path))
+            using (Stream s = await sHttpClient.GetStreamAsync(path))
+            {
+                using (DeflateStream ds = new DeflateStream(s, CompressionMode.Decompress))
                 {
-                    using (DeflateStream ds = new DeflateStream(s, CompressionMode.Decompress))
-                    {
-                        return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
-                    }
+                    return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                 }
             }
         }
@@ -439,11 +441,11 @@ internal static class Model
     {
         try
         {
-            using (Stream? rs = typeof(App).Assembly.GetManifestResourceStream("WinAppSdkCleaner.versions.dat"))
+            await using (Stream? rs = typeof(App).Assembly.GetManifestResourceStream("WinAppSdkCleaner.versions.dat"))
             {
                 if (rs is not null)
                 {
-                    using (DeflateStream ds = new DeflateStream(rs, CompressionMode.Decompress))
+                    await using (DeflateStream ds = new DeflateStream(rs, CompressionMode.Decompress))
                     {
                         return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
@@ -468,7 +470,7 @@ internal static class Model
             {
                 await using (FileStream fs = File.OpenRead(path))
                 {
-                    using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
+                    await using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
                     {
                         return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                     }
@@ -481,5 +483,26 @@ internal static class Model
         }
 
         return null;
+    }
+
+    public static async Task<Version> GetCurrentReleaseVersionAsync()
+    {
+        Version? release = null;
+
+        try
+        {
+            const string path = "DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/appversion.json";
+
+            await using (Stream s = await sHttpClient.GetStreamAsync(path))
+            {
+                release = await JsonSerializer.DeserializeAsync(s, VersionJsonSerializerContext.Default.Version);
+            }
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine(ex.ToString());
+        }
+
+        return release ?? new Version();
     }
 }
