@@ -46,7 +46,7 @@ internal static class Model
 
                     lock (lockObject)
                     {
-                        parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
+                        parentPackageRecord!.Dependents.Add(dependentPackage);
                     }
                 }
             }
@@ -201,9 +201,9 @@ internal static class Model
                 count += 1;
             }
 
-            if (packageData.PackagesDependentOnThis.Count > 0)
+            if (packageData.Dependents.Count > 0)
             {
-                count += IdentifyOtherApps(sdk, packageData.PackagesDependentOnThis);
+                count += IdentifyOtherApps(sdk, packageData.Dependents);
             }
 
             total += count;

@@ -12,7 +12,7 @@ internal sealed class PackageItem : ItemBase
         PackageRecord = packageRecord;
         cachedLogo = LoadPackageLogo();
 
-        foreach (PackageData dependentPackage in packageRecord.PackagesDependentOnThis)
+        foreach (PackageData dependentPackage in packageRecord.Dependents)
         {
             Children.Add(new PackageItem(dependentPackage, this));
         }
