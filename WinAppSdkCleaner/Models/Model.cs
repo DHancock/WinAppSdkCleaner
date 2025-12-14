@@ -55,16 +55,16 @@ internal static class Model
 
     public static async Task<IEnumerable<SdkData>> GetSDKsAsync()
     {
-        Task<List<SdkData>> sdksTask = Task.Run(GetSDKPackages);
+        Task<List<SdkData>> sdkTask = Task.Run(GetSDKPackages);
         Task versionsTask = Task.Run(GetVersionsListAsync);
 
-        await Task.WhenAll(sdksTask, versionsTask);
+        await Task.WhenAll(sdkTask, versionsTask);
 
-        CategorizePackageVersions(sdksTask.Result);
+        CategorizePackageVersions(sdkTask.Result);
 
-        Trace.WriteLine($"Found {sdksTask.Result.Count} SDKs");
+        Trace.WriteLine($"Found {sdkTask.Result.Count} SDKs");
 
-        return sdksTask.Result;
+        return sdkTask.Result;
     }
 
     private static int MakeKey(SdkId sdkId, PackageVersion version)
@@ -72,9 +72,9 @@ internal static class Model
         return ((int)sdkId << 16 | version.Major) ^ (version.Minor << 16 | version.Build);
     }
 
-    private static void CategorizePackageVersions(IEnumerable<SdkData> sdks)
+    private static void CategorizePackageVersions(List<SdkData> sdkList)
     {
-        foreach (SdkData sdk in sdks)
+        foreach (SdkData sdk in sdkList)
         {
             if (sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.Version.Release), out VersionRecord? versionRecord))
             {
@@ -84,7 +84,7 @@ internal static class Model
         }
     }
 
-    public static IEnumerable<ISdk> SupportedSdks => [new ProjectReunion(), new WinAppSdk()];
+    public static ISdk[] SupportedSdk => [new ProjectReunion(), new WinAppSdk()];
 
     private static List<SdkData> GetSDKPackages()
     {
@@ -103,7 +103,7 @@ internal static class Model
             allPackages = packageManager.FindPackagesForUser(string.Empty);
         }
 
-        foreach (ISdk sdk in SupportedSdks)
+        foreach (ISdk sdk in SupportedSdk)
         {
             IEnumerable<IGrouping<PackageVersion, Package>> query;
 
@@ -176,7 +176,7 @@ internal static class Model
 
     private static void CalculateDependentAppCounts(IEnumerable<SdkData> sdkList)
     {
-        foreach (ISdk sdk in SupportedSdks)
+        foreach (ISdk sdk in SupportedSdk)
         {
             foreach (SdkData sdkData in sdkList)
             {
@@ -404,7 +404,7 @@ internal static class Model
             // used by the versions view model 
             Interlocked.Exchange(ref VersionListLoaded, true);
 
-            // used in a similar fashion to an INotifyProtpertyChanged event
+            // used in a similar fashion to an INotifyPropertyChanged event
             OnVersionsLoaded(EventArgs.Empty);
         }
     }
