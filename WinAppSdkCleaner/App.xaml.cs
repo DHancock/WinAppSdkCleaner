@@ -11,7 +11,7 @@ public sealed partial class App : Application
     private readonly SafeHandle globalMutex;
 
     private MainWindow? m_window;
-    private Version lastestVersion = new Version();
+    private Version latestVersion = new Version();
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -49,11 +49,11 @@ public sealed partial class App : Application
         return Path.Join(localAppData, "winappsdkcleaner.davidhancock.net");
     }
 
-    public Version LastestVersion => lastestVersion;
+    public Version LatestVersion => latestVersion;
 
     private async Task GetCurrentReleaseVersionAsync()
     {
         Version version = await Models.Model.GetCurrentReleaseVersionAsync();
-        Interlocked.Exchange<Version>(ref lastestVersion, version);
+        Interlocked.Exchange<Version>(ref latestVersion, version);
     }
 }

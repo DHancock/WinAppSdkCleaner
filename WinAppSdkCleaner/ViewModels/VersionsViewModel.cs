@@ -76,7 +76,7 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 
     private static string GetSdkName(SdkId sdkId)
     {
-        foreach (ISdk sdk in Model.SupportedSdks)
+        foreach (ISdk sdk in Model.SupportedSdk)
         {
             if (sdk.Id == sdkId)
             {

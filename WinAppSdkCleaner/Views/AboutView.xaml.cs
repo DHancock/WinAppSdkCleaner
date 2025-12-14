@@ -24,7 +24,7 @@ internal sealed partial class AboutView : Page, IPageItem
         if ((version is not null) && !teachingTipDismissed)
         {
             // it's quite unlikely but possible that the latest version hasn't been loaded at this point
-            UpdateInfo.IsOpen = version < App.Instance.LastestVersion;
+            UpdateInfo.IsOpen = version < App.Instance.LatestVersion;
         }
     }
 
