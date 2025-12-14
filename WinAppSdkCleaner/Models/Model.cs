@@ -45,14 +45,13 @@ internal static class Model
         {
             foreach (Package dependency in package.Dependencies)
             {
-                // TryGetValue() is thread safe as long as the dictionary isn't modified by another thread
                 if (sdkFrameworksLookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentPackageRecord))
                 {
+                    PackageData dependentPackage = new PackageData(package, new List<PackageData>());
+
                     lock (lockObject)
                     {
-                        PackageData dependentPackage = new PackageData(package, new List<PackageData>());
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
-                        Debug.Assert(!package.IsFramework);  // framework packages cannot be dependent on other framework packages
                     }
                 }
             }
