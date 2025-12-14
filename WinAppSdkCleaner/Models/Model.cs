@@ -19,11 +19,6 @@ internal static class Model
         VersionsLoaded?.Invoke(null, e);
     }
 
-    private static bool IsMicrosoftPublisher(PackageId id)
-    {
-        return string.Equals(id.PublisherId, "8wekyb3d8bbwe", StringComparison.Ordinal);
-    }
-
     public static IEnumerable<VersionRecord> VersionsList => sVersionsLookUp.Values;
 
     public static VersionRecord CategorizePackageVersion(SdkId sdkId, PackageVersion packageVersion)
@@ -45,14 +40,13 @@ internal static class Model
         {
             foreach (Package dependency in package.Dependencies)
             {
-                // TryGetValue() is thread safe as long as the dictionary isn't modified by another thread
                 if (sdkFrameworksLookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentPackageRecord))
                 {
+                    PackageData dependentPackage = new PackageData(package, new List<PackageData>());
+
                     lock (lockObject)
                     {
-                        PackageData dependentPackage = new PackageData(package, new List<PackageData>());
                         parentPackageRecord!.PackagesDependentOnThis.Add(dependentPackage);
-                        Debug.Assert(!package.IsFramework);  // framework packages cannot be dependent on other framework packages
                     }
                 }
             }
@@ -114,7 +108,7 @@ internal static class Model
             IEnumerable<IGrouping<PackageVersion, Package>> query;
 
             query = from package in allPackages
-                    where (package.SignatureKind != PackageSignatureKind.System) && IsMicrosoftPublisher(package.Id) && sdk.Match(package.Id)
+                    where (package.SignatureKind != PackageSignatureKind.System) && sdk.Match(package.Id)
                     group package by package.Id.Version;
 
             foreach (IGrouping<PackageVersion, Package> group in query)
@@ -202,7 +196,7 @@ internal static class Model
         {
             int count = 0;
 
-            if (!(sdk.Match(packageData.Package.Id) && IsMicrosoftPublisher(packageData.Package.Id)))
+            if (!sdk.Match(packageData.Package.Id))
             {
                 count += 1;
             }

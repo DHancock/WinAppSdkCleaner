@@ -128,11 +128,7 @@ internal sealed partial class SdkView : Page, IPageItem
             if (tvi is not null)
             {
                 TextBlock? tb = tvi.FindChild<TextBlock>("OtherAppsCountTextBox");
-
-                if (tb is not null)
-                {
-                    tb.Text = ((ItemBase)node.Content).OtherAppsCountStr;
-                }
+                tb?.Text = ((ItemBase)node.Content).OtherAppsCountStr;
             }
         }
     }

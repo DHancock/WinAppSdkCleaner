@@ -6,7 +6,7 @@ internal sealed class ProjectReunion : ISdk
 
     public bool Match(PackageId pId)
     {
-        return pId.FullName.Contains("ProjectReunion", StringComparison.OrdinalIgnoreCase);
+        return ISdk.IsMicrosoftPublisher(pId) && pId.FullName.Contains("ProjectReunion", StringComparison.OrdinalIgnoreCase);
     }
 
     public SdkId Id => SdkId.Reunion;
