@@ -230,7 +230,7 @@ internal sealed partial class MainWindow : Window
                 {
                     window.systemMenu.Hide();
                 }
-                else if ((key != VirtualKey.Escape) && (key != VirtualKey.Enter) && (key != VirtualKey.Up) && (key != VirtualKey.Down))
+                else if (!IsMenuNavigationKey(key))
                 {
                     bool found = false;
 
@@ -245,6 +245,7 @@ internal sealed partial class MainWindow : Window
                             {
                                 MenuFlyoutItem item = (MenuFlyoutItem)itemBase;
                                 item.Command.Execute(item.CommandParameter);
+                                break;
                             }
                         }
                     }
@@ -267,6 +268,11 @@ internal sealed partial class MainWindow : Window
     private static bool IsAcceleratorKeyModifier(VirtualKey key)
     {
         return (key == VirtualKey.Menu) || (key == VirtualKey.Control) || (key == VirtualKey.Shift) || (key == VirtualKey.LeftWindows) || (key == VirtualKey.RightWindows);
+    }
+
+    private static bool IsMenuNavigationKey(VirtualKey key)
+    {
+        return (key == VirtualKey.Enter) || (key == VirtualKey.Escape) || (key == VirtualKey.Up) || (key == VirtualKey.Down) || (key == VirtualKey.Space);
     }
 
     public void PostCloseMessage() => PostSysCommandMessage(SC.CLOSE);
