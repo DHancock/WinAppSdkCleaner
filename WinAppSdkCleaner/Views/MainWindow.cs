@@ -245,14 +245,15 @@ internal sealed partial class MainWindow : Window
                             {
                                 MenuFlyoutItem item = (MenuFlyoutItem)itemBase;
                                 item.Command.Execute(item.CommandParameter);
-                                break;
                             }
+
+                            break; // no duplicate access keys
                         }
                     }
 
                     if (!found)
                     {
-                        Utils.PlayExclamation();
+                        Utils.PlayExclamation(); // mimics the old win32 menu
                     }
                 }
             }
