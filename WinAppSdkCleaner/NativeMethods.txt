@@ -1,9 +1,7 @@
 ﻿MessageBeep
 GetDpiForWindow
-MINMAXINFO
 SetWindowSubclass
 DefSubclassProc
-WM_GETMINMAXINFO
 WM_DPICHANGED
 WM_NCRBUTTONUP
 WM_NCLBUTTONDOWN

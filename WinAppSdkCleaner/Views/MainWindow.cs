@@ -38,8 +38,6 @@ internal sealed partial class MainWindow : Window
     private PointInt32 restorePosition;
     private SizeInt32 restoreSize;
     private readonly MenuFlyout systemMenu;
-    private int scaledMinWidth;
-    private int scaledMinHeight;
     private double scaleFactor;
     private UnhookWindowsHookExSafeHandle? hookSafeHandle;
 
@@ -75,8 +73,10 @@ internal sealed partial class MainWindow : Window
         Trace.Listeners.Add(traceListener);
 
         scaleFactor = IntialiseScaleFactor();
-        scaledMinWidth = Scale(cMinWidth);
-        scaledMinHeight = Scale(cMinHeight);
+
+        OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
+        op.PreferredMinimumWidth = Scale(cMinWidth);
+        op.PreferredMinimumHeight = Scale(cMinHeight);
 
         restoreCommand = new RelayCommand(o => PostSysCommandMessage(SC.RESTORE), CanRestore);
         moveCommand = new RelayCommand(o => PostSysCommandMessage(SC.MOVE), CanMove);
@@ -119,22 +119,13 @@ internal sealed partial class MainWindow : Window
         {
             switch (uMsg)
             {
-                case PInvoke.WM_GETMINMAXINFO:
-                {
-                    unsafe
-                    {
-                        MINMAXINFO* mPtr = (MINMAXINFO*)lParam.Value;
-                        mPtr->ptMinTrackSize.X = window.scaledMinWidth;
-                        mPtr->ptMinTrackSize.Y = window.scaledMinHeight;
-                    }
-                    break;
-                }
-
                 case PInvoke.WM_DPICHANGED:
                 {
                     window.scaleFactor = (wParam & 0xFFFF) / 96.0;
-                    window.scaledMinWidth = window.Scale(cMinWidth);
-                    window.scaledMinHeight = window.Scale(cMinHeight);
+
+                    OverlappedPresenter op = (OverlappedPresenter)window.AppWindow.Presenter;
+                    op.PreferredMinimumWidth = window.Scale(cMinWidth);
+                    op.PreferredMinimumHeight = window.Scale(cMinHeight);
                     break;
                 }
 
@@ -222,7 +213,7 @@ internal sealed partial class MainWindow : Window
         if (code >= 0)
         {
             VirtualKey key = (VirtualKey)(nuint)wParam;
-            bool isKeyDown = (lParam & 0x80000000) == 0;
+            bool isKeyDown = (lParam & 0x8000_0000) == 0;
 
             if (isKeyDown)
             {
