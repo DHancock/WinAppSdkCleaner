@@ -14,7 +14,7 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<Nullable>enable</Nullable>
 		<WindowsPackageType>None</WindowsPackageType>
-		<Version>1.10.0</Version>
+		<Version>1.11.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -24,12 +24,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.228">
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.264">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="1.8.250906003" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6901" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="1.8.251222000" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
