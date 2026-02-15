@@ -460,14 +460,11 @@ internal static class Model
         {
             string path = Path.Join(AppContext.BaseDirectory, "versions.dat");
 
-            if (File.Exists(path))
+            await using (FileStream fs = File.OpenRead(path))
             {
-                await using (FileStream fs = File.OpenRead(path))
+                await using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
                 {
-                    await using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress))
-                    {
-                        return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
-                    }
+                    return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                 }
             }
         }
