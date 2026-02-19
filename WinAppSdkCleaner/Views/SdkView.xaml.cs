@@ -12,7 +12,6 @@ internal sealed partial class SdkView : Page, IPageItem
     private RelayCommand RemoveCommand { get; }
     private RelayCommand SortCommand { get; }
 
-    private bool isIdle = true;
     private DateTime lastPointerTimeStamp;
     private readonly SdkViewModel viewModel;
 
@@ -26,6 +25,8 @@ internal sealed partial class SdkView : Page, IPageItem
 
         viewModel = new SdkViewModel();
         viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+        IsIdle = true;
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -203,6 +204,18 @@ internal sealed partial class SdkView : Page, IPageItem
             {
                 Trace.WriteLine(ex.ToString());
 
+                try
+                {
+                    await viewModel.ExecuteSearch();
+                }
+                catch (Exception secondaryException)
+                {
+                    // don't show a content dialog, the primary error will be opening one
+                    Trace.WriteLine(secondaryException.ToString());
+                }
+
+                IsIdle = true;
+
                 string message;
                 string details;
 
@@ -217,7 +230,6 @@ internal sealed partial class SdkView : Page, IPageItem
                     details = ex.ToString();
                 }
 
-                ExecuteSearch();
                 await App.MainWindow.ContentDialogHelper.ShowErrorDialogAsync(message, details);
             }
         }
@@ -225,18 +237,23 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private bool CanRemove(object? param)
     {
-        bool canRemove = IsIdle && (SdkTreeView.SelectedNode?.Content is SdkItem);
-        RemoveIcon.Opacity = canRemove ? 1.0 : 0.4;
-        return canRemove;
+        if (IsIdle && (SdkTreeView.SelectedNode?.Content is SdkItem))
+        {
+            RemoveIcon.Opacity = 1.0;
+            return true;
+        }
+
+        RemoveIcon.Opacity = 0.4;
+        return false;
     }
 
     private bool IsIdle
     {
-        get => isIdle;
+        get;
 
         set
         {
-            isIdle = value;
+            field = value;
             BusyIndicator.IsIndeterminate = !value;
             AdjustCommandsState();
         }
