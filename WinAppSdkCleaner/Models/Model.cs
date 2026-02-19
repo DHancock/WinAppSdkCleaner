@@ -468,9 +468,12 @@ internal static class Model
                 }
             }
         }
+        catch (FileNotFoundException)
+        {
+        }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.ToString());
+            Debug.WriteLine(ex.ToString());
         }
 
         return null;
