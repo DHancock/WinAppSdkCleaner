@@ -4,8 +4,6 @@ namespace WinAppSdkCleaner.Views;
 
 internal sealed partial class CustomTitleBar : UserControl
 {
-    private AppWindow? parentAppWindow;
-
     public CustomTitleBar()
     {
         this.InitializeComponent();
@@ -35,11 +33,11 @@ internal sealed partial class CustomTitleBar : UserControl
 
     public AppWindow? ParentAppWindow
     {
-        get => parentAppWindow;
+        get;
         set
         {
             Debug.Assert(value is not null);
-            parentAppWindow = value;
+            field = value;
         }
     }
 

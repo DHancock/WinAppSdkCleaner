@@ -468,9 +468,13 @@ internal static class Model
                 }
             }
         }
+        catch (FileNotFoundException)
+        {
+            Debug.WriteLine("file system versions.dat not found");
+        }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.ToString());
+            Debug.WriteLine(ex.ToString());
         }
 
         return null;

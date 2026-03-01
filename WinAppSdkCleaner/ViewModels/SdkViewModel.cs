@@ -4,19 +4,17 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed partial class SdkViewModel : INotifyPropertyChanged
 {
-    private SdkList? sdkList;
-
     public SdkViewModel()
     {
     }
 
     public SdkList SdkList
     {
-        get { return sdkList ?? new SdkList(); }
+        get { return field ?? new SdkList(); }
 
         set
         {
-            sdkList = value;
+            field = value;
             RaisePropertyChanged();
         }
     }
