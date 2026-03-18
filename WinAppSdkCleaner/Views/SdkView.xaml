@@ -33,7 +33,7 @@
             <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyUp="SdkTreeView_KeyUp">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="TreeViewNode">
-                        <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
+                        <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}" ToolTipService.ToolTip="{x:Bind ((vm:ItemBase)Content).ToolTipText}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
