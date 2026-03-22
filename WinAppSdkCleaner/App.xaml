@@ -16,7 +16,10 @@
                 <Setter Property="TitleTemplate">
                     <Setter.Value>
                         <DataTemplate>
-                            <TextBlock FontSize="18" Text="WinAppSdk Cleaner"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Resources/app.ico" Height="24" Margin="7,0"/>
+                                <TextBlock FontSize="18" Text="WinAppSdk Cleaner"/>
+                            </StackPanel>
                         </DataTemplate>
                     </Setter.Value>
                 </Setter>
