@@ -33,7 +33,7 @@
             <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyUp="SdkTreeView_KeyUp">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="TreeViewNode">
-                        <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}" ToolTipService.ToolTip="{x:Bind ((vm:ItemBase)Content).ToolTipText}">
+                        <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -44,6 +44,11 @@
                                 <Grid.ContextFlyout>
                                     <MenuFlyout>
                                         <MenuFlyoutItem Icon="Copy" Text="Copy" Click="CopyMenuFlyoutItem_Click"/>
+                                        <MenuFlyoutItem Text="Info..." Click="InfoMenuFlyoutItem_Click">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE946;"/>
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
                                     </MenuFlyout>
                                 </Grid.ContextFlyout>
 

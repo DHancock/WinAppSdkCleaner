@@ -9,10 +9,8 @@ internal sealed partial class ErrorDialog : ContentDialog
         PrimaryButtonText = "OK";
         DefaultButton = ContentDialogButton.Primary;
 
-        Loaded += (s, e) =>
-        {
-            Utils.PlayExclamation();
-            Content = $"{message}{Environment.NewLine}{Environment.NewLine}{details}";
-        };
+        Content = $"{message}{Environment.NewLine}{Environment.NewLine}{details}";
+
+        Utils.PlayExclamation();
     }
 }

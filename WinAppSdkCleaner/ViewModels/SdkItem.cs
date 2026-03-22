@@ -39,7 +39,20 @@ internal sealed class SdkItem : ItemBase
     public override FontWeight HeadingFontWeight => FontWeights.SemiBold;
     public override int OtherAppsCount => sdkData.OtherAppsCount;
     public override string OtherAppsCountStr => (OtherAppsCount > 0) ? $"+{OtherAppsCount}" : string.Empty;
-    public override string ToolTipText => Version.PackageVersionStr;
+
+    public override List<(string property, string value)> Info
+    {
+        get
+        {
+            List<(string property, string value)> info = new();
+
+            info.Add(("Title", HeadingText));
+            info.Add(("Version", Version.PackageVersionStr));
+
+            return info;
+        }
+    }
+
     public override ImageSource? Logo => null;
 
     public SdkId SdkIdentifier => sdkData.Sdk.Id;

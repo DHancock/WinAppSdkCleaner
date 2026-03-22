@@ -7,10 +7,10 @@ internal abstract class ItemBase : IComparable<ItemBase>
         Parent = parent;
     }
 
-    public List<ItemBase> Children { get; } = new List<ItemBase>();
+    public List<ItemBase> Children { get; } = new();
     public abstract string HeadingText { get; }
     public abstract FontWeight HeadingFontWeight { get; }
-    public abstract string ToolTipText { get; }
+    public abstract List<(string property, string value)> Info { get; }
     public abstract int OtherAppsCount { get; }
     public abstract string OtherAppsCountStr { get; }
     public abstract ImageSource? Logo { get; }
