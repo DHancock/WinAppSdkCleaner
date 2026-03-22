@@ -19,7 +19,12 @@ internal sealed class ContentDialogHelper
     {
         return await ShowDialogAsync(new ConfirmDialog(message));
     }
-    
+
+    public async Task ShowInfoDialogAsync(List<(string property, string value)> info)
+    {
+        await ShowDialogAsync(new InfoDialog(info));
+    }
+
     private async Task<ContentDialogResult> ShowDialogAsync(ContentDialog dialog)
     {
         if (currentDialog is not null)

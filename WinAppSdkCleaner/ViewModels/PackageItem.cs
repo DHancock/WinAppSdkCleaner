@@ -58,7 +58,7 @@ internal sealed class PackageItem : ItemBase
                 text = "Framework ";
             }
 
-            VersionRecord vr = Model.CategorizePackageVersion(sdkItem.SdkIdentifier, Package.Id.Version);
+            VersionRecord vr = Model.CategorizePackageVersion(SdkId.WinAppSdk, Package.Id.Version);
             text += string.IsNullOrEmpty(vr.SemanticVersion) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
 
             return text + $" - {Package.Id.Architecture.ToString().ToLower()}";
@@ -67,20 +67,64 @@ internal sealed class PackageItem : ItemBase
         return Package.DisplayName;  // default for reunion packages
     }
 
-    public override string ToolTipText
+    private enum Names { Title, Description, FullName, Publisher, InstalledPath, PathExists, InstalledDate, Version }
+
+    public override List<(string property, string value)> Info
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(Package.Description))
+            List<(string property, string value)> info = new();
+
+            info.Add((Names.Title.ToString(), HeadingText));
+            info.Add(GetInfo(Names.Description, Package));
+            info.Add(GetInfo(Names.FullName, Package));
+            info.Add(GetInfo(Names.Publisher, Package));
+            info.Add(GetInfo(Names.InstalledPath, Package));
+            info.Add(GetInfo(Names.PathExists, Package));
+            info.Add(GetInfo(Names.InstalledDate, Package));
+            info.Add(GetInfo(Names.Version, Package));
+
+            return info;
+
+            static (string, string) GetInfo(Names name, Package package)
             {
-                return Package.Id.FullName;
+                string nameStr = name.ToString();
+
+                try
+                {
+                    switch (name)
+                    {
+                        case Names.Description: return (nameStr, GetValue(package.Description));
+                        case Names.FullName: return (nameStr, GetValue(package.Id.FullName));
+                        case Names.Publisher: return (nameStr, GetValue(package.PublisherDisplayName));
+                        case Names.InstalledPath: return (nameStr, GetValue(package.InstalledPath));
+                        case Names.PathExists: return (nameStr, Directory.Exists(package.InstalledPath).ToString());
+                        case Names.InstalledDate: return (nameStr, package.InstalledDate.ToString("g"));
+                        case Names.Version: return (nameStr, $"{package.Id.Version.Major}.{package.Id.Version.Minor}.{package.Id.Version.Build}.{package.Id.Version.Revision}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return (nameStr, $"<threw {ex.GetType().Name}>");
+                }
+
+                return (nameStr, "<error>");
             }
 
-            return Package.Description;
+            static string GetValue(string value)
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return "<empty>";
+                }
+
+                return value;
+            }
         }
     }
 
     public override int OtherAppsCount => PackageRecord.OtherAppsCount;
+
     public override string OtherAppsCountStr => (!IsNonSdkPackage && (PackageRecord.OtherAppsCount > 0)) ? $"+{OtherAppsCount}" : string.Empty;
 
     public override FontWeight HeadingFontWeight

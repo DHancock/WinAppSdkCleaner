@@ -319,4 +319,11 @@ internal sealed partial class SdkView : Page, IPageItem
         rects[2] = Utils.GetPassthroughRect(RemoveButton);
         rects[3] = Utils.GetPassthroughRect(SortButton);
     }
+
+    private async void InfoMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        ItemBase item = (ItemBase)((TreeViewNode)((FrameworkElement)sender).DataContext).Content;
+
+        await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
+    }
 }
