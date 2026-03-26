@@ -1,5 +1,5 @@
 ﻿using WinAppSdkCleaner.Models;
-using WinAppSdkCleaner.Utilites;
+using WinAppSdkCleaner.Utilities;
 
 namespace WinAppSdkCleaner.ViewModels;
 

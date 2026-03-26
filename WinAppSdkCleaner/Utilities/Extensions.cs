@@ -1,4 +1,4 @@
-﻿namespace WinAppSdkCleaner.Utilites;
+﻿namespace WinAppSdkCleaner.Utilities;
 
 internal static class Extensions
 {
@@ -10,9 +10,17 @@ internal static class Extensions
         {
             DependencyObject child = VisualTreeHelper.GetChild(parent, index);
 
-            if ((child is T target) && ((name is null) || string.Equals(target.Name, name, StringComparison.Ordinal)))
+            try
             {
-                return target;
+                T target = child.As<T>(); // casting WinRT.IInspectable to type T can fail on AOT builds
+
+                if ((name is null) || string.Equals(target.Name, name, StringComparison.Ordinal))
+                {
+                    return target;
+                }
+            }
+            catch (InvalidCastException)
+            {
             }
 
             T? result = child.FindChild<T>(name);

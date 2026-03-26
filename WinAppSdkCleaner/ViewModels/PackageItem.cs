@@ -4,13 +4,15 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed class PackageItem : ItemBase
 {
-    private readonly ImageSource cachedLogo;
+    private readonly BitmapImage cachedLogo;
     public PackageData PackageRecord { get; init; }
 
     public PackageItem(PackageData packageRecord, ItemBase parent) : base(parent)
     {
         PackageRecord = packageRecord;
-        cachedLogo = LoadPackageLogo();
+
+        cachedLogo = new BitmapImage();
+        LoadPackageLogo();
 
         foreach (PackageData dependentPackage in packageRecord.Dependents)
         {
@@ -134,19 +136,35 @@ internal sealed class PackageItem : ItemBase
 
     public bool IsNonSdkPackage => (Children.Count == 0) && (PackageRecord.OtherAppsCount == 1);
 
-    public override ImageSource? Logo => cachedLogo;
+    public override BitmapImage? Logo => cachedLogo;
 
-    private BitmapImage LoadPackageLogo()
+    private async void LoadPackageLogo()
     {
-        try                                        
+        string path;
+
+        try
         {
-            return new BitmapImage(Package.Logo);
+            path = Package.Logo.LocalPath;
         }
-        catch  // expected, especially for VS deployed packages that have been orphaned
+        catch (ArgumentException) // expected for VS deployed packages that have been orphaned
         {
+            path = Path.Join(AppContext.BaseDirectory, "Resources//missing.png");
+        }
+        catch
+        {
+            return;
         }
 
-        return new BitmapImage(new Uri("ms-appx:///Resources/missing.png"));
+        try
+        {
+            await using (Stream s = File.OpenRead(path))
+            {
+                await cachedLogo.SetSourceAsync(s.AsRandomAccessStream());
+            }
+        }
+        catch
+        {
+        }
     }
 
     public override int CompareTo(ItemBase? item)
