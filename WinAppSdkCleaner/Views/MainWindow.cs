@@ -1,6 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls.Primitives;
 
-using WinAppSdkCleaner.Utilites;
+using WinAppSdkCleaner.Utilities;
 
 namespace WinAppSdkCleaner.Views;
 

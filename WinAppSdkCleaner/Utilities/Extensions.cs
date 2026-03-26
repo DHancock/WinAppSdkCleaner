@@ -1,4 +1,4 @@
-﻿namespace WinAppSdkCleaner.Utilites;
+﻿namespace WinAppSdkCleaner.Utilities;
 
 internal static class Extensions
 {
