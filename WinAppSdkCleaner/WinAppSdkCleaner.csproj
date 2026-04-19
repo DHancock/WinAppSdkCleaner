@@ -14,6 +14,7 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<Nullable>enable</Nullable>
 		<WindowsPackageType>None</WindowsPackageType>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Version>1.11.0</Version>
 	</PropertyGroup>
 
@@ -28,6 +29,7 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
 		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="1.8.260224000" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>

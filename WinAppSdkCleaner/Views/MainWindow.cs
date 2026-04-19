@@ -135,6 +135,13 @@ internal sealed partial class MainWindow : Window
                     return (LRESULT)0;
                 }
 
+                case PInvoke.WM_SYSCOMMAND when wParam == (int)SC.MINIMIZE:
+                {
+                    // work around for https://github.com/microsoft/microsoft-ui-xaml/issues/11068
+                    CloseMenuPopups(window.Content.XamlRoot);
+                    break;
+                }
+
                 case PInvoke.WM_NCRBUTTONUP when wParam == HTCAPTION:
                 {
                     window.ShowSystemMenu(viaKeyboard: false);
@@ -156,6 +163,17 @@ internal sealed partial class MainWindow : Window
         }
 
         return PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
+    }
+
+    private static void CloseMenuPopups(XamlRoot xamlRoot)
+    {
+        foreach (Popup popup in VisualTreeHelper.GetOpenPopupsForXamlRoot(xamlRoot))
+        {
+            if (popup.Child is MenuFlyoutPresenter) // avoid content dialogs
+            {
+                popup.IsOpen = false;
+            }
+        }
     }
 
     private void PostSysCommandMessage(SC command)
@@ -425,7 +443,6 @@ internal sealed partial class MainWindow : Window
     {
         OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
         op.IsResizable = true;
-        op.IsMinimizable = true;
 
         SetWindowDragRegionsInternal();
     }
@@ -434,7 +451,6 @@ internal sealed partial class MainWindow : Window
     {
         OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
         op.IsResizable = false;
-        op.IsMinimizable = false;
 
         SetWindowDragRegionsInternal();
     }
