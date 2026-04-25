@@ -12,9 +12,7 @@ internal static class Extensions
 
             try
             {
-                T target = child.As<T>(); // casting WinRT.IInspectable to type T can fail on AOT builds
-
-                if ((name is null) || string.Equals(target.Name, name, StringComparison.Ordinal))
+                if ((child is T target) && ((name is null) || string.Equals(target.Name, name, StringComparison.Ordinal)))
                 {
                     return target;
                 }

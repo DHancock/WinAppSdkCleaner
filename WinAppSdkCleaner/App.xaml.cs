@@ -1,5 +1,9 @@
 ﻿using WinAppSdkCleaner.Views;
 
+// valid c# casts would otherwise fail for these types in AOT builds (using CsWinRT 2.2.0)
+[assembly: GeneratedWinRTExposedExternalType(typeof(ScrollViewer))]
+[assembly: GeneratedWinRTExposedExternalType(typeof(OverlappedPresenter))]
+
 namespace WinAppSdkCleaner;
 
 public sealed partial class App : Application
