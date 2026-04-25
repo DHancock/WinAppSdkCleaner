@@ -50,9 +50,6 @@ internal sealed partial class MainWindow : Window
     {
         this.InitializeComponent();
 
-        // work around for https://github.com/microsoft/CsWinRT/issues/1930
-        AppWindow.Presenter.As<OverlappedPresenter>();
-
         WindowHandle = (HWND)WindowNative.GetWindowHandle(this);
 
         thisGCHandle = GCHandle.Alloc(this);
