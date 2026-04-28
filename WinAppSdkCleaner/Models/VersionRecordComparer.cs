@@ -1,8 +1,6 @@
-﻿using WinAppSdkCleaner.Models;
+﻿namespace WinAppSdkCleaner.Models;
 
-namespace WinAppSdkCleaner.ViewModels;
-
-internal sealed class VersionComparer : IComparer<VersionRecord>
+internal sealed class VersionRecordComparer : IComparer<VersionRecord>
 {
     public int Compare(VersionRecord? a, VersionRecord? b)
     {
@@ -54,8 +52,7 @@ internal sealed class VersionComparer : IComparer<VersionRecord>
         return result;
     }
 
-
-    private static int PackageVersionComparer(PackageVersion a, PackageVersion b)
+    public static int PackageVersionComparer(PackageVersion a, PackageVersion b)
     {
         int result = a.Major - b.Major;
 

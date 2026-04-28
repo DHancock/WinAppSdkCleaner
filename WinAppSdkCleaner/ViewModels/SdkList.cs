@@ -19,33 +19,28 @@ internal sealed partial class SdkList : List<ItemBase>
         Sort();
     }
 
-    public static IEnumerable<Package> GetDistinctPackages(ItemBase item)
+    public static IEnumerable<Package> GetPackages(ItemBase item)
     {
-        return GetPackages(item).DistinctBy(p => p.Id.FullName);
+        List<Package> packages = new List<Package>();
 
-        static List<Package> GetPackages(ItemBase item)
+        if (item is PackageItem packageItem)
         {
-            List<Package> packages = new List<Package>();
-
-            if (item is PackageItem packageItem)
-            {
-                packages.Add(packageItem.Package);
-            }
-
-            foreach (ItemBase child in item.Children)
-            {
-                packages.AddRange(GetPackages(child));
-            }
-
-            return packages;
+            packages.Add(packageItem.Package);
         }
+
+        foreach (ItemBase child in item.Children)
+        {
+            packages.AddRange(GetPackages(child));
+        }
+
+        return packages;
     }
 
     public static string GetCopyData(ItemBase item)
     {
         StringBuilder sb = new StringBuilder();
 
-        IEnumerable<Package> packages = GetDistinctPackages(item);
+        IEnumerable<Package> packages = GetPackages(item);
         IEnumerable<string> frameworks = packages.Where(p => p.IsFramework).Select(p => BuildPS(p));
         IEnumerable<string> others = packages.Where(p => !p.IsFramework).Select(p => BuildPS(p));
 

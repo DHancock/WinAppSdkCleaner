@@ -4,7 +4,7 @@ internal sealed class WinAppSdk : ISdk
 {
     public string DisplayName => "Win App SDK";
 
-    public bool Match(PackageId pId)
+    public bool IsMatch(PackageId pId)
     {
         return ISdk.IsMicrosoftPublisher(pId) && 
                 (pId.FullName.Contains("WinAppRuntime", StringComparison.OrdinalIgnoreCase) ||

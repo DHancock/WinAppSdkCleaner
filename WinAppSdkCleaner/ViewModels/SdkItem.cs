@@ -6,13 +6,13 @@ internal sealed class SdkItem : ItemBase
 {
     private readonly SdkData sdkData;
 
-    public SdkItem(SdkData sdkRecord) : base(null)
+    public SdkItem(SdkData sdkData) : base(null)
     {
-        sdkData = sdkRecord;
+        this.sdkData = sdkData;
 
-        foreach (PackageData packageRecord in sdkRecord.SdkPackages)
+        foreach (PackageData packageData in sdkData.FrameworkPackages)
         {
-            Children.Add(new PackageItem(packageRecord, this));
+            Children.Add(new PackageItem(packageData, this));
         }
 
         Children.Sort();
@@ -22,17 +22,19 @@ internal sealed class SdkItem : ItemBase
     {
         get
         {
-            if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion))
+            if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion)) // this sdk isn't in the versions file
             {
-                return $"{sdkData.Sdk.DisplayName} ({Version.PackageVersionStr})";
+                return $"{sdkData.Sdk.DisplayName} {sdkData.Version.PackageVersionStr}";
             }
+
+            string heading = $"{sdkData.Sdk.DisplayName} {sdkData.Version.SemanticVersion}";
 
             if (!string.IsNullOrEmpty(sdkData.Version.VersionTag))
             {
-                return $"{sdkData.Sdk.DisplayName} {Version.SemanticVersion} - {Version.VersionTag}";
+                heading += $" - {sdkData.Version.VersionTag}";
             }
 
-            return $"{sdkData.Sdk.DisplayName} {Version.SemanticVersion}";
+            return heading;
         }
     }
 
@@ -47,7 +49,7 @@ internal sealed class SdkItem : ItemBase
             List<(string property, string value)> info = new();
 
             info.Add(("Title", HeadingText));
-            info.Add(("Version", Version.PackageVersionStr));
+            info.Add(("Version", sdkData.Version.PackageVersionStr));
 
             return info;
         }
@@ -56,16 +58,13 @@ internal sealed class SdkItem : ItemBase
     public override ImageSource? Logo => null;
 
     public SdkId SdkIdentifier => sdkData.Sdk.Id;
-    private VersionRecord Version => sdkData.Version;
-
-    
 
     public override int CompareTo(ItemBase? item)
     {
         Debug.Assert(item is not null);
         Debug.Assert(item is SdkItem);
 
-        int result = VersionComparer.Comparer(Version, ((SdkItem)item).Version);
+        int result = VersionRecordComparer.Comparer(sdkData.Version, ((SdkItem)item).sdkData.Version);
 
         if (!Settings.Instance.SortAscending)
         {

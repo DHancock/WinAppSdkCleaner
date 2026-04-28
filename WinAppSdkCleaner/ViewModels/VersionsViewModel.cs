@@ -2,20 +2,19 @@
 
 namespace WinAppSdkCleaner.ViewModels;
 
-internal sealed record DisplayVersion(string SdkName, string SdkVersion, string PackageVersion)
+internal sealed partial class GroupInfo : List<VersionRecord>
 {
-    public string AutomationName => $"{SdkName} version {SdkVersion} package version {PackageVersion}";
-};
-
-internal sealed partial class GroupInfo : List<DisplayVersion>
-{
-    public GroupInfo(string sdkName, IEnumerable<DisplayVersion> items) : base(items)
+    public GroupInfo(string sdkName, IEnumerable<VersionRecord> items) : base(items)
     {
-        Name = $"{sdkName} package versions";
+        Name = sdkName;
+        SingletonVersion = items.Any(vr => !string.IsNullOrWhiteSpace(vr.SingletonVersionStr)) ? "Singleton" : "";
     }
 
     public string Name { get; }
-    public override string ToString() => Name;   // the narrator uses this to read the group headers
+    public string FrameworkVersion { get; } = "Framework";
+    public string SingletonVersion { get; }
+
+    public override string ToString() => $"{Name} {FrameworkVersion} {SingletonVersion}" ; // the narrator uses this to read the group headers
 }
 
 
@@ -27,7 +26,6 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
     {
         Model.VersionsLoaded += (s, e) =>
         {
-            // the model loads the versions on a non ui thread
             uiDispatcher.TryEnqueue(() =>
             {
                 if ((viewSource.View is null) || (viewSource.View.Count == 0))
@@ -44,27 +42,16 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
         {
             if (!Model.VersionListLoaded)  
             {
-                // The page is being loaded before the model has retrived the versions.
-                // A VersionsLoaded event is going to be raised when the model has loaded them. 
+                // A VersionsLoaded event will be raised when the model has retrieved the versions file. 
                 viewSource.Source = new List<GroupInfo>();
             }
             else
             {
-                IEnumerable<IGrouping<SdkId, VersionRecord>> query = from version in Model.VersionsList
-                                                                     group version by version.SdkId into g
-                                                                     orderby g.Key descending
-                                                                     select g;
-
                 List<GroupInfo> groups = new();
 
-                foreach (IGrouping<SdkId, VersionRecord> g in query)
+                foreach (ISdk sdk in Model.SupportedSdk.Reverse())
                 {
-                    string sdkName = GetSdkName(g.Key);
-
-                    // the downloaded sdk file is already sorted
-                    IEnumerable<DisplayVersion> data = g.Reverse().Select(v => new DisplayVersion(sdkName, $"{v.SemanticVersion} {v.VersionTag}", v.PackageVersionStr));
-
-                    groups.Add(new GroupInfo(sdkName, data));
+                    groups.Add(new GroupInfo(GetSdkName(sdk.Id), Model.VersionsList.Where(vr => vr.SdkId == sdk.Id).Reverse()));
                 }
 
                 viewSource.Source = groups;
@@ -84,7 +71,31 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
             }
         }
 
+        Debug.Fail("failed to find sdk display name");
         return sdkId.ToString();
+    }
+
+    public static void ExecuteCopy(IList<object> selectedItems)
+    {
+        // the selected items are in the time order that they were selected in
+        // need to convert them back to sorted list ordering
+        StringBuilder sb = new StringBuilder();
+
+        foreach (VersionRecord vr in selectedItems.Cast<VersionRecord>().OrderDescending(new VersionRecordComparer()))
+        {
+            sb.Append(vr.SdkVersionStr);
+            sb.Append('\t');
+            sb.Append(vr.PackageVersionStr);
+            sb.Append('\t');
+            sb.AppendLine(vr.SingletonVersionStr);
+        }
+
+        if (sb.Length > 0)
+        {
+            DataPackage dp = new DataPackage();
+            dp.SetText(sb.ToString());
+            Clipboard.SetContent(dp);
+        }
     }
 
     private void RaisePropertyChanged([CallerMemberName] string? propertyName = default)

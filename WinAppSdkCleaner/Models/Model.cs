@@ -4,7 +4,10 @@ namespace WinAppSdkCleaner.Models;
 
 internal static class Model
 {
+    public static ISdk[] SupportedSdk => [new ProjectReunion(), new WinAppSdk()];
+
     private static readonly Dictionary<int, VersionRecord> sVersionsLookUp = new();
+    private static readonly Dictionary<int, VersionRecord> sSingletonLookUp = new();
 
     public static event EventHandler? VersionsLoaded;
     public static bool VersionListLoaded = false;
@@ -21,15 +24,21 @@ internal static class Model
 
     public static IEnumerable<VersionRecord> VersionsList => sVersionsLookUp.Values;
 
-    public static VersionRecord CategorizePackageVersion(SdkId sdkId, PackageVersion packageVersion)
+    public static VersionRecord CategorizePackageVersion(SdkId sdkId, PackageVersion packageVersion, bool isSingleton)
     {
-        if (sVersionsLookUp.TryGetValue(MakeKey(sdkId, packageVersion), out VersionRecord? versionRecord))
+        if (isSingleton)
         {
-            Debug.Assert(versionRecord is not null);
+            if (sSingletonLookUp.TryGetValue(MakeKey(sdkId, packageVersion), out VersionRecord? versionRecord))
+            {
+                return versionRecord;
+            }
+        }
+        else if (sVersionsLookUp.TryGetValue(MakeKey(sdkId, packageVersion), out VersionRecord? versionRecord))
+        {
             return versionRecord;
         }
 
-        return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion);
+        return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion, default);
     }
 
     private static void AddDependents(Dictionary<string, PackageData> sdkFrameworksLookUpTable, IEnumerable<Package> allPackages)
@@ -42,11 +51,11 @@ internal static class Model
             {
                 if (sdkFrameworksLookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentPackageRecord))
                 {
-                    PackageData dependentPackage = new PackageData(package, new List<PackageData>());
+                    PackageData dependentPackage = new PackageData(package);
 
                     lock (lockObject)
                     {
-                        parentPackageRecord!.Dependents.Add(dependentPackage);
+                        parentPackageRecord.Dependents.Add(dependentPackage);
                     }
                 }
             }
@@ -60,7 +69,7 @@ internal static class Model
 
         await Task.WhenAll(sdkTask, versionsTask);
 
-        CategorizePackageVersions(sdkTask.Result);
+        CategorizeSdkVersions(sdkTask.Result);
 
         Trace.WriteLine($"Found {sdkTask.Result.Count} SDKs");
 
@@ -72,11 +81,11 @@ internal static class Model
         return ((int)sdkId << 16 | version.Major) ^ (version.Minor << 16 | version.Build);
     }
 
-    private static void CategorizePackageVersions(List<SdkData> sdkList)
+    private static void CategorizeSdkVersions(List<SdkData> sdkList)
     {
         foreach (SdkData sdk in sdkList)
         {
-            if (sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.Version.Release), out VersionRecord? versionRecord))
+            if (sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.PackageVersion), out VersionRecord? versionRecord))
             {
                 Debug.Assert(versionRecord is not null);
                 sdk.Version = versionRecord;
@@ -84,12 +93,10 @@ internal static class Model
         }
     }
 
-    public static ISdk[] SupportedSdk => [new ProjectReunion(), new WinAppSdk()];
-
     private static List<SdkData> GetSDKPackages()
     {
-        List<SdkData> sdkList = new List<SdkData>();
-        Dictionary<string, PackageData> lookUpTable = new Dictionary<string, PackageData>();
+        List<SdkData> sdkList = new();
+        Dictionary<string, PackageData> lookUpTable = new();
 
         PackageManager packageManager = new PackageManager();
         IEnumerable<Package> allPackages;
@@ -103,40 +110,46 @@ internal static class Model
             allPackages = packageManager.FindPackagesForUser(string.Empty);
         }
 
-        foreach (ISdk sdk in SupportedSdk)
+        List<List<Package>> sdkFrameworkPackages = new(SupportedSdk.Length);
+
+        foreach(ISdk sdk in SupportedSdk)
         {
-            IEnumerable<IGrouping<PackageVersion, Package>> query;
+            List<Package> frameworks = new();
 
-            query = from package in allPackages
-                    where (package.SignatureKind != PackageSignatureKind.System) && sdk.Match(package.Id)
-                    group package by package.Id.Version;
-
-            foreach (IGrouping<PackageVersion, Package> group in query)
+            foreach (Package package in allPackages)
             {
-                List<PackageData> packageList = new List<PackageData>();
-
-                foreach (Package package in group)
+                if (package.IsFramework && (package.SignatureKind != PackageSignatureKind.System))
                 {
-                    // check that it's not a staged package
-                    if (IntegrityLevel.IsElevated && !IsInstalled(package, packageManager.FindUsers(package.Id.FullName)))
+                    if (sdk.IsMatch(package.Id) && IsValid(packageManager, package))
                     {
-                        continue;
-                    }
-
-                    PackageData packageData = new PackageData(package, new List<PackageData>());
-                    packageList.Add(packageData);
-
-                    if (package.IsFramework)
-                    {
-                        lookUpTable[package.Id.FullName] = packageData; // used to find dependents
+                        frameworks.Add(package);
                     }
                 }
+            }
 
-                if (packageList.Count > 0)
+            frameworks.Sort(new PackageVersionComparer());
+            sdkFrameworkPackages.Add(frameworks);
+        }
+
+        PackageVersion currentVersion = default;
+        SdkData? currentSdk = default;
+
+        for (int sdkIndex = 0; sdkIndex < SupportedSdk.Length; sdkIndex++)
+        {
+            foreach (Package package in sdkFrameworkPackages[sdkIndex])
+            {
+                if (currentVersion != package.Id.Version)  // assumes that the x64 and x86 framework packages have the same package version
                 {
-                    VersionRecord version = new VersionRecord(string.Empty, string.Empty, sdk.Id, Release: group.Key);
-                    sdkList.Add(new SdkData(version, sdk, packageList));
+                    currentVersion = package.Id.Version;
+                    currentSdk = new SdkData(SupportedSdk[sdkIndex], package.Id.Version);
+
+                    sdkList.Add(currentSdk);
                 }
+
+                PackageData packageData = new PackageData(package);
+
+                currentSdk?.FrameworkPackages.Add(packageData);
+                lookUpTable[package.Id.FullName] = packageData; // used to find dependents
             }
         }
 
@@ -149,28 +162,25 @@ internal static class Model
         return sdkList;
     }
 
-    private static bool IsInstalled(Package package, IEnumerable<PackageUserInformation> collection)
+    private static bool IsValid(PackageManager packageManager, Package package)
     {
-        Debug.Assert(collection.Count() == 1);
-        PackageUserInformation? userInfo = collection.FirstOrDefault();
-
-        if (userInfo is not null)
+        if (!IntegrityLevel.IsElevated)
         {
-            if (userInfo.InstallState == PackageInstallState.Installed)
-            {
-                return true;
-            }
-
-            // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
-            // when it was removed for some (all?) users. Staged packages cannot be deleted by this program, so omit it from the results. 
-            // The "Staged" packages do seem to be automatically deleted after some time (reboot?) so I assume it's a temporary cached state. 
-            Trace.WriteLine($"\tomitting package: {package.Id.FullName} install state: {userInfo.InstallState} sid: {userInfo.UserSecurityId}");
-        }
-        else
-        {
-            Trace.WriteLine($"\tomitting package: {package.Id.FullName} - unable to determine package install state");
+            return true;
         }
 
+        IEnumerable<PackageUserInformation> users = packageManager.FindUsers(package.Id.FullName);
+
+        if (users.All(u => u.InstallState == PackageInstallState.Installed))
+        {
+            return true;
+        }
+
+        // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
+        // when it was removed for some (all?) users. Staged packages cannot be deleted by this program, so omit it from the results. 
+        // The "Staged" packages do seem to be automatically deleted after some time (reboot?) so I assume it's a temporary cached state. 
+
+        Trace.WriteLine($"\tomitting package: {package.Id.FullName} - unable to determine package install state");
         return false;
     }
 
@@ -182,7 +192,7 @@ internal static class Model
             {
                 if (sdkData.Sdk.Id == sdk.Id)
                 {
-                    sdkData.OtherAppsCount = IdentifyOtherApps(sdk, sdkData.SdkPackages);
+                    sdkData.OtherAppsCount = IdentifyOtherApps(sdk, sdkData.FrameworkPackages);
                 }
             }
         }
@@ -196,7 +206,7 @@ internal static class Model
         {
             int count = 0;
 
-            if (!sdk.Match(packageData.Package.Id))
+            if (!sdk.IsMatch(packageData.Package.Id))
             {
                 count += 1;
             }
@@ -382,11 +392,23 @@ internal static class Model
                     Debug.Assert(versions.Count > 0);
 
                     sVersionsLookUp.EnsureCapacity(versions.Count);
+                    sSingletonLookUp.EnsureCapacity(versions.Count);
 
                     foreach (VersionRecord versionRecord in versions)
                     {
                         bool success = sVersionsLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
                         Debug.Assert(success);
+
+                        if (versionRecord.Singleton != default)
+                        {
+                            // from WinAppSdk "2.0.0 preview 2" and "2.0.0 experimental 7" the singleton package has it's own package version
+                            // presumably multiple new WinAppSdk releases will now be able to include the same singleton version
+                            sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Singleton), versionRecord);
+                        }
+                        else
+                        {
+                            sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
+                        }
                     }
 
                     Trace.WriteLine($"Retrieved {sVersionsLookUp.Count} version records from: {location}");
@@ -499,5 +521,16 @@ internal static class Model
         }
 
         return release ?? new Version();
+    }
+
+    private class PackageVersionComparer : IComparer<Package>
+    {
+        public int Compare(Package? x, Package? y)
+        {
+            Debug.Assert(x is not null);
+            Debug.Assert(y is not null);
+
+            return VersionRecordComparer.PackageVersionComparer(x.Id.Version, y.Id.Version);
+        }
     }
 }
