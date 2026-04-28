@@ -3,14 +3,17 @@
 internal sealed class SdkData
 {
     public VersionRecord Version { get; set; }
-    public ISdk Sdk { get; init; }
-    public List<PackageData> SdkPackages { get; init; }
+    public ISdk Sdk { get; }
+    public List<PackageData> FrameworkPackages { get; } = new();
     public int OtherAppsCount { get; set; }
+    public PackageVersion PackageVersion { get; }
 
-    public SdkData(VersionRecord version, ISdk sdk, List<PackageData> sdkPackages)
+    public SdkData(ISdk sdk, PackageVersion packageVersion)
     {
-        Version = version;
+        PackageVersion = packageVersion;
         Sdk = sdk;
-        SdkPackages = sdkPackages;
+
+        // this may be updated when the version file has finished loading
+        Version = new VersionRecord("", "", sdk.Id, packageVersion, default);
     }
 }

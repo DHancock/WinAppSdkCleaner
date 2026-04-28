@@ -4,7 +4,7 @@ internal sealed class ProjectReunion : ISdk
 {
     public string DisplayName => "Project Reunion";
 
-    public bool Match(PackageId pId)
+    public bool IsMatch(PackageId pId)
     {
         return ISdk.IsMicrosoftPublisher(pId) && pId.FullName.Contains("ProjectReunion", StringComparison.OrdinalIgnoreCase);
     }

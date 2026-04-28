@@ -48,7 +48,6 @@ internal sealed partial class SdkView : Page, IPageItem
         void SdkTreeView_Loaded(object sender, RoutedEventArgs e)
         {
             SdkTreeView.Loaded -= SdkTreeView_Loaded;
-
             UpdateTree();
         }
     }
@@ -78,7 +77,7 @@ internal sealed partial class SdkView : Page, IPageItem
                     while (newNodeCount-- > 0)
                     {
                         TreeViewNode newNode = CreateTree(newData[nodeIndex + newNodeCount]);
-                        newNode.IsExpanded = depth == 0;
+                        newNode.IsExpanded = true;
                         nodes.Insert(nodeIndex, newNode);
                     }
 
@@ -104,7 +103,7 @@ internal sealed partial class SdkView : Page, IPageItem
             while (nodeIndex < newData.Count)
             {
                 TreeViewNode newNode = CreateTree(newData[nodeIndex++]);
-                newNode.IsExpanded = depth == 0;
+                newNode.IsExpanded = true;
                 nodes.Add(newNode);
             }
         }
@@ -117,6 +116,7 @@ internal sealed partial class SdkView : Page, IPageItem
             {
                 TreeViewNode childNode = CreateTree(child);
                 node.Children.Add(childNode);
+                node.IsExpanded = true;
             }
 
             return node;
@@ -124,11 +124,9 @@ internal sealed partial class SdkView : Page, IPageItem
 
         void UpdateDependentAppsCount(TreeViewNode node)
         {
-            TreeViewItem? tvi = (TreeViewItem)SdkTreeView.ContainerFromNode(node);
-
-            if (tvi is not null)
+            if (SdkTreeView.ContainerFromNode(node) is TreeViewItem tvi)
             {
-                TextBlock? tb = tvi.FindChild<TextBlock>("OtherAppsCountTextBox");
+                TextBlock? tb = tvi.FindChild<TextBlock>("OtherAppsCountTextBlock");
                 tb?.Text = ((ItemBase)node.Content).OtherAppsCountStr;
             }
         }

@@ -5,16 +5,16 @@ namespace WinAppSdkCleaner.ViewModels;
 internal sealed class PackageItem : ItemBase
 {
     private readonly BitmapImage cachedLogo;
-    public PackageData PackageRecord { get; init; }
+    private readonly PackageData packageData;
 
-    public PackageItem(PackageData packageRecord, ItemBase parent) : base(parent)
+    public PackageItem(PackageData packageData, ItemBase parent) : base(parent)
     {
-        PackageRecord = packageRecord;
+        this.packageData = packageData;
 
         cachedLogo = new BitmapImage();
         LoadPackageLogo();
 
-        foreach (PackageData dependentPackage in packageRecord.Dependents)
+        foreach (PackageData dependentPackage in packageData.Dependents)
         {
             Children.Add(new PackageItem(dependentPackage, this));
         }
@@ -22,7 +22,7 @@ internal sealed class PackageItem : ItemBase
         Children.Sort();
     }
 
-    public Package Package => PackageRecord.Package;
+    public Package Package => packageData.Package;
 
     public override string HeadingText => IsNonSdkPackage ? Package.DisplayName : GetSdkPackageDisplayName();
 
@@ -38,35 +38,50 @@ internal sealed class PackageItem : ItemBase
 
         Debug.Assert(sdkItem is not null);
 
-        if ((sdkItem is not null) && (sdkItem.SdkIdentifier == SdkId.WinAppSdk))
+        if (sdkItem is not null)
         {
             string text;
+            bool isSingleton = false;
 
             if (Package.Id.FullName.Contains("Main"))
             {
-                text = "Main ";
+                text = "Main";
             }
             else if (Package.Id.FullName.Contains("DDLM"))
             {
-                text = "DDLM ";
+                text = "DDLM";
             }
             else if (Package.Id.FullName.Contains("Singleton"))
             {
-                text = "Singleton ";
+                text = "Singleton";
+                isSingleton = true;
             }
             else
             {
                 Debug.Assert(Package.IsFramework);
-                text = "Framework ";
+                text = "Framework";
             }
 
-            VersionRecord vr = Model.CategorizePackageVersion(SdkId.WinAppSdk, Package.Id.Version);
-            text += string.IsNullOrEmpty(vr.SemanticVersion) ? $"({vr.PackageVersionStr})" : vr.SemanticVersion;
+            VersionRecord vr = Model.CategorizePackageVersion(sdkItem.SdkIdentifier, Package.Id.Version, isSingleton);
+
+            if (string.IsNullOrEmpty(vr.SemanticVersion)) // there isn't an corresponding entry in the versions file
+            {
+                text += $" {vr.PackageVersionStr}";
+            }
+            else
+            {
+                text += $" {vr.SemanticVersion}";
+
+                if (!string.IsNullOrEmpty(vr.VersionTag))
+                {
+                    text += $" {vr.VersionTag}";
+                }
+            }
 
             return text + $" - {Package.Id.Architecture.ToString().ToLower()}";
         }
 
-        return Package.DisplayName;  // default for reunion packages
+        return Package.DisplayName; 
     }
 
     private enum Names { Title, Description, FullName, Publisher, InstalledPath, PathExists, InstalledDate, Version }
@@ -125,16 +140,16 @@ internal sealed class PackageItem : ItemBase
         }
     }
 
-    public override int OtherAppsCount => PackageRecord.OtherAppsCount;
+    public override int OtherAppsCount => packageData.OtherAppsCount;
 
-    public override string OtherAppsCountStr => (!IsNonSdkPackage && (PackageRecord.OtherAppsCount > 0)) ? $"+{OtherAppsCount}" : string.Empty;
+    public override string OtherAppsCountStr => (!IsNonSdkPackage && (packageData.OtherAppsCount > 0)) ? $"+{OtherAppsCount}" : string.Empty;
 
     public override FontWeight HeadingFontWeight
     {
-        get => IsNonSdkPackage ? FontWeights.SemiBold : FontWeights.Normal;
+        get => IsNonSdkPackage ? FontWeights.Normal : FontWeights.SemiBold;
     }
 
-    public bool IsNonSdkPackage => (Children.Count == 0) && (PackageRecord.OtherAppsCount == 1);
+    public bool IsNonSdkPackage => (Children.Count == 0) && (packageData.OtherAppsCount == 1);
 
     public override BitmapImage? Logo => cachedLogo;
 
@@ -157,9 +172,9 @@ internal sealed class PackageItem : ItemBase
 
         try
         {
-            await using (Stream s = File.OpenRead(path))
+            await using (FileStream fs = File.OpenRead(path))
             {
-                await cachedLogo.SetSourceAsync(s.AsRandomAccessStream());
+                await cachedLogo.SetSourceAsync(fs.AsRandomAccessStream());
             }
         }
         catch
@@ -179,7 +194,7 @@ internal sealed class PackageItem : ItemBase
 
         if (IsNonSdkPackage != other.IsNonSdkPackage)
         {
-            return IsNonSdkPackage ? cBefore : cAfter;
+            return IsNonSdkPackage ? cAfter : cBefore;
         }
 
         int result = string.Compare(HeadingText, other.HeadingText, StringComparison.CurrentCulture);

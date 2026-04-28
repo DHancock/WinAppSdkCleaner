@@ -4,7 +4,7 @@ internal interface ISdk
 {
     string DisplayName { get; }
 
-    bool Match(PackageId pId);
+    bool IsMatch(PackageId pId);
 
     SdkId Id { get; }
 

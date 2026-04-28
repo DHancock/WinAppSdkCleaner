@@ -4,22 +4,25 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:WinAppSdkCleaner.Views"
     xmlns:vm="using:WinAppSdkCleaner.ViewModels"
+    xmlns:m="using:WinAppSdkCleaner.Models"
     NavigationCacheMode="Required">
 
     <!-- left, top, right, bottom -->
     
     <Grid>
         <Grid.Resources>
-            <DataTemplate x:Key="VersionItemTemplate" x:DataType="vm:DisplayVersion">
+            <DataTemplate x:Key="VersionItemTemplate" x:DataType="m:VersionRecord">
                 <Grid AutomationProperties.Name="{x:Bind AutomationName}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="{x:Bind SdkVersion}"/>
-                    <TextBlock Grid.Column="1" Text="{x:Bind PackageVersion}"/>
-
+                    <TextBlock Grid.Column="0" Text="{x:Bind SdkVersionStr}"/>
+                    <TextBlock Grid.Column="1" Text="{x:Bind PackageVersionStr}"/>
+                    <TextBlock Grid.Column="2" Text="{x:Bind SingletonVersionStr}"/>
+                    
                     <Grid.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Icon="Copy" Text="Copy" Click="CopyMenuFlyoutItem_Click"/>
@@ -50,9 +53,32 @@
         <ListView x:Name="VersionListView" Style="{StaticResource ListViewStyle}" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}">
             <ListView.GroupStyle>
                 <GroupStyle>
+                    <GroupStyle.HeaderContainerStyle>
+                        <Style TargetType="ListViewHeaderItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        </Style>
+                    </GroupStyle.HeaderContainerStyle>
+                    
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate x:DataType="vm:GroupInfo">
-                            <TextBlock MinWidth="400" FontWeight="SemiBold" FontSize="14" Text="{x:Bind Name}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="FontSize" Value="14"/>
+                                    </Style>
+                                </Grid.Resources>
+                                
+                                <TextBlock Grid.Column="0" Text="{x:Bind Name}"/>
+                                <TextBlock Grid.Column="1" Text="{x:Bind FrameworkVersion}"/>
+                                <TextBlock Grid.Column="2" Text="{x:Bind SingletonVersion}"/>
+                            </Grid>
                         </DataTemplate>
                     </GroupStyle.HeaderTemplate>
                 </GroupStyle>
