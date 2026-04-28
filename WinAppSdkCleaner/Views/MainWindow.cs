@@ -69,7 +69,7 @@ internal sealed partial class MainWindow : Window
         traceListener = new ViewTraceListener();
         Trace.Listeners.Add(traceListener);
 
-        scaleFactor = IntialiseScaleFactor();
+        scaleFactor = InitialiseScaleFactor();
 
         OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
         op.PreferredMinimumWidth = Scale(cMinWidth);
@@ -363,7 +363,7 @@ internal sealed partial class MainWindow : Window
 
     private int Scale(double value) => (int)Math.FusedMultiplyAdd(value, scaleFactor, 0.5);
 
-    private double IntialiseScaleFactor()
+    private double InitialiseScaleFactor()
     {
         double dpi = PInvoke.GetDpiForWindow(WindowHandle);
         return dpi / 96.0;
