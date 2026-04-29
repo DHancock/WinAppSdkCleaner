@@ -78,7 +78,7 @@ internal static class Model
 
     private static int MakeKey(SdkId sdkId, PackageVersion version)
     {
-        return ((int)sdkId << 16 | version.Major) ^ (version.Minor << 16 | version.Build);
+        return (sdkId, version.Major, version.Minor, version.Build, version.Revision).GetHashCode();
     }
 
     private static void CategorizeSdkVersions(List<SdkData> sdkList)
