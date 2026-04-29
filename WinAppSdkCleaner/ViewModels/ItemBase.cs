@@ -9,7 +9,7 @@ internal abstract class ItemBase : IComparable<ItemBase>
 
     public List<ItemBase> Children { get; } = new();
     public abstract string HeadingText { get; }
-    public abstract FontWeight HeadingFontWeight { get; }
+    public virtual FontWeight HeadingFontWeight { get; } = FontWeights.Normal;
     public abstract List<(string property, string value)> Info { get; }
     public abstract int OtherAppsCount { get; }
     public abstract string OtherAppsCountStr { get; }
