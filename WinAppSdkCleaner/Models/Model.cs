@@ -49,13 +49,13 @@ internal static class Model
         {
             foreach (Package dependency in package.Dependencies)
             {
-                if (sdkFrameworksLookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentPackageRecord))
+                if (sdkFrameworksLookUpTable.TryGetValue(dependency.Id.FullName, out PackageData? parentFramework))
                 {
                     PackageData dependentPackage = new PackageData(package);
 
                     lock (lockObject)
                     {
-                        parentPackageRecord.Dependents.Add(dependentPackage);
+                        parentFramework.Dependents.Add(dependentPackage);
                     }
                 }
             }
@@ -98,7 +98,7 @@ internal static class Model
         List<SdkData> sdkList = new();
         Dictionary<string, PackageData> lookUpTable = new();
 
-        PackageManager packageManager = new PackageManager();
+        PackageManager packageManager = new();
         IEnumerable<Package> allPackages;
 
         if (IntegrityLevel.IsElevated)
@@ -110,46 +110,36 @@ internal static class Model
             allPackages = packageManager.FindPackagesForUser(string.Empty);
         }
 
-        List<List<Package>> sdkFrameworkPackages = new(SupportedSdk.Length);
-
-        foreach(ISdk sdk in SupportedSdk)
+        foreach (ISdk sdk in SupportedSdk)
         {
-            List<Package> frameworks = new();
+            IEnumerable<IGrouping<PackageVersion, Package>> query;
 
-            foreach (Package package in allPackages)
+            query = from package in allPackages
+                    where package.IsFramework && (package.SignatureKind != PackageSignatureKind.System) && sdk.IsMatch(package.Id)
+                    group package by package.Id.Version;
+
+            foreach (IGrouping<PackageVersion, Package> group in query)
             {
-                if (package.IsFramework && (package.SignatureKind != PackageSignatureKind.System))
+                List<PackageData> packageList = new();
+
+                foreach (Package package in group)  // assumes that the x86 and x64 framework packages have the same version
                 {
-                    if (sdk.IsMatch(package.Id) && IsValid(packageManager, package))
+                    // check that it's not a staged package
+                    if (IntegrityLevel.IsElevated && !IsInstalled(package, packageManager.FindUsers(package.Id.FullName)))
                     {
-                        frameworks.Add(package);
+                        continue;
                     }
+
+                    PackageData packageData = new PackageData(package);
+                    packageList.Add(packageData);
+
+                    lookUpTable[package.Id.FullName] = packageData; // used to find dependents
                 }
-            }
 
-            frameworks.Sort(new PackageVersionComparer());
-            sdkFrameworkPackages.Add(frameworks);
-        }
-
-        PackageVersion currentVersion = default;
-        SdkData? currentSdk = default;
-
-        for (int sdkIndex = 0; sdkIndex < SupportedSdk.Length; sdkIndex++)
-        {
-            foreach (Package package in sdkFrameworkPackages[sdkIndex])
-            {
-                if (currentVersion != package.Id.Version)  // assumes that the x64 and x86 framework packages have the same package version
+                if (packageList.Count > 0)
                 {
-                    currentVersion = package.Id.Version;
-                    currentSdk = new SdkData(SupportedSdk[sdkIndex], package.Id.Version);
-
-                    sdkList.Add(currentSdk);
+                    sdkList.Add(new SdkData(sdk, packageVersion: group.Key, packageList));
                 }
-
-                PackageData packageData = new PackageData(package);
-
-                currentSdk?.FrameworkPackages.Add(packageData);
-                lookUpTable[package.Id.FullName] = packageData; // used to find dependents
             }
         }
 
@@ -162,25 +152,28 @@ internal static class Model
         return sdkList;
     }
 
-    private static bool IsValid(PackageManager packageManager, Package package)
+    private static bool IsInstalled(Package package, IEnumerable<PackageUserInformation> collection)
     {
-        if (!IntegrityLevel.IsElevated)
+        Debug.Assert(collection.Count() == 1);
+        PackageUserInformation? userInfo = collection.FirstOrDefault();
+
+        if (userInfo is not null)
         {
-            return true;
+            if (userInfo.InstallState == PackageInstallState.Installed)
+            {
+                return true;
+            }
+
+            // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
+            // when it was removed for some (all?) users. Staged packages cannot be deleted by this program, so omit it from the results. 
+            // The "Staged" packages do seem to be automatically deleted after some time (reboot?) so I assume it's a temporary cached state. 
+            Trace.WriteLine($"\tomitting package: {package.Id.FullName} install state: {userInfo.InstallState} sid: {userInfo.UserSecurityId}");
+        }
+        else
+        {
+            Trace.WriteLine($"\tomitting package: {package.Id.FullName} - unable to determine package install state");
         }
 
-        IEnumerable<PackageUserInformation> users = packageManager.FindUsers(package.Id.FullName);
-
-        if (users.All(u => u.InstallState == PackageInstallState.Installed))
-        {
-            return true;
-        }
-
-        // It's most likely that the framework package's install state has been converted to "Staged" by the package manager
-        // when it was removed for some (all?) users. Staged packages cannot be deleted by this program, so omit it from the results. 
-        // The "Staged" packages do seem to be automatically deleted after some time (reboot?) so I assume it's a temporary cached state. 
-
-        Trace.WriteLine($"\tomitting package: {package.Id.FullName} - unable to determine package install state");
         return false;
     }
 
