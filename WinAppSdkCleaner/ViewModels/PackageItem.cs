@@ -24,7 +24,18 @@ internal sealed class PackageItem : ItemBase
 
     public Package Package => packageData.Package;
 
-    public override string HeadingText => IsNonSdkPackage ? Package.DisplayName : GetSdkPackageDisplayName();
+    public override string HeadingText
+    {
+        get
+        {
+            if (field == default)
+            {
+                field = IsNonSdkPackage ? Package.DisplayName : GetSdkPackageDisplayName();
+            }
+
+            return field;
+        }
+    }
 
     private string GetSdkPackageDisplayName()
     {
@@ -66,7 +77,7 @@ internal sealed class PackageItem : ItemBase
 
             if (string.IsNullOrEmpty(vr.SemanticVersion)) // there isn't an corresponding entry in the versions file
             {
-                text += $" {vr.PackageVersionStr}";
+                text += $" {vr.PackageVersionStr} {vr.VersionTag}";
             }
             else
             {
@@ -143,11 +154,6 @@ internal sealed class PackageItem : ItemBase
     public override int OtherAppsCount => packageData.OtherAppsCount;
 
     public override string OtherAppsCountStr => (!IsNonSdkPackage && (packageData.OtherAppsCount > 0)) ? $"+{OtherAppsCount}" : string.Empty;
-
-    public override FontWeight HeadingFontWeight
-    {
-        get => IsNonSdkPackage ? FontWeights.Normal : FontWeights.SemiBold;
-    }
 
     public bool IsNonSdkPackage => (Children.Count == 0) && (packageData.OtherAppsCount == 1);
 

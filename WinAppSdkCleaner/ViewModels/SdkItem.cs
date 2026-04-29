@@ -24,7 +24,7 @@ internal sealed class SdkItem : ItemBase
         {
             if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion)) // this sdk isn't in the versions file
             {
-                return $"{sdkData.Sdk.DisplayName} {sdkData.Version.PackageVersionStr}";
+                return $"{sdkData.Sdk.DisplayName} {sdkData.Version.PackageVersionStr} {sdkData.Version.VersionTag}";
             }
 
             string heading = $"{sdkData.Sdk.DisplayName} {sdkData.Version.SemanticVersion}";
@@ -64,7 +64,21 @@ internal sealed class SdkItem : ItemBase
         Debug.Assert(item is not null);
         Debug.Assert(item is SdkItem);
 
-        int result = VersionRecordComparer.Comparer(sdkData.Version, ((SdkItem)item).sdkData.Version);
+        SdkItem other = (SdkItem)item;
+
+        int result = SdkIdentifier - other.SdkIdentifier;
+
+        if (result == 0)
+        {
+            if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion) || string.IsNullOrEmpty(other.sdkData.Version.SemanticVersion))
+            {
+                 result = PInvoke.StrCmpLogical(HeadingText, other.HeadingText);
+            }
+            else
+            {
+                result = VersionRecordComparer.Comparer(sdkData.Version, other.sdkData.Version);
+            }
+        }
 
         if (!Settings.Instance.SortAscending)
         {

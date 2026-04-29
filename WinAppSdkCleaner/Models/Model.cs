@@ -38,6 +38,7 @@ internal static class Model
             return versionRecord;
         }
 
+        // for an sdk singleton package that has a different version to the framework and isn't in the versions file
         return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion, default);
     }
 
@@ -69,7 +70,7 @@ internal static class Model
 
         await Task.WhenAll(sdkTask, versionsTask);
 
-        CategorizeSdkVersions(sdkTask.Result);
+        UpdateSdkVersions(sdkTask.Result);
 
         Trace.WriteLine($"Found {sdkTask.Result.Count} SDKs");
 
@@ -91,16 +92,42 @@ internal static class Model
         return (sdkId, version.Major, version.Minor, version.Build, version.Revision).GetHashCode();
     }
 
-    private static void CategorizeSdkVersions(List<SdkData> sdkList)
+    private static void UpdateSdkVersions(List<SdkData> sdkList)
     {
         foreach (SdkData sdk in sdkList)
         {
-            if (sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.PackageVersion), out VersionRecord? versionRecord))
+            if (!sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.PackageVersion), out VersionRecord? versionRecord))
             {
-                Debug.Assert(versionRecord is not null);
-                sdk.Version = versionRecord;
+                // not in the versions file so synthesize for packages that have the same version as the frameworks
+                int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
+                versionRecord = new("", ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package), sdk.Sdk.Id, sdk.PackageVersion, default);
+
+                sVersionsLookUp.Add(key, versionRecord); 
             }
+
+            sdk.Version = versionRecord;
         }
+    }
+
+    public static string ExtractFrameworkVersionTag(Package package)
+    {
+        Debug.Assert(package.IsFramework);
+        ReadOnlySpan<char> fullName = package.Id.FullName.AsSpan();
+
+        int index = fullName.IndexOf("preview");
+
+        if (index < 0)
+        {
+            index = fullName.IndexOf("experimental");
+        }
+
+        if (index > 0)
+        {
+            int length = fullName.Slice(index).IndexOf('_');
+            return new string(fullName.Slice(index, length));
+        }
+
+        return string.Empty;
     }
 
     private static List<SdkData> GetSDKPackages()
