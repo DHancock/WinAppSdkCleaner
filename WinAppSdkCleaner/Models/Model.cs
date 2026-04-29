@@ -78,6 +78,16 @@ internal static class Model
 
     private static int MakeKey(SdkId sdkId, PackageVersion version)
     {
+        /*
+        PackageVersion.GetHashCode() cannot be used because the following package versions generate the
+        same hash code, namely 6293. Two Reunion packages have these versions.
+
+        int a = new PackageVersion(8000, 167, 1906, 0).GetHashCode();
+        int b = new PackageVersion(8004, 256, 1745, 0).GetHashCode();
+
+        Debug.Assert(a != b);
+        */
+
         return (sdkId, version.Major, version.Minor, version.Build, version.Revision).GetHashCode();
     }
 
