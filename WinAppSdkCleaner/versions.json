@@ -1249,12 +1249,63 @@
   },
   {
     "SemanticVersion": "2.0.0",
+    "VersionTag": "experimental 7",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2,
+      "Minor": 0,
+      "Build": 0,
+      "Revision": 7
+    },
+    "Singleton": {
+      "Major": 8002,
+      "Minor": 0,
+      "Build": 0,
+      "Revision": 7
+    }
+  },
+  {
+    "SemanticVersion": "2.0.0",
     "VersionTag": "preview 1",
     "SdkId": 1,
     "Release": {
       "Major": 0,
       "Minor": 772,
       "Build": 1552
+    }
+  },
+  {
+    "SemanticVersion": "2.0.0",
+    "VersionTag": "preview 2",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2,
+      "Minor": 0,
+      "Build": 0,
+      "Revision": 2
+    },
+    "Singleton": {
+      "Major": 8002,
+      "Minor": 0,
+      "Build": 0,
+      "Revision": 2
+    }
+  },
+  {
+    "SemanticVersion": "2.0.1",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2,
+      "Minor": 0,
+      "Build": 1,
+      "Revision": 0
+    },
+    "Singleton": {
+      "Major": 8002,
+      "Minor": 0,
+      "Build": 1,
+      "Revision": 0
     }
   }
 ]
