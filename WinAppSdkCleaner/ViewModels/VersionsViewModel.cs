@@ -51,7 +51,14 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 
                 foreach (ISdk sdk in Model.SupportedSdk.Reverse())
                 {
-                    groups.Add(new GroupInfo(GetSdkName(sdk.Id), Model.VersionsList.Where(vr => vr.SdkId == sdk.Id).Reverse()));
+                    string sdkName = GetSdkName(sdk.Id);
+
+                    // filter out any synthesized version records
+                    IEnumerable<VersionRecord> query = Model.VersionsList
+                                                       .Where(vr => vr.SdkId == sdk.Id && !string.IsNullOrEmpty(vr.SemanticVersion))
+                                                       .Reverse();
+
+                    groups.Add(new GroupInfo(sdkName, query));
                 }
 
                 viewSource.Source = groups;
