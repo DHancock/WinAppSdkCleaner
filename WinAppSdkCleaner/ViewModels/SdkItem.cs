@@ -22,7 +22,7 @@ internal sealed class SdkItem : ItemBase
     {
         get
         {
-            if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion)) // this sdk isn't in the versions file
+            if (sdkData.Version.IsSynthesized) // this sdk isn't in the versions file
             {
                 return $"{sdkData.Sdk.DisplayName} {sdkData.Version.PackageVersionStr} {sdkData.Version.VersionTag}";
             }
@@ -70,7 +70,7 @@ internal sealed class SdkItem : ItemBase
 
         if (result == 0)
         {
-            if (string.IsNullOrEmpty(sdkData.Version.SemanticVersion) || string.IsNullOrEmpty(other.sdkData.Version.SemanticVersion))
+            if (sdkData.Version.IsSynthesized || other.sdkData.Version.IsSynthesized)
             {
                  result = PInvoke.StrCmpLogical(HeadingText, other.HeadingText);
             }

@@ -75,7 +75,7 @@ internal sealed class PackageItem : ItemBase
 
             VersionRecord vr = Model.CategorizePackageVersion(sdkItem.SdkIdentifier, Package.Id.Version, isSingleton);
 
-            if (string.IsNullOrEmpty(vr.SemanticVersion)) // there isn't an corresponding entry in the versions file
+            if (vr.IsSynthesized) // there isn't an corresponding entry in the versions file
             {
                 text += $" {vr.PackageVersionStr} {vr.VersionTag}";
             }
