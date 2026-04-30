@@ -55,7 +55,7 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 
                     // filter out any synthesized version records
                     IEnumerable<VersionRecord> query = Model.VersionsList
-                                                       .Where(vr => vr.SdkId == sdk.Id && !string.IsNullOrEmpty(vr.SemanticVersion))
+                                                       .Where(vr => vr.SdkId == sdk.Id && !vr.IsSynthesized)
                                                        .Reverse();
 
                     groups.Add(new GroupInfo(sdkName, query));

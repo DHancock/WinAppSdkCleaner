@@ -16,7 +16,7 @@ internal sealed class VersionRecordComparer : IComparer<VersionRecord>
 
         if (result == 0)
         {
-            if (string.IsNullOrEmpty(a.SemanticVersion) || string.IsNullOrEmpty(b.SemanticVersion))
+            if (a.IsSynthesized || b.IsSynthesized)
             {
                 // one or both don't appear in the versions file
                 result = PackageVersionComparer(a.Release, b.Release);
