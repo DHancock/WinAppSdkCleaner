@@ -89,7 +89,7 @@ internal static class Model
         Debug.Assert(a != b);
         */
 
-        return (sdkId, version.Major, version.Minor, version.Build, version.Revision).GetHashCode();
+        return HashCode.Combine(sdkId, version.Major, version.Minor, version.Build, version.Revision);
     }
 
     private static void UpdateSdkVersions(List<SdkData> sdkList)
