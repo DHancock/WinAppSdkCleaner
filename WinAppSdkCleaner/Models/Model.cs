@@ -124,8 +124,9 @@ internal static class Model
         if (index > 0)
         {
             int length = fullName.Slice(index).IndexOf('_');
+            Debug.Assert(length > 0);
 
-            if ((length > 0) && ((index + length) <= fullName.Length))
+            if (length > 0)
             {
                 return new string(fullName.Slice(index, length));
             }
