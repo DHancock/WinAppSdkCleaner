@@ -3,7 +3,7 @@
 [System.Diagnostics.DebuggerDisplay("{SdkId} {SemanticVersion, nq} {VersionTag, nq} {PackageVersionStr, nq} {SingletonVersionStr, nq}")]
 internal sealed record VersionRecord(string SemanticVersion, string VersionTag, SdkId SdkId, PackageVersion Release, PackageVersion Singleton)
 {
-    public bool IsSynthesized => string.IsNullOrEmpty(SemanticVersion);
+    public bool IsSynthesized => string.IsNullOrEmpty(SemanticVersion);  // this sdk isn't in the versions file, it's generated from an installed framework package
     public string SdkVersionStr => $"{SemanticVersion} {VersionTag}";
     public string PackageVersionStr => GetVersionStr(Release);
     public string SingletonVersionStr => Singleton == default ? "" : GetVersionStr(Singleton);
