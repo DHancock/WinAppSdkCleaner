@@ -59,5 +59,7 @@ public sealed partial class App : Application
     {
         Version version = await Models.Model.GetCurrentReleaseVersionAsync();
         Interlocked.Exchange<Version>(ref latestVersion, version);
+
+        Debug.WriteLine($"Latest version on GitHub: {latestVersion?.ToString(3)}");
     }
 }
