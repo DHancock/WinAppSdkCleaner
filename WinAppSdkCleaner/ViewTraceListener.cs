@@ -1,6 +1,6 @@
 ﻿using WinAppSdkCleaner.Utilities;
 
-namespace WinAppSdkCleaner.Views;
+namespace WinAppSdkCleaner;
 
 internal sealed partial class ViewTraceListener : TraceListener
 {
@@ -11,16 +11,11 @@ internal sealed partial class ViewTraceListener : TraceListener
     private readonly StringBuilder store;
     private TextBox? consumer;
     private ScrollViewer? scrollViewer;
-    private readonly DispatcherTimer dispatcherTimer;
+    private DispatcherTimer? dispatcherTimer;
 
     public ViewTraceListener() : base(nameof(ViewTraceListener))
     {
         lockObject = new Lock();
-
-        dispatcherTimer = new DispatcherTimer();
-        dispatcherTimer.Interval = TimeSpan.FromMilliseconds(100);
-        dispatcherTimer.Tick += DispatcherTimer_Tick;
-
         store = new StringBuilder(cInitialCapacity);
     }
 
@@ -35,6 +30,7 @@ internal sealed partial class ViewTraceListener : TraceListener
                     int start = consumer.SelectionStart;
                     int length = consumer.SelectionLength;
 
+                    // WinUi text boxes don't have an append method
                     consumer.Text = string.Concat(consumer.Text.AsSpan(), store.ToString().AsSpan());
 
                     consumer.SelectionStart = start;
@@ -45,7 +41,7 @@ internal sealed partial class ViewTraceListener : TraceListener
 
                 if (scrollViewer.ChangeView(0.0, scrollViewer.ExtentHeight, 1.0f))
                 {
-                    dispatcherTimer.Stop();
+                    dispatcherTimer?.Stop();
                 }
             }
         }
@@ -60,6 +56,11 @@ internal sealed partial class ViewTraceListener : TraceListener
 
             consumer = textBox;
             scrollViewer = consumer.FindChild<ScrollViewer>();
+            Debug.WriteLine(scrollViewer is not null);
+
+            dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Interval = TimeSpan.FromMilliseconds(100);
+            dispatcherTimer.Tick += DispatcherTimer_Tick;
 
             if (store.Length > 0)
             {
@@ -70,30 +71,20 @@ internal sealed partial class ViewTraceListener : TraceListener
 
     public override bool IsThreadSafe { get; } = true;
 
-    private void Write(string? message, bool append)
+    private void WriteInternal(string? message)
     {
         lock (lockObject)
         {
             try
             {
-                if (append)
-                {
-                    store.Append(message);
-                }
-                else
-                {
-                    store.AppendLine(message);
-                }
+                store.Append(message);
 
                 if (store.Length > cMaxCapacity)
                 {
                     store.Remove(0, cMaxCapacity / 2);   // very unlikely but prudent
                 }
 
-                if ((consumer is not null) && !dispatcherTimer.IsEnabled)
-                {
-                    dispatcherTimer.Start();
-                }
+                dispatcherTimer?.Start();
             }
             catch
             {
@@ -101,7 +92,7 @@ internal sealed partial class ViewTraceListener : TraceListener
         }
     }
 
-    public override void Write(string? message) => Write(message, append: true);
+    public override void Write(string? message) => WriteInternal(message);
 
-    public override void WriteLine(string? message) => Write(message, append: false);
+    public override void WriteLine(string? message) => WriteInternal(message + Environment.NewLine);
 }

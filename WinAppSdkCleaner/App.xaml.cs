@@ -23,6 +23,8 @@ public sealed partial class App : Application
     /// </summary>
     public App()
     {
+        Trace.Listeners.Add(new ViewTraceListener());
+
         // Create the installer mutexes with current user access. The app is installed per
         // user rather than all users. It isn't obvious what the .Net Mutex class is creating.
         const string name = "4ACA5302-CE42-4882-AA6E-FC54667A934B";
@@ -31,7 +33,14 @@ public sealed partial class App : Application
 
         InitializeComponent();
 
-        Task.Run(GetCurrentReleaseVersionAsync);
+        AssemblyName assemblyName = typeof(App).Assembly.GetName();
+        Trace.WriteLine($"{assemblyName.Name} version: {assemblyName.Version?.ToString(3)}");
+
+        Task.Run(async () =>
+        {
+            await GetCurrentReleaseVersionAsync();
+            Trace.WriteLine($"Latest version on GitHub: {latestVersion?.ToString(3)}");
+        });
     }
 
     /// <summary>
@@ -59,7 +68,5 @@ public sealed partial class App : Application
     {
         Version version = await Models.Model.GetCurrentReleaseVersionAsync();
         Interlocked.Exchange<Version>(ref latestVersion, version);
-
-        Debug.WriteLine($"Latest version on GitHub: {latestVersion?.ToString(3)}");
     }
 }
