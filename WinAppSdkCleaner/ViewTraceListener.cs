@@ -56,7 +56,7 @@ internal sealed partial class ViewTraceListener : TraceListener
 
             consumer = textBox;
             scrollViewer = consumer.FindChild<ScrollViewer>();
-            Debug.WriteLine(scrollViewer is not null);
+            Debug.Assert(scrollViewer is not null);
 
             dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Interval = TimeSpan.FromMilliseconds(100);
