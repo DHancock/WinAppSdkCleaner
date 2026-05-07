@@ -52,7 +52,7 @@ internal sealed class VersionRecordComparer : IComparer<VersionRecord>
         return result;
     }
 
-    public static int PackageVersionComparer(PackageVersion a, PackageVersion b)
+    private static int PackageVersionComparer(PackageVersion a, PackageVersion b)
     {
         int result = a.Major - b.Major;
 
