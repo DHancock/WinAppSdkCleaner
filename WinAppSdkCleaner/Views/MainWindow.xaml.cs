@@ -19,10 +19,6 @@ internal sealed partial class MainWindow : Window
 
     public MainWindow(string title) : this()
     {
-        AssemblyName assemblyName = typeof(App).Assembly.GetName();
-        Trace.WriteLine($"{assemblyName.Name} version: {assemblyName.Version?.ToString(3)}");
-        Trace.WriteLine($"All users: {IntegrityLevel.IsElevated}");
-
         AppWindow.Closing += (s, a) =>
         {
             SaveSettings();

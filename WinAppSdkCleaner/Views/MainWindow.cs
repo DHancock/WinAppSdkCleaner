@@ -34,7 +34,6 @@ internal sealed partial class MainWindow : Window
 
     private readonly InputNonClientPointerSource inputNonClientPointerSource;
     private readonly DispatcherTimer dispatcherTimer;
-    private readonly ViewTraceListener traceListener;
     private PointInt32 restorePosition;
     private SizeInt32 restoreSize;
     private readonly MenuFlyout systemMenu;
@@ -51,7 +50,6 @@ internal sealed partial class MainWindow : Window
         this.InitializeComponent();
 
         WindowHandle = (HWND)WindowNative.GetWindowHandle(this);
-
         thisGCHandle = GCHandle.Alloc(this);
 
         unsafe
@@ -61,14 +59,8 @@ internal sealed partial class MainWindow : Window
         }
 
         inputNonClientPointerSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
-
         ContentDialogHelper = new ContentDialogHelper(this);
-
         dispatcherTimer = InitialiseDragRegionTimer();
-
-        traceListener = new ViewTraceListener();
-        Trace.Listeners.Add(traceListener);
-
         scaleFactor = InitialiseScaleFactor();
 
         OverlappedPresenter op = (OverlappedPresenter)AppWindow.Presenter;
@@ -89,7 +81,6 @@ internal sealed partial class MainWindow : Window
         Closed += (s, e) =>
         {
             dispatcherTimer.Stop();
-            Trace.Listeners.Remove(traceListener);
         };
     }
 
