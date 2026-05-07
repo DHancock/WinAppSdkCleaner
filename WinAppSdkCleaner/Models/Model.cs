@@ -557,15 +557,4 @@ internal static class Model
 
         return release ?? new Version();
     }
-
-    private class PackageVersionComparer : IComparer<Package>
-    {
-        public int Compare(Package? x, Package? y)
-        {
-            Debug.Assert(x is not null);
-            Debug.Assert(y is not null);
-
-            return VersionRecordComparer.PackageVersionComparer(x.Id.Version, y.Id.Version);
-        }
-    }
 }
