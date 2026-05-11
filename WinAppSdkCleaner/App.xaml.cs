@@ -11,9 +11,6 @@ public sealed partial class App : Application
     public const string cAppDisplayName = "WinAppSdk Cleaner";
     public static App Instance => (App)Current;
 
-    private readonly SafeHandle localMutex;
-    private readonly SafeHandle globalMutex;
-
     private MainWindow? m_window;
     private Version latestVersion = new Version();
 
@@ -23,14 +20,6 @@ public sealed partial class App : Application
     /// </summary>
     public App()
     {
-        Trace.Listeners.Add(new ViewTraceListener());
-
-        // Create the installer mutexes with current user access. The app is installed per
-        // user rather than all users. It isn't obvious what the .Net Mutex class is creating.
-        const string name = "4ACA5302-CE42-4882-AA6E-FC54667A934B";
-        localMutex = PInvoke.CreateMutex(null, false, name);
-        globalMutex = PInvoke.CreateMutex(null, false, "Global\\" + name);
-
         InitializeComponent();
 
         AssemblyName assemblyName = typeof(App).Assembly.GetName();
