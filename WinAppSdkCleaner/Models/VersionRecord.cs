@@ -18,5 +18,21 @@ internal sealed record VersionRecord(string SemanticVersion, string VersionTag, 
     [JsonIgnore]
     public string AutomationName => $"{SdkVersionStr} {PackageVersionStr} {SingletonVersionStr}";
 
-    private static string GetVersionStr(PackageVersion pv) => $"{pv.Major}.{pv.Minor}.{pv.Build}.{pv.Revision}";
+    private static string GetVersionStr(PackageVersion pv)
+    {
+        System.Text.StringBuilder sb = new(32);
+        sb.Append(pv.Major);
+        sb.Append('.');
+        sb.Append(pv.Minor);
+        sb.Append('.');
+        sb.Append(pv.Build);
+
+        if (pv.Revision != 0)
+        {
+            sb.Append('.');
+            sb.Append(pv.Revision);
+        }
+
+        return sb.ToString();
+    }
 }

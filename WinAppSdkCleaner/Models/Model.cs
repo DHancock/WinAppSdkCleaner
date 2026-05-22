@@ -114,21 +114,28 @@ internal static class Model
         Debug.Assert(package.IsFramework);
         ReadOnlySpan<char> fullName = package.Id.FullName.AsSpan();
 
-        int index = fullName.IndexOf("preview");
+        string[] tags = { "preview", "experimental" };
 
-        if (index < 0)
+        foreach (string tag in tags)
         {
-            index = fullName.IndexOf("experimental");
-        }
+            int index = fullName.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
 
-        if (index > 0)
-        {
-            int length = fullName.Slice(index).IndexOf('_');
-            Debug.Assert(length > 0);
-
-            if (length > 0)
+            if (index > 0)
             {
-                return new string(fullName.Slice(index, length));
+                int versionPart = fullName.Slice(index + tag.Length).IndexOf('_');
+                Debug.Assert(versionPart > 0);
+
+                if (versionPart > 0)
+                {
+                    StringBuilder sb = new(16);
+                    sb.Append(tag);
+                    sb.Append(' ');
+                    sb.Append(fullName.Slice(index + tag.Length, versionPart));
+
+                    return sb.ToString();
+                }
+
+                return tag;
             }
         }
 
