@@ -1,6 +1,6 @@
 ﻿namespace WinAppSdkCleaner.Models;
 
-[System.Diagnostics.DebuggerDisplay("{SdkId} {SemanticVersion, nq} {VersionTag, nq} {PackageVersionStr, nq} {SingletonVersionStr, nq}")]
+[DebuggerDisplay("{SdkId} {SemanticVersion, nq} {VersionTag, nq} {PackageVersionStr, nq} {SingletonVersionStr, nq}")]
 internal sealed record VersionRecord(string SemanticVersion, string VersionTag, SdkId SdkId, PackageVersion Release, PackageVersion Singleton)
 {
     [JsonIgnore]
@@ -20,7 +20,7 @@ internal sealed record VersionRecord(string SemanticVersion, string VersionTag, 
 
     private static string GetVersionStr(PackageVersion pv)
     {
-        System.Text.StringBuilder sb = new(32);
+        StringBuilder sb = new(32);
         sb.Append(pv.Major);
         sb.Append('.');
         sb.Append(pv.Minor);
