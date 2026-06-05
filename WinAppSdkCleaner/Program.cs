@@ -12,8 +12,8 @@ public static class Program
         // user rather than all users. It isn't obvious what the .Net Mutex class is creating.
         const string name = "4ACA5302-CE42-4882-AA6E-FC54667A934B";
 
-        SafeHandle localMutex = PInvoke.CreateMutex(null, false, name);
-        SafeHandle globalMutex = PInvoke.CreateMutex(null, false, "Global\\" + name);
+        PInvoke.CreateMutex(null, false, name);
+        PInvoke.CreateMutex(null, false, "Global\\" + name);
 
         Trace.Listeners.Add(new ViewTraceListener());
 
