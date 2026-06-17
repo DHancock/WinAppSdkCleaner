@@ -118,16 +118,24 @@ internal sealed partial class MainWindow : Window
                     break;
                 }
 
-                case PInvoke.WM_SYSCOMMAND when ((wParam & 0xFFF0) == (nuint)SC.KEYMENU) && (lParam == (nint)VirtualKey.Space):
+                case PInvoke.WM_SYSCOMMAND:
                 {
-                    window.ShowSystemMenu(viaKeyboard: true);
-                    return (LRESULT)0;
-                }
+                    switch ((SC)(wParam & 0xFFF0))
+                    {
+                        case SC.KEYMENU when lParam == (nint)VirtualKey.Space:
+                        {
+                            window.ShowSystemMenu(viaKeyboard: true);
+                            return (LRESULT)0;
+                        }
 
-                case PInvoke.WM_SYSCOMMAND when (wParam & 0xFFF0) == (nuint)SC.MINIMIZE:
-                {
-                    // work around for https://github.com/microsoft/microsoft-ui-xaml/issues/11068
-                    CloseMenuPopups(window.Content.XamlRoot);
+                        case SC.MINIMIZE:
+                        {
+                            // work around for https://github.com/microsoft/microsoft-ui-xaml/issues/11068
+                            CloseMenuPopups(window.Content.XamlRoot);
+                            break;
+                        }
+                    }
+
                     break;
                 }
 
@@ -192,7 +200,7 @@ internal sealed partial class MainWindow : Window
         }
     }
 
-    private void MenuFlyout_Closing(FlyoutBase sender, FlyoutBaseClosingEventArgs args)
+    private void SystemMenuFlyout_Closing(FlyoutBase sender, FlyoutBaseClosingEventArgs args)
     {
         AccessKeyManager.ExitDisplayMode();
 
@@ -200,7 +208,7 @@ internal sealed partial class MainWindow : Window
         hookSafeHandle = null;
     }
 
-    private void MenuFlyout_Opening(object? sender, object e)
+    private void SystemMenuFlyout_Opening(object? sender, object e)
     {
         Debug.Assert(hookSafeHandle is null);
 
