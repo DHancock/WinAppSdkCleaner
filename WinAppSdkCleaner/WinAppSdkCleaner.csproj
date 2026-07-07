@@ -15,7 +15,7 @@
 		<Nullable>enable</Nullable>
 		<WindowsPackageType>None</WindowsPackageType>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<Version>1.13.0</Version>
+		<Version>1.12.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
