@@ -29,7 +29,7 @@
                 <MenuFlyoutItem Text="Size" Command="{x:Bind sizeCommand}" AccessKey="S"/>
                 <MenuFlyoutItem Text="Minimize" Command="{x:Bind minimizeCommand}" AccessKey="N">
                     <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE921;" Margin="2"/>
+                        <FontIcon Glyph="&#xE921;" Margin="3"/>
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem Text="Maximize" Command="{x:Bind maximizeCommand}" AccessKey="X">
