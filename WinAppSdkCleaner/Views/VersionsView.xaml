@@ -10,7 +10,7 @@
     <!-- left, top, right, bottom -->
 
     <Grid>
-        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" KeyUp="VersionListView_KeyUp">
+        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" KeyDown="VersionListView_KeyDown">
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderContainerStyle>

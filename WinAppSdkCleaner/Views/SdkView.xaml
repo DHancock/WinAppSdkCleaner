@@ -30,7 +30,7 @@
         </Grid.Resources>
 
         <Border Style="{StaticResource TreeViewBorderStyle}">
-            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyUp="SdkTreeView_KeyUp">
+            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyDown="SdkTreeView_KeyDown">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="TreeViewNode">
                         <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
