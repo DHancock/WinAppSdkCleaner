@@ -10,7 +10,7 @@
     <!-- left, top, right, bottom -->
 
     <Grid>
-        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}">
+        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" KeyUp="VersionListView_KeyUp">
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderContainerStyle>
@@ -76,7 +76,7 @@
 
                                     <Grid.ContextFlyout>
                                         <MenuFlyout>
-                                            <MenuFlyoutItem Icon="Copy" Text="Copy" Click="CopyMenuFlyoutItem_Click"/>
+                                            <MenuFlyoutItem Icon="Copy" Text="Copy" Click="GridContextCopy_Click"/>
                                         </MenuFlyout>
                                     </Grid.ContextFlyout>
                                 </Grid>
@@ -85,6 +85,12 @@
                     </Setter>
                 </Style>
             </ListView.Style>
+
+            <ListView.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Icon="Copy" Text="Copy" Click="ListViewContextCopy_Click"/>
+                </MenuFlyout>
+            </ListView.ContextFlyout>
         </ListView>
     </Grid>
 </Page>

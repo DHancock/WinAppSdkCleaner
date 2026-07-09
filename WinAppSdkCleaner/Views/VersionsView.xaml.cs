@@ -19,17 +19,20 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     internal VersionsViewModel ViewModel => viewModel;
 
-    private void CopyMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    private void GridContextCopy_Click(object sender, RoutedEventArgs e)
     {
-        object item = ((FrameworkElement)sender).DataContext;
+        object? item = ((FrameworkElement)sender).DataContext;
 
-        if (VersionListView.SelectedItems.Contains(item))
+        if (item is not null)
         {
-            VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
-        }
-        else
-        {
-            VersionsViewModel.ExecuteCopy([item]);
+            if (VersionListView.SelectedItems.Contains(item))
+            {
+                VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
+            }
+            else
+            {
+                VersionsViewModel.ExecuteCopy([item]);
+            }
         }
     }
 
@@ -38,5 +41,29 @@ internal sealed partial class VersionsView : Page, IPageItem
     public void AddPassthroughContent(in RectInt32[] rects)
     {
         rects[0] = Utils.GetPassthroughRect(VersionListView);
+    }
+
+    private void ListViewContextCopy_Click(object sender, RoutedEventArgs e)
+    {
+        // called via Shift+F10 activation of the list view context menu
+        VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
+    }
+
+    private void VersionListView_KeyUp(object sender, KeyRoutedEventArgs e)
+    {
+        if ((e.Key == VirtualKey.C) && (VersionListView.SelectedItems.Count > 0) && IsControlKeyDown())
+        {
+            VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
+        }
+
+        static bool IsControlKeyDown()
+        {
+            return IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl) || IsKeyDown(VirtualKey.Control);
+
+            static bool IsKeyDown(VirtualKey key)
+            {
+                return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
+            }
+        }
     }
 }
