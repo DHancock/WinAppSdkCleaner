@@ -49,7 +49,7 @@ internal sealed partial class VersionsView : Page, IPageItem
         VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
     }
 
-    private void VersionListView_KeyUp(object sender, KeyRoutedEventArgs e)
+    private void VersionListView_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if ((e.Key == VirtualKey.C) && (VersionListView.SelectedItems.Count > 0) && IsControlKeyDown())
         {
@@ -58,7 +58,7 @@ internal sealed partial class VersionsView : Page, IPageItem
 
         static bool IsControlKeyDown()
         {
-            return IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl) || IsKeyDown(VirtualKey.Control);
+            return IsKeyDown(VirtualKey.Control) || IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl);
 
             static bool IsKeyDown(VirtualKey key)
             {

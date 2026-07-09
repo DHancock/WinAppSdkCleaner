@@ -274,21 +274,21 @@ internal sealed partial class SdkView : Page, IPageItem
         SdkViewModel.ExecuteCopy((ItemBase)((TreeViewNode)((FrameworkElement)sender).DataContext).Content);
     }
 
-    private void SdkTreeView_KeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    private void SdkTreeView_KeyDown(object sender, KeyRoutedEventArgs e)
     {
-        if (IsControlKeyDown() && (e.Key == VirtualKey.C) && (SdkTreeView.SelectedItem is TreeViewNode node))
+        if ((e.Key == VirtualKey.C) && (SdkTreeView.SelectedItem is TreeViewNode node) && IsControlKeyDown())
         {
             SdkViewModel.ExecuteCopy((ItemBase)node.Content);
         }
 
-        static bool IsKeyDown(VirtualKey key)
-        {
-            return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
-        }
-
         static bool IsControlKeyDown()
         {
-            return IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl) || IsKeyDown(VirtualKey.Control);
+            return IsKeyDown(VirtualKey.Control) || IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl);
+
+            static bool IsKeyDown(VirtualKey key)
+            {
+                return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
+            }
         }
     }
 
