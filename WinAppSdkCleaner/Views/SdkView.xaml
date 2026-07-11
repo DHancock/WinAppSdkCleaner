@@ -35,7 +35,7 @@
                 <TreeView.Resources>
                     <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
                         <XamlUICommand.KeyboardAccelerators>
-                            <!-- disabled because it would only be active after it's context menu has been opened, so handle them in code-->
+                            <!-- disabled because it would only be active after it's context menu has been opened, so handle it in code-->
                             <KeyboardAccelerator Key="C" Modifiers="Control" IsEnabled="False"/>
                         </XamlUICommand.KeyboardAccelerators>
                         <XamlUICommand.IconSource>
@@ -45,7 +45,7 @@
 
                     <XamlUICommand x:Name="InfoCommand" Label="Info..." CanExecuteRequested="InfoCommand_CanExecuteRequested" ExecuteRequested="InfoCommand_ExecuteRequested">
                         <XamlUICommand.KeyboardAccelerators>
-                            <!-- disabled because it would only be active after it's context menu has been opened, so handle them in code-->
+                            <!-- disabled because it would only be active after it's context menu has been opened, so handle it in code-->
                             <KeyboardAccelerator Key="I" Modifiers="Control" IsEnabled="False"/>
                         </XamlUICommand.KeyboardAccelerators>
                         <XamlUICommand.IconSource>

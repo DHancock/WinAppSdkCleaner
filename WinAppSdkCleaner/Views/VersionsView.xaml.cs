@@ -38,19 +38,9 @@ internal sealed partial class VersionsView : Page, IPageItem
         // handle the list's context menu items keyboard accelerators here because if it was left to  
         // the api they would only be active after the context menu has been opened for the first time.
 
-        if ((e.Key == VirtualKey.C) && (VersionListView.SelectedItems.Count > 0) && IsControlKeyDown())
+        if ((e.Key == VirtualKey.C) && (VersionListView.SelectedItems.Count > 0) && Utils.IsControlKeyDown())
         {
             VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
-        }
-
-        static bool IsControlKeyDown()
-        {
-            return IsKeyDown(VirtualKey.Control) || IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl);
-
-            static bool IsKeyDown(VirtualKey key)
-            {
-                return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
-            }
         }
     }
 
