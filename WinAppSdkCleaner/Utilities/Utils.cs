@@ -31,4 +31,14 @@ internal static class Utils
     {
         return ScaledRect(GetOffsetFromXamlRoot(e), e.ActualSize, e.XamlRoot.RasterizationScale);
     }
+
+    public static bool IsControlKeyDown()
+    {
+        return IsKeyDown(VirtualKey.Control) || IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl);
+
+        static bool IsKeyDown(VirtualKey key)
+        {
+            return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
+        }
+    }
 }

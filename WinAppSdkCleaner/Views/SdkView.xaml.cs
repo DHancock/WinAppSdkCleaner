@@ -287,29 +287,16 @@ internal sealed partial class SdkView : Page, IPageItem
         {
             if (e.Key == VirtualKey.C)
             {
-                if (IsControlKeyDown())
+                if (Utils.IsControlKeyDown())
                 {
                     ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
                     SdkViewModel.ExecuteCopy(item);
                 }
             }
-            else if (e.Key == VirtualKey.I)
+            else if ((e.Key == VirtualKey.I) && Utils.IsControlKeyDown())
             {
-                if (IsControlKeyDown())
-                {
-                    ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
-                    await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
-                }
-            }
-        }
-
-        static bool IsControlKeyDown()
-        {
-            return IsKeyDown(VirtualKey.Control) || IsKeyDown(VirtualKey.LeftControl) || IsKeyDown(VirtualKey.RightControl);
-
-            static bool IsKeyDown(VirtualKey key)
-            {
-                return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
+                ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+                await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
             }
         }
     }
