@@ -15,26 +15,16 @@ internal sealed partial class VersionsView : Page, IPageItem
         InitializeComponent();
 
         viewModel = new VersionsViewModel(this.DispatcherQueue);
+        Loaded += VersionsView_Loaded;
+    }
+
+    private void VersionsView_Loaded(object sender, RoutedEventArgs e)
+    {
+        // allow keyboard interaction without the need to tab into the list
+        VersionListView.Focus(FocusState.Programmatic);
     }
 
     internal VersionsViewModel ViewModel => viewModel;
-
-    private void GridContextCopy_Click(object sender, RoutedEventArgs e)
-    {
-        object? item = ((FrameworkElement)sender).DataContext;
-
-        if (item is not null)
-        {
-            if (VersionListView.SelectedItems.Contains(item))
-            {
-                VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
-            }
-            else
-            {
-                VersionsViewModel.ExecuteCopy([item]);
-            }
-        }
-    }
 
     public int PassthroughCount => 1;
 
@@ -43,14 +33,11 @@ internal sealed partial class VersionsView : Page, IPageItem
         rects[0] = Utils.GetPassthroughRect(VersionListView);
     }
 
-    private void ListViewContextCopy_Click(object sender, RoutedEventArgs e)
-    {
-        // called via Shift+F10 activation of the list view context menu
-        VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
-    }
-
     private void VersionListView_KeyDown(object sender, KeyRoutedEventArgs e)
     {
+        // handle the list's context menu items keyboard accelerators here because if it was left to  
+        // the api they would only be active after the context menu has been opened for the first time.
+
         if ((e.Key == VirtualKey.C) && (VersionListView.SelectedItems.Count > 0) && IsControlKeyDown())
         {
             VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
@@ -65,5 +52,15 @@ internal sealed partial class VersionsView : Page, IPageItem
                 return InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
             }
         }
+    }
+
+    private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    {
+        args.CanExecute = VersionListView.SelectedItems.Count > 0;
+    }
+
+    private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    {
+        VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
     }
 }

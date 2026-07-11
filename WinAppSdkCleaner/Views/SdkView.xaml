@@ -31,17 +31,36 @@
 
         <Border Style="{StaticResource TreeViewBorderStyle}">
             <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyDown="SdkTreeView_KeyDown">
+
+                <TreeView.Resources>
+                    <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
+                        <XamlUICommand.KeyboardAccelerators>
+                            <!-- disabled because it would only be active after it's context menu has been opened, so handle them in code-->
+                            <KeyboardAccelerator Key="C" Modifiers="Control" IsEnabled="False"/>
+                        </XamlUICommand.KeyboardAccelerators>
+                        <XamlUICommand.IconSource>
+                            <SymbolIconSource Symbol="Copy"/>
+                        </XamlUICommand.IconSource>
+                    </XamlUICommand>
+
+                    <XamlUICommand x:Name="InfoCommand" Label="Info..." CanExecuteRequested="InfoCommand_CanExecuteRequested" ExecuteRequested="InfoCommand_ExecuteRequested">
+                        <XamlUICommand.KeyboardAccelerators>
+                            <!-- disabled because it would only be active after it's context menu has been opened, so handle them in code-->
+                            <KeyboardAccelerator Key="I" Modifiers="Control" IsEnabled="False"/>
+                        </XamlUICommand.KeyboardAccelerators>
+                        <XamlUICommand.IconSource>
+                            <FontIconSource Glyph="&#xE946;"/>
+                        </XamlUICommand.IconSource>
+                    </XamlUICommand>  
+                </TreeView.Resources>
+                
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="TreeViewNode">
                         <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
                             <TreeViewItem.ContextFlyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Icon="Copy" Text="Copy" Click="CopyMenuFlyoutItem_Click"/>
-                                    <MenuFlyoutItem Text="Info..." Click="InfoMenuFlyoutItem_Click">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon Glyph="&#xE946;"/>
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
+                                    <MenuFlyoutItem Command="{StaticResource InfoCommand}"/>
                                 </MenuFlyout>
                             </TreeViewItem.ContextFlyout>
                             
