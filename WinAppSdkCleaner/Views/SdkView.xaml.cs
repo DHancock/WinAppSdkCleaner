@@ -26,7 +26,15 @@ internal sealed partial class SdkView : Page, IPageItem
         viewModel = new SdkViewModel();
         viewModel.PropertyChanged += ViewModel_PropertyChanged;
 
+        Loaded += SdkView_Loaded;
+
         IsIdle = true;
+    }
+
+    private void SdkView_Loaded(object sender, RoutedEventArgs e)
+    {
+        // allow keyboard interaction without the need to tab into the list
+        SdkTreeView.Focus(FocusState.Programmatic);
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -269,16 +277,30 @@ internal sealed partial class SdkView : Page, IPageItem
         AdjustCommandsState();
     }
 
-    private void CopyMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
-    {
-        SdkViewModel.ExecuteCopy((ItemBase)((TreeViewNode)((FrameworkElement)sender).DataContext).Content);
-    }
 
-    private void SdkTreeView_KeyDown(object sender, KeyRoutedEventArgs e)
+    private async void SdkTreeView_KeyDown(object sender, KeyRoutedEventArgs e)
     {
-        if ((e.Key == VirtualKey.C) && (SdkTreeView.SelectedItem is TreeViewNode node) && IsControlKeyDown())
+        // handle the list's context menu items keyboard accelerators here because if it was left to  
+        // the api they would only be active after the context menu has been opened for the first time.
+
+        if (SdkTreeView.SelectedItem is not null)
         {
-            SdkViewModel.ExecuteCopy((ItemBase)node.Content);
+            if (e.Key == VirtualKey.C)
+            {
+                if (IsControlKeyDown())
+                {
+                    ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+                    SdkViewModel.ExecuteCopy(item);
+                }
+            }
+            else if (e.Key == VirtualKey.I)
+            {
+                if (IsControlKeyDown())
+                {
+                    ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+                    await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
+                }
+            }
         }
 
         static bool IsControlKeyDown()
@@ -318,10 +340,25 @@ internal sealed partial class SdkView : Page, IPageItem
         rects[3] = Utils.GetPassthroughRect(SortButton);
     }
 
-    private async void InfoMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        ItemBase item = (ItemBase)((TreeViewNode)((FrameworkElement)sender).DataContext).Content;
+        args.CanExecute = SdkTreeView.SelectedItem is not null;
+    }
 
+    private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    {
+        ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+        SdkViewModel.ExecuteCopy(item);
+    }
+
+    private void InfoCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    {
+        args.CanExecute = SdkTreeView.SelectedItem is not null;
+    }
+
+    private async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    {
+        ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
         await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
     }
 }

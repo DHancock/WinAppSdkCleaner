@@ -74,11 +74,7 @@
                                     <TextBlock Grid.Column="1" Text="{x:Bind PackageVersionStr}"/>
                                     <TextBlock Grid.Column="2" Text="{x:Bind SingletonVersionStr}"/>
 
-                                    <Grid.ContextFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem Icon="Copy" Text="Copy" Click="GridContextCopy_Click"/>
-                                        </MenuFlyout>
-                                    </Grid.ContextFlyout>
+
                                 </Grid>
                             </DataTemplate>
                         </Setter.Value>
@@ -86,9 +82,20 @@
                 </Style>
             </ListView.Style>
 
+            <ListView.Resources>
+                <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
+                    <XamlUICommand.KeyboardAccelerators>
+                        <!-- disabled because it would only be active after it's context menu has been opened, so handle them in code-->
+                        <KeyboardAccelerator Key="C" Modifiers="Control" IsEnabled="False"/>
+                    </XamlUICommand.KeyboardAccelerators>
+                    <XamlUICommand.IconSource>
+                        <SymbolIconSource Symbol="Copy"/>
+                    </XamlUICommand.IconSource>
+                </XamlUICommand>
+            </ListView.Resources>
             <ListView.ContextFlyout>
                 <MenuFlyout>
-                    <MenuFlyoutItem Icon="Copy" Text="Copy" Click="ListViewContextCopy_Click"/>
+                    <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
                 </MenuFlyout>
             </ListView.ContextFlyout>
         </ListView>
