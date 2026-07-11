@@ -283,19 +283,19 @@ internal sealed partial class SdkView : Page, IPageItem
         // handle the list's context menu items keyboard accelerators here because if it was left to  
         // the api they would only be active after the context menu has been opened for the first time.
 
-        if (SdkTreeView.SelectedItem is not null)
+        if (SdkTreeView.SelectedNode is not null)
         {
             if (e.Key == VirtualKey.C)
             {
                 if (Utils.IsControlKeyDown())
                 {
-                    ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+                    ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
                     SdkViewModel.ExecuteCopy(item);
                 }
             }
             else if ((e.Key == VirtualKey.I) && Utils.IsControlKeyDown())
             {
-                ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+                ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
                 await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
             }
         }
@@ -329,23 +329,23 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        args.CanExecute = SdkTreeView.SelectedItem is not null;
+        args.CanExecute = SdkTreeView.SelectedNode is not null;
     }
 
     private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+        ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
         SdkViewModel.ExecuteCopy(item);
     }
 
     private void InfoCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        args.CanExecute = SdkTreeView.SelectedItem is not null;
+        args.CanExecute = SdkTreeView.SelectedNode is not null;
     }
 
     private async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        ItemBase item = (ItemBase)((TreeViewNode)SdkTreeView.SelectedItem).Content;
+        ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
         await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
     }
 }
