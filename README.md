@@ -2,7 +2,7 @@
  A GUI utility for removing unwanted Windows Application Sdk versions.
  
 > [!WARNING] 
-> This is a developer only utility. The utility will list all packages that depend on a particular WinAppSdk framework package. If you remove the WinAppSdk that contains them, **the code will remove all the dependent packages first**. This includes windows utilities installed as part of the OS. The app will not be able to detect if a framework dependant unpackaged app has a dependencey on any WinAppSdk version. Deleteing that version may break the app. Use at your own risk.
+> This is a developer only utility. The utility will list all packages that depend on a particular WinAppSdk framework package. If you remove the WinAppSdk that contains them, **the code will remove all the dependent packages first**. This includes windows utilities installed as part of the OS. The utility can not detect if a framework dependant unpackaged app has a dependencey on any WinAppSdk version. Removing the version may break that app. Use at your own risk.
 
  By default, the utility allows the removal of WinAppSdk packages for the current user. If you only install WinAppSdks using that user account, removing the WinAppSdk will recover the disk space.
  
