@@ -53,17 +53,17 @@
                         </XamlUICommand.IconSource>
                     </XamlUICommand>  
                 </TreeView.Resources>
+
+                <TreeView.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
+                        <MenuFlyoutItem Command="{StaticResource InfoCommand}"/>
+                    </MenuFlyout>
+                </TreeView.ContextFlyout>
                 
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="TreeViewNode">
                         <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
-                            <TreeViewItem.ContextFlyout>
-                                <MenuFlyout>
-                                    <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
-                                    <MenuFlyoutItem Command="{StaticResource InfoCommand}"/>
-                                </MenuFlyout>
-                            </TreeViewItem.ContextFlyout>
-                            
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
