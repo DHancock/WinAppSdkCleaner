@@ -1395,5 +1395,20 @@
       "Minor": 2,
       "Build": 2
     }
+  },
+  {
+    "SemanticVersion": "2.3.1",
+    "VersionTag": "",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2,
+      "Minor": 3,
+      "Build": 1
+    },
+    "Singleton": {
+      "Major": 8002,
+      "Minor": 3,
+      "Build": 1
+    }
   }
 ]
