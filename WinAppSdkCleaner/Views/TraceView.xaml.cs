@@ -29,6 +29,8 @@ internal sealed partial class TraceView : Page, IPageItem
         {
             TraceTextBox.Loaded -= TraceTextBox_Loaded;
 
+            TraceTextBox.ContextFlyout.Opening += ContextFlyout_Opening;
+
             foreach (TraceListener listener in Trace.Listeners)
             {
                 if (listener is ViewTraceListener viewTraceListener)
@@ -42,7 +44,21 @@ internal sealed partial class TraceView : Page, IPageItem
         };
     }
 
-
+    private static void ContextFlyout_Opening(object? sender, object e)
+    {
+        if ((sender is TextCommandBarFlyout tcbf) && (tcbf.Target is TextBox tb))
+        {
+            foreach (ICommandBarElement icbe in tcbf.SecondaryCommands)
+            {
+                if ((icbe is AppBarButton abb) && (abb.ActualTheme != tb.ActualTheme))
+                {
+                    // fix the menu item's text colour for theme changes after the context flyout was created
+                    // (this will also fix each menu item's tool tip colours)
+                    abb.RequestedTheme = tb.ActualTheme;
+                }
+            }
+        }
+    }
 
     public void ExecuteClear(object? param) => TraceTextBox.Text = string.Empty;
 
