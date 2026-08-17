@@ -1,7 +1,4 @@
-﻿using Microsoft.UI.Dispatching;
-using DispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue;
-
-namespace WinAppSdkCleaner;
+﻿namespace WinAppSdkCleaner;
 
 public static class Program
 {
@@ -17,11 +14,6 @@ public static class Program
 
         Trace.Listeners.Add(new ViewTraceListener());
 
-        Application.Start((p) =>
-        {
-            DispatcherQueueSynchronizationContext context = new(DispatcherQueue.GetForCurrentThread());
-            SynchronizationContext.SetSynchronizationContext(context);
-            _ = new App();
-        });
+        XamlGeneratedProgram.XamlGeneratedMain();
     }
 }
