@@ -145,7 +145,7 @@ internal sealed partial class SdkView : Page, IPageItem
         try
         {
             IsIdle = false;
-            await viewModel.ExecuteSearch();
+            await viewModel.ExecuteSearchAsync();
             IsIdle = true;
         }
         catch (Exception ex)
@@ -201,8 +201,14 @@ internal sealed partial class SdkView : Page, IPageItem
                 if (result == ContentDialogResult.Primary)
                 {
                     IsIdle = false;
-                    await viewModel.ExecuteRemove(sdk);
-                    await viewModel.ExecuteSearch();
+                    await viewModel.ExecuteSearchAsync(); // update the backing data
+
+                    if (sdk.CompareTo((ItemBase?)SdkTreeView.SelectedNode?.Content) == 0)  // the sdk still exists
+                    {
+                        await SdkViewModel.ExecuteRemoveAsync(sdk);
+                        await viewModel.ExecuteSearchAsync();
+                    }
+
                     IsIdle = true;
                 }
             }
@@ -212,7 +218,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
                 try
                 {
-                    await viewModel.ExecuteSearch();
+                    await viewModel.ExecuteSearchAsync();
                 }
                 catch (Exception secondaryException)
                 {
@@ -274,6 +280,15 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private void SelectedTreeViewItemChanged(TreeView sender, TreeViewSelectionChangedEventArgs e)
     {
+        // When deselecting an item via Ctrl+click, this event is received before the TreeView is updated.
+        // Adjusting the command's state assumes that it has been so need to force it here...
+
+        if ((e.RemovedItems.Count == 1) && (e.AddedItems.Count == 0) && (sender.SelectedNode is not null))
+        {
+            Debug.Assert(sender.SelectionMode == TreeViewSelectionMode.Single);
+            sender.SelectedNode = null;
+        }
+
         AdjustCommandsState();
     }
 

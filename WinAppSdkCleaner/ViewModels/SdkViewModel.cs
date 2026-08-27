@@ -19,7 +19,7 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
         }
     }
 
-    public async Task ExecuteSearch()
+    public async Task ExecuteSearchAsync()
     {
         try
         {
@@ -32,27 +32,13 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
         }
     }
 
-    public async Task ExecuteRemove(SdkItem sdk)
+    public static async Task ExecuteRemoveAsync(SdkItem sdk)
     {
-        try
+        IEnumerable<Package> packages = SdkList.GetPackages(sdk);
+
+        if (packages.Any())
         {
-            await ExecuteSearch();
-
-            int index = SdkList.BinarySearch(sdk);
-
-            if (index >= 0)
-            {
-                IEnumerable<Package> packages = SdkList.GetPackages(SdkList[index]);
-
-                if (packages.Any())
-                {
-                    await Model.RemovePackagesAsync(packages);
-                }
-            }
-        }
-        catch 
-        {
-            throw;
+            await Model.RemovePackagesAsync(packages);
         }
     }
 
