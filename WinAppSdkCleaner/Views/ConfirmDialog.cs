@@ -6,7 +6,7 @@ internal sealed partial class ConfirmDialog : ContentDialog
     {
         DefaultButton = ContentDialogButton.Primary;
 
-        PrimaryButtonText = "OK";
+        PrimaryButtonText = "Yes";
         SecondaryButtonText = "Cancel";
 
         Content = message;

@@ -77,16 +77,16 @@ internal sealed class PackageItem : ItemBase
 
             if (vr.IsSynthesized) // there isn't an corresponding entry in the versions file
             {
-                text += $" {vr.PackageVersionStr} {vr.VersionTag}";
+                text += $" {vr.PackageVersionStr}";
             }
             else
             {
                 text += $" {vr.SemanticVersion}";
+            }
 
-                if (!string.IsNullOrEmpty(vr.VersionTag))
-                {
-                    text += $" {vr.VersionTag}";
-                }
+            if (!string.IsNullOrEmpty(vr.VersionTag))
+            {
+                text += $" {vr.VersionTag}";
             }
 
             return text + $" - {Package.Id.Architecture.ToString().ToLower()}";
@@ -101,7 +101,7 @@ internal sealed class PackageItem : ItemBase
     {
         get
         {
-            List<(string property, string value)> info = new();
+            List<(string property, string value)> info = new(8);
 
             info.Add((Names.Title.ToString(), HeadingText));
             info.Add(GetInfo(Names.Description, Package));

@@ -35,7 +35,7 @@ internal sealed class ContentDialogHelper
         }
 
         currentDialog = dialog;
-        currentDialog.Opened += CurrentDialog_Opened;
+        currentDialog.Opened += ContentDialog_Opened;
         currentDialog.Closed += ContentDialog_Closed;
 
         currentDialog.Style = (Style)Application.Current.Resources["CustomContentDialogStyle"];
@@ -48,11 +48,14 @@ internal sealed class ContentDialogHelper
 
     private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
     {
+        currentDialog?.Opened -= ContentDialog_Opened;
+        currentDialog?.Closed -= ContentDialog_Closed;
         currentDialog = null;
+
         parentWindow.ContentDialogClosed();
     }
 
-    private void CurrentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
+    private void ContentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
     {
         parentWindow.ContentDialogOpened();
     }

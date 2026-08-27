@@ -22,19 +22,26 @@ internal sealed class SdkItem : ItemBase
     {
         get
         {
-            if (sdkData.Version.IsSynthesized) // this sdk isn't in the versions file
+            if (field == default)
             {
-                return $"{sdkData.Sdk.DisplayName} {sdkData.Version.PackageVersionStr} {sdkData.Version.VersionTag}";
+                field = $"{sdkData.Sdk.DisplayName}";
+
+                if (sdkData.Version.IsSynthesized) // this sdk isn't in the versions file
+                {
+                    field += $" {sdkData.Version.PackageVersionStr}";
+                }
+                else
+                {
+                    field += $" {sdkData.Version.SemanticVersion}";
+                }
+
+                if (!string.IsNullOrEmpty(sdkData.Version.VersionTag))
+                {
+                    field += $" - {sdkData.Version.VersionTag}";
+                }
             }
 
-            string heading = $"{sdkData.Sdk.DisplayName} {sdkData.Version.SemanticVersion}";
-
-            if (!string.IsNullOrEmpty(sdkData.Version.VersionTag))
-            {
-                heading += $" - {sdkData.Version.VersionTag}";
-            }
-
-            return heading;
+            return field;
         }
     }
 

@@ -248,12 +248,11 @@ internal static class Model
         {
             int count = 0;
 
-            if (!sdk.IsMatch(packageData.Package.Id))
+            if (!sdk.IsMatch(packageData.Package.Id))  // must be a leaf node
             {
                 count += 1;
             }
-
-            if (packageData.Dependents.Count > 0)
+            else if (packageData.Dependents.Count > 0)
             {
                 count += IdentifyOtherApps(sdk, packageData.Dependents);
             }
@@ -479,9 +478,9 @@ internal static class Model
         {
             const string path = "DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.dat";
 
-            using (Stream s = await sHttpClient.GetStreamAsync(path))
+            await using (Stream s = await sHttpClient.GetStreamAsync(path))
             {
-                using (DeflateStream ds = new DeflateStream(s, CompressionMode.Decompress))
+                await using (DeflateStream ds = new DeflateStream(s, CompressionMode.Decompress))
                 {
                     return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
                 }
@@ -550,6 +549,7 @@ internal static class Model
 
         try
         {
+            // unfortunately the versions file contains an anonymous json array so I couldn't just add a new field
             const string path = "DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/appversion.json";
 
             await using (Stream s = await sHttpClient.GetStreamAsync(path))
