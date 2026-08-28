@@ -32,13 +32,18 @@ internal sealed partial class SdkViewModel : INotifyPropertyChanged
         }
     }
 
-    public static async Task ExecuteRemoveAsync(SdkItem sdk)
+    public async Task ExecuteRemoveAsync(SdkItem sdk)
     {
-        IEnumerable<Package> packages = SdkList.GetPackages(sdk);
+        int index = SdkList.BinarySearch(sdk); // use the latest backing data
 
-        if (packages.Any())
+        if (index >= 0)
         {
-            await Model.RemovePackagesAsync(packages);
+            IEnumerable<Package> packages = SdkList.GetPackages(SdkList[index]);
+
+            if (packages.Any())
+            {
+                await Model.RemovePackagesAsync(packages);
+            }
         }
     }
 

@@ -202,13 +202,8 @@ internal sealed partial class SdkView : Page, IPageItem
                 {
                     IsIdle = false;
                     await viewModel.ExecuteSearchAsync(); // update the backing data
-
-                    if (sdk.CompareTo((ItemBase?)SdkTreeView.SelectedNode?.Content) == 0)  // the sdk still exists
-                    {
-                        await SdkViewModel.ExecuteRemoveAsync(sdk);
-                        await viewModel.ExecuteSearchAsync();
-                    }
-
+                    await viewModel.ExecuteRemoveAsync(sdk);
+                    await viewModel.ExecuteSearchAsync();
                     IsIdle = true;
                 }
             }
