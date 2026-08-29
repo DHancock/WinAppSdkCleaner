@@ -33,6 +33,8 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private void SdkView_Loaded(object sender, RoutedEventArgs e)
     {
+        RemoveIcon.Foreground = new SolidColorBrush(IntegrityLevel.IsElevated ? Colors.Crimson : Colors.Green);
+
         // allow keyboard interaction without the need to tab into the list
         SdkTreeView.Focus(FocusState.Programmatic);
     }

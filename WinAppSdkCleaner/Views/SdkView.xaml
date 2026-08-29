@@ -111,7 +111,7 @@
             
             <Button x:Name="RemoveButton" Command="{x:Bind RemoveCommand}" AutomationProperties.Name="Remove">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon x:Name="RemoveIcon" Glyph="&#xE74D;" FontSize="13" Foreground="Green" />
+                    <FontIcon x:Name="RemoveIcon" Glyph="&#xE74D;" FontSize="13"/>
                     <TextBlock Text="Remove" />
                 </StackPanel>
             </Button>
