@@ -25,7 +25,7 @@ internal sealed partial class CustomTitleBar : UserControl
 
             Loaded += (s, e) =>
             {
-                windowIcon.Foreground = new SolidColorBrush (IntegrityLevel.IsElevated ? Colors.Red : Colors.Green);
+                windowIcon.Foreground = new SolidColorBrush (IntegrityLevel.IsElevated ? Colors.Crimson : Colors.Green);
                 UpdateTitleBarPadding(ActualWidth);
             };
         }
