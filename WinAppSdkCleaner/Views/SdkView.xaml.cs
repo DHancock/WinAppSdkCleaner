@@ -294,6 +294,10 @@ internal sealed partial class SdkView : Page, IPageItem
                 sender.SelectedNode = e.AddedItems[0] as TreeViewNode;
             }
         }
+        else if ((e.RemovedItems.Count == 0) && (e.AddedItems.Count == 1) && (sender.SelectedNode is null)) // a new selection when no previous item selected
+        {
+            sender.SelectedNode = e.AddedItems[0] as TreeViewNode;
+        }
 
         AdjustCommandsState();
     }
