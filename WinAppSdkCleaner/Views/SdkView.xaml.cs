@@ -277,13 +277,22 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private void SelectedTreeViewItemChanged(TreeView sender, TreeViewSelectionChangedEventArgs e)
     {
-        // When deselecting an item via Ctrl+click, this event is received before the TreeView is updated.
-        // Adjusting the command's state assumes that it has been so need to force it here...
+        Debug.Assert(sender.SelectionMode == TreeViewSelectionMode.Single);
 
-        if ((e.RemovedItems.Count == 1) && (e.AddedItems.Count == 0) && (sender.SelectedNode is not null))
+        // When selecting or deselecting an item via "Ctrl + left click", this event is received before the
+        // TreeView.SelectedNode property is fully updated. Adjusting the command states assumes that it has
+        // been so need to force it here...
+
+        if (e.RemovedItems.Count == 1)
         {
-            Debug.Assert(sender.SelectionMode == TreeViewSelectionMode.Single);
-            sender.SelectedNode = null;
+            if ((e.AddedItems.Count == 0) && (sender.SelectedNode is not null)) // deselect the currently selected item
+            {
+                sender.SelectedNode = null;
+            }
+            else if ((e.AddedItems.Count == 1) && (sender.SelectedNode is null)) // change the current selection to a different item
+            {
+                sender.SelectedNode = e.AddedItems[0] as TreeViewNode;
+            }
         }
 
         AdjustCommandsState();
