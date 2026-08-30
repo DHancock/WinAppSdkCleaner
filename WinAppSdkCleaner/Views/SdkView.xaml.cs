@@ -283,20 +283,13 @@ internal sealed partial class SdkView : Page, IPageItem
         // TreeView.SelectedNode property is fully updated. Adjusting the command states assumes that it has
         // been so need to force it here...
 
-        if (e.RemovedItems.Count == 1)
+        if ((e.RemovedItems.Count == 1) && (e.AddedItems.Count == 0) && (sender.SelectedNode is not null)) // deselect the currently selected item
         {
-            if ((e.AddedItems.Count == 0) && (sender.SelectedNode is not null)) // deselect the currently selected item
-            {
-                sender.SelectedNode = null;
-            }
-            else if ((e.AddedItems.Count == 1) && (sender.SelectedNode is null)) // change the current selection to a different item
-            {
-                sender.SelectedNode = e.AddedItems[0] as TreeViewNode;
-            }
+            sender.SelectedNode = null;
         }
-        else if ((e.RemovedItems.Count == 0) && (e.AddedItems.Count == 1) && (sender.SelectedNode is null)) // a new selection when no previous item selected
+        else if ((e.AddedItems.Count == 1) && (sender.SelectedNode is null)) // change the current selection or a new selection
         {
-            sender.SelectedNode = e.AddedItems[0] as TreeViewNode;
+            sender.SelectedNode = (TreeViewNode)e.AddedItems[0];
         }
 
         AdjustCommandsState();
