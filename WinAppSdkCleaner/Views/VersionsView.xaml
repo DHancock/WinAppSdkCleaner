@@ -5,12 +5,13 @@
     xmlns:local="using:WinAppSdkCleaner.Views"
     xmlns:vm="using:WinAppSdkCleaner.ViewModels"
     xmlns:m="using:WinAppSdkCleaner.Models"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Required"
+    ProcessKeyboardAccelerators="Page_ProcessKeyboardAccelerators">
 
     <!-- left, top, right, bottom -->
 
     <Grid>
-        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" KeyDown="VersionListView_KeyDown">
+        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}">
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderContainerStyle>
