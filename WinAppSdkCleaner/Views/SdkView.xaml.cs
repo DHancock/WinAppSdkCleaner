@@ -295,32 +295,6 @@ internal sealed partial class SdkView : Page, IPageItem
         AdjustCommandsState();
     }
 
-
-    private async void SdkTreeView_KeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        // handle the list's context menu items keyboard accelerators here because if it was left to  
-        // the api they would only be active after the context menu has been opened for the first time.
-
-        if (SdkTreeView.SelectedNode is not null)
-        {
-            if (e.Key == VirtualKey.C)
-            {
-                if (Utils.IsControlKeyDown())
-                {
-                    ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
-                    SdkViewModel.ExecuteCopy(item);
-                    e.Handled = true;
-                }
-            }
-            else if ((e.Key == VirtualKey.I) && Utils.IsControlKeyDown())
-            {
-                ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
-                await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
-                e.Handled = true;
-            }
-        }
-    }
-
     private void SdkTreeView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
     {
         TimeSpan doubleClickTime = TimeSpan.FromMilliseconds(PInvoke.GetDoubleClickTime());
@@ -367,5 +341,27 @@ internal sealed partial class SdkView : Page, IPageItem
     {
         ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
         await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
+    }
+
+    private async void Page_ProcessKeyboardAccelerators(UIElement sender, ProcessKeyboardAcceleratorEventArgs args)
+    {
+        if (SdkTreeView.SelectedNode is not null)
+        {
+            if (args.Key == VirtualKey.C)
+            {
+                if (args.Modifiers.HasFlag(VirtualKeyModifiers.Control))
+                {
+                    args.Handled = true;
+                    ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
+                    SdkViewModel.ExecuteCopy(item);
+                }
+            }
+            else if ((args.Key == VirtualKey.I) && args.Modifiers.HasFlag(VirtualKeyModifiers.Control))
+            {
+                args.Handled = true;
+                ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
+                await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
+            }
+        }
     }
 }

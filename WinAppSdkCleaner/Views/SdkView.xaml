@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:WinAppSdkCleaner.Views"
     xmlns:vm="using:WinAppSdkCleaner.ViewModels"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Required"
+    ProcessKeyboardAccelerators="Page_ProcessKeyboardAccelerators">
 
     <!-- left, top, right, bottom -->
     
@@ -30,7 +31,7 @@
         </Grid.Resources>
 
         <Border Style="{StaticResource TreeViewBorderStyle}">
-            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked" KeyDown="SdkTreeView_KeyDown">
+            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked">
 
                 <TreeView.Resources>
                     <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
