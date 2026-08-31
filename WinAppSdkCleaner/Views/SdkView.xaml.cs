@@ -309,12 +309,14 @@ internal sealed partial class SdkView : Page, IPageItem
                 {
                     ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
                     SdkViewModel.ExecuteCopy(item);
+                    e.Handled = true;
                 }
             }
             else if ((e.Key == VirtualKey.I) && Utils.IsControlKeyDown())
             {
                 ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
                 await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
+                e.Handled = true;
             }
         }
     }
