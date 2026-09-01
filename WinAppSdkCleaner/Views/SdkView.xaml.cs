@@ -343,25 +343,8 @@ internal sealed partial class SdkView : Page, IPageItem
         await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
     }
 
-    private async void Page_ProcessKeyboardAccelerators(UIElement sender, ProcessKeyboardAcceleratorEventArgs args)
+    public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        if (SdkTreeView.SelectedNode is not null)
-        {
-            if (args.Key == VirtualKey.C)
-            {
-                if (args.Modifiers.HasFlag(VirtualKeyModifiers.Control))
-                {
-                    args.Handled = true;
-                    ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
-                    SdkViewModel.ExecuteCopy(item);
-                }
-            }
-            else if ((args.Key == VirtualKey.I) && args.Modifiers.HasFlag(VirtualKeyModifiers.Control))
-            {
-                args.Handled = true;
-                ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
-                await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
-            }
-        }
+        return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)SdkTreeView.ContextFlyout).Items, modifiers, key);      
     }
 }

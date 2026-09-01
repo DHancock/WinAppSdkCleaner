@@ -39,4 +39,9 @@ internal sealed partial class AboutView : Page, IPageItem
     {
         rects[0] = Utils.GetPassthroughRect(HyperlinkTextBlock);
     }
+
+    public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
+    {
+        return false;
+    }
 }

@@ -43,12 +43,8 @@ internal sealed partial class VersionsView : Page, IPageItem
         VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
     }
 
-    private void Page_ProcessKeyboardAccelerators(UIElement sender, ProcessKeyboardAcceleratorEventArgs args)
+    public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        if ((VersionListView.SelectedItems.Count > 0) && (args.Key == VirtualKey.C) && args.Modifiers.HasFlag(VirtualKeyModifiers.Control))
-        {
-            args.Handled = true;
-            VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
-        }
+        return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)VersionListView.ContextFlyout).Items, modifiers, key);
     }
 }

@@ -200,6 +200,13 @@ internal sealed partial class MainWindow : Window
         Settings.Instance.RestoreBounds = RestoreBounds;
         Settings.Instance.Save();
     }
+
+    private void LayoutRoot_ProcessKeyboardAccelerators(UIElement sender, ProcessKeyboardAcceleratorEventArgs args)
+    {
+        // The lists context menu item keyboard accelerators only seem to be active after the menu has been shown.
+        // Invoke here instead, the accelerators are in known positions in the visual tree
+        args.Handled = ((IPageItem)ContentFrame.Content).InvokeKeyboardAccelerator(args.Modifiers, args.Key);
+    }
 }
 
 
