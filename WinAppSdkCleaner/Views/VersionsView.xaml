@@ -5,8 +5,7 @@
     xmlns:local="using:WinAppSdkCleaner.Views"
     xmlns:vm="using:WinAppSdkCleaner.ViewModels"
     xmlns:m="using:WinAppSdkCleaner.Models"
-    NavigationCacheMode="Required"
-    ProcessKeyboardAccelerators="Page_ProcessKeyboardAccelerators">
+    NavigationCacheMode="Required">
 
     <!-- left, top, right, bottom -->
 
@@ -86,8 +85,7 @@
             <ListView.Resources>
                 <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
                     <XamlUICommand.KeyboardAccelerators>
-                        <!-- disabled because it would only be active after it's context menu has been opened, so handle it in code-->
-                        <KeyboardAccelerator Key="C" Modifiers="Control" IsEnabled="False"/>
+                        <KeyboardAccelerator Key="C" Modifiers="Control"/>
                     </XamlUICommand.KeyboardAccelerators>
                     <XamlUICommand.IconSource>
                         <SymbolIconSource Symbol="Copy"/>

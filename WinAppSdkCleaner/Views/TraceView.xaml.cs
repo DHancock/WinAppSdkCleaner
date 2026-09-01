@@ -75,5 +75,10 @@ internal sealed partial class TraceView : Page, IPageItem
         rects[0] = Utils.GetPassthroughRect(TraceTextBox);
         rects[1] = Utils.GetPassthroughRect(ClearButton);
     }
+
+    public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
+    {
+        return false;
+    }
 }
 
