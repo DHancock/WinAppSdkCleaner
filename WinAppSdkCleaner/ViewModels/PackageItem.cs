@@ -95,58 +95,34 @@ internal sealed class PackageItem : ItemBase
         return Package.DisplayName; 
     }
 
-    private enum Names { Title, Description, FullName, Publisher, InstalledPath, PathExists, InstalledDate, Version }
-
     public override List<(string property, string value)> Info
     {
         get
         {
             List<(string property, string value)> info = new(8);
 
-            info.Add((Names.Title.ToString(), HeadingText));
-            info.Add(GetInfo(Names.Description, Package));
-            info.Add(GetInfo(Names.FullName, Package));
-            info.Add(GetInfo(Names.Publisher, Package));
-            info.Add(GetInfo(Names.InstalledPath, Package));
-            info.Add(GetInfo(Names.PathExists, Package));
-            info.Add(GetInfo(Names.InstalledDate, Package));
-            info.Add(GetInfo(Names.Version, Package));
+            info.Add(("Title", HeadingText));
+            info.Add(("Description", GetInfo(Package, p => p.Description)));
+            info.Add(("Full Name", GetInfo(Package, p => p.Id.FullName)));
+            info.Add(("Publisher", GetInfo(Package, p => p.PublisherDisplayName)));
+            info.Add(("Installed Path", GetInfo(Package, p => p.InstalledPath)));
+            info.Add(("Path Exists", GetInfo(Package, p => Directory.Exists(p.InstalledPath).ToString())));
+            info.Add(("Installed Date", GetInfo(Package, p => p.InstalledDate.ToString("g"))));
+            info.Add(("Version", GetInfo(Package, p => $"{p.Id.Version.Major}.{p.Id.Version.Minor}.{p.Id.Version.Build}.{p.Id.Version.Revision}")));
 
             return info;
 
-            static (string, string) GetInfo(Names name, Package package)
+            static string GetInfo(Package package, Func<Package, string> dataProvider)
             {
-                string nameStr = name.ToString();
-
                 try
                 {
-                    switch (name)
-                    {
-                        case Names.Description: return (nameStr, GetValue(package.Description));
-                        case Names.FullName: return (nameStr, GetValue(package.Id.FullName));
-                        case Names.Publisher: return (nameStr, GetValue(package.PublisherDisplayName));
-                        case Names.InstalledPath: return (nameStr, GetValue(package.InstalledPath));
-                        case Names.PathExists: return (nameStr, Directory.Exists(package.InstalledPath).ToString());
-                        case Names.InstalledDate: return (nameStr, package.InstalledDate.ToString("g"));
-                        case Names.Version: return (nameStr, $"{package.Id.Version.Major}.{package.Id.Version.Minor}.{package.Id.Version.Build}.{package.Id.Version.Revision}");
-                    }
+                    string value = dataProvider(package);
+                    return string.IsNullOrWhiteSpace(value) ? "<empty>" : value;
                 }
                 catch (Exception ex)
                 {
-                    return (nameStr, $"<threw {ex.GetType().Name}>");
+                    return $"<threw {ex.GetType().Name}>";
                 }
-
-                return (nameStr, "<error>");
-            }
-
-            static string GetValue(string value)
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    return "<empty>";
-                }
-
-                return value;
             }
         }
     }
