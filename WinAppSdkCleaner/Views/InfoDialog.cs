@@ -9,7 +9,16 @@ internal sealed partial class InfoDialog : ContentDialog
         PrimaryButtonText = "OK";
         DefaultButton = ContentDialogButton.Primary;
 
-        RichTextBlock rtb = new RichTextBlock();
+        ScrollView sv = new ScrollView() 
+        { 
+            ContentOrientation = ScrollingContentOrientation.Horizontal,
+        };
+
+        RichTextBlock rtb = new RichTextBlock()
+        {
+            Margin = new Thickness(16, 0, 0, 16),
+            IsTextSelectionEnabled = true,
+        };
 
         for (int index = 0; index < info.Count; index++) 
         {
@@ -27,10 +36,8 @@ internal sealed partial class InfoDialog : ContentDialog
             rtb.Blocks.Add(paragraph);
         }
 
-        rtb.IsTextSelectionEnabled = true;
-        rtb.Margin = new Thickness(left: 15, 0, 0, 0);
-
-        Content = rtb;
+        sv.Content = rtb;
+        Content = sv;
     }
 }
 
