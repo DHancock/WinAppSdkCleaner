@@ -92,7 +92,9 @@ internal sealed partial class MainWindow : Window
 
     private void CompositionTarget_Rendered(object? sender, RenderedEventArgs e)
     {
-	    // let a handful of frames through before showing the window by which time xaml has caught up
+        // let a couple of frames through before showing the window by which time xaml has caught up
+        // see https://github.com/microsoft/microsoft-ui-xaml/discussions/11700
+
         if (++renderedFrameCount < 2)
             return;
                             
