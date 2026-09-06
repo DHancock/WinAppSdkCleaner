@@ -340,7 +340,7 @@ internal sealed partial class SdkView : Page, IPageItem
     private async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
         ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
-        await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info);
+        await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info, item.Logo);
     }
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)

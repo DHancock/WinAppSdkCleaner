@@ -20,9 +20,9 @@ internal sealed class ContentDialogHelper
         return await ShowDialogAsync(new ConfirmDialog(message));
     }
 
-    public async Task ShowInfoDialogAsync(List<(string property, string value)> info)
+    public async Task ShowInfoDialogAsync(List<(string property, string value)> info, ImageSource? logo)
     {
-        await ShowDialogAsync(new InfoDialog(info));
+        await ShowDialogAsync(new InfoDialog(info, logo));
     }
 
     private async Task<ContentDialogResult> ShowDialogAsync(ContentDialog dialog)
@@ -38,7 +38,7 @@ internal sealed class ContentDialogHelper
         currentDialog.Opened += ContentDialog_Opened;
         currentDialog.Closed += ContentDialog_Closed;
 
-        currentDialog.Style = (Style)Application.Current.Resources["CustomContentDialogStyle"];
+        currentDialog.Style ??= (Style)Application.Current.Resources["CustomContentDialogStyle"];
         currentDialog.XamlRoot = parentWindow.Content.XamlRoot;
         currentDialog.RequestedTheme = ((FrameworkElement)parentWindow.Content).ActualTheme;
         currentDialog.FlowDirection = ((FrameworkElement)parentWindow.Content).FlowDirection;
