@@ -46,6 +46,9 @@ internal sealed partial class MainWindow : Window
     private const nuint cSubClassID = 0;
     private readonly GCHandle thisGCHandle;
 
+    private bool allowShow = false;
+    private int renderedFrameCount = 0;
+
     private MainWindow()
     {
         this.InitializeComponent();
@@ -83,6 +86,21 @@ internal sealed partial class MainWindow : Window
         {
             dispatcherTimer.Stop();
         };
+
+        CompositionTarget.Rendered += CompositionTarget_Rendered;
+    }
+
+    private void CompositionTarget_Rendered(object? sender, RenderedEventArgs e)
+    {
+	    // let a handful of frames through before showing the window by which time xaml has caught up
+        if (++renderedFrameCount < 2)
+            return;
+                            
+        CompositionTarget.Rendered -= CompositionTarget_Rendered;
+
+        allowShow = true;
+        PInvoke.ShowWindow(WindowHandle, SHOW_WINDOW_CMD.SW_SHOW);
+        PInvoke.SetForegroundWindow(WindowHandle);
     }
 
     private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
@@ -108,6 +126,19 @@ internal sealed partial class MainWindow : Window
         {
             switch (uMsg)
             {
+                case PInvoke.WM_WINDOWPOSCHANGING:
+                {
+                    if (!window.allowShow) // disable showing a blank window until xaml is ready
+                    {
+                        unsafe
+                        {
+                            ((WINDOWPOS*)(nint)lParam)->flags &= ~SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW;
+                        }
+                    }
+
+                    break;
+                }
+
                 case PInvoke.WM_DPICHANGED:
                 {
                     window.scaleFactor = (wParam & 0xFFFF) / 96.0;

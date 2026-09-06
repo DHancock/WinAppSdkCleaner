@@ -17,3 +17,9 @@ GetCurrentThreadId
 StrCmpLogical
 WM_ENDSESSION
 CreateMutex
+WM_WINDOWPOSCHANGING
+WINDOWPOS
+SET_WINDOW_POS_FLAGS
+ShowWindow
+SHOW_WINDOW_CMD
+SetForegroundWindow
