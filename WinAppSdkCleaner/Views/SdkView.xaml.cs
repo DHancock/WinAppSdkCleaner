@@ -66,7 +66,7 @@ internal sealed partial class SdkView : Page, IPageItem
     {
         UpdateTree(SdkTreeView.RootNodes, viewModel.SdkList, 0);
 
-        void UpdateTree(IList<TreeViewNode> nodes, List<ItemBase> newData, int depth)
+        static void UpdateTree(IList<TreeViewNode> nodes, List<ItemBase> newData, int depth)
         {
             int nodeIndex = 0;
 
@@ -92,16 +92,10 @@ internal sealed partial class SdkView : Page, IPageItem
                     }
 
                     nodeIndex = result;
-                    int previousCount = ((ItemBase)node.Content).OtherAppsCount;
 
                     node.Content = newData[nodeIndex];
 
-                    if (previousCount != newData[nodeIndex].OtherAppsCount)
-                    {
-                        UpdateDependentAppsCount(node);
-                    }
-
-                    if ((newData[nodeIndex].Children.Count + node.Children.Count) > 0)
+                    if ((newData[nodeIndex].Children.Count + node.Children.Count) > 0)  // either are non zero
                     {
                         UpdateTree(node.Children, newData[nodeIndex].Children, depth + 1);
                     }
@@ -130,15 +124,6 @@ internal sealed partial class SdkView : Page, IPageItem
             }
 
             return node;
-        }
-
-        void UpdateDependentAppsCount(TreeViewNode node)
-        {
-            if (SdkTreeView.ContainerFromNode(node) is TreeViewItem tvi)
-            {
-                TextBlock? tb = tvi.FindChild<TextBlock>("OtherAppsCountTextBlock");
-                tb?.Text = ((ItemBase)node.Content).OtherAppsCountStr;
-            }
         }
     }
 

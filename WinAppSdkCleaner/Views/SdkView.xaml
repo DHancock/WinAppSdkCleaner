@@ -69,9 +69,9 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <Image Height="20" Source="{x:Bind ((vm:ItemBase)Content).Logo}"/>
+                                <Image Height="20" Source="{x:Bind ((vm:ItemBase)Content).Logo, Mode=OneWay}"/>
                                 <TextBlock Grid.Column="1" Text="{x:Bind ((vm:ItemBase)Content).HeadingText}" FontWeight="{x:Bind ((vm:ItemBase)Content).HeadingFontWeight}" Padding="4,0,2,0"/>
-                                <TextBlock Grid.Column="2" x:Name="OtherAppsCountTextBlock" Text="{x:Bind ((vm:ItemBase)Content).OtherAppsCountStr}" Foreground="Crimson" Margin="4,0,0,0"/>
+                                <TextBlock Grid.Column="2" x:Name="OtherAppsCountTextBlock" Text="{x:Bind ((vm:ItemBase)Content).OtherAppsCountStr, Mode=OneWay}" Foreground="Crimson" Margin="4,0,0,0"/>
                             </Grid>
                         </TreeViewItem>
                     </DataTemplate>
