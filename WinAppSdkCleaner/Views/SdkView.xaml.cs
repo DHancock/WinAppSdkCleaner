@@ -64,9 +64,9 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private void UpdateTree()
     {
-        UpdateTree(SdkTreeView.RootNodes, viewModel.SdkList, 0);
+        UpdateTree(SdkTreeView.RootNodes, viewModel.SdkList);
 
-        static void UpdateTree(IList<TreeViewNode> nodes, List<ItemBase> newData, int depth)
+        static void UpdateTree(IList<TreeViewNode> nodes, List<ItemBase> newData)
         {
             int nodeIndex = 0;
 
@@ -97,7 +97,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
                     if ((newData[nodeIndex].Children.Count + node.Children.Count) > 0)  // either are non zero
                     {
-                        UpdateTree(node.Children, newData[nodeIndex].Children, depth + 1);
+                        UpdateTree(node.Children, newData[nodeIndex].Children);
                     }
 
                     nodeIndex += 1;
