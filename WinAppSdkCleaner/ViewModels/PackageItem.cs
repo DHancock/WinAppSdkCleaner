@@ -4,14 +4,14 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed class PackageItem : ItemBase
 {
-    private readonly BitmapImage cachedLogo;
+    private static readonly Dictionary<string, BitmapImage> sLogoCache = new();
+    private BitmapImage? cachedLogo;
     private readonly PackageData packageData;
 
     public PackageItem(PackageData packageData, ItemBase parent) : base(parent)
     {
         this.packageData = packageData;
 
-        cachedLogo = new BitmapImage();
         LoadPackageLogo();
 
         foreach (PackageData dependentPackage in packageData.Dependents)
@@ -143,7 +143,7 @@ internal sealed class PackageItem : ItemBase
         {
             path = Package.Logo.LocalPath;
         }
-        catch (ArgumentException) // expected for VS deployed packages that have been orphaned
+        catch (ArgumentException) // expected for VS deployed packages that have had their solution deleted
         {
             path = Path.Join(AppContext.BaseDirectory, "Resources//missing.png");
         }
@@ -154,9 +154,22 @@ internal sealed class PackageItem : ItemBase
 
         try
         {
-            await using (FileStream fs = File.OpenRead(path))
+            byte[] data = File.ReadAllBytes(path);
+            string key = Convert.ToBase64String(MD5.HashData(data));
+
+            if (sLogoCache.TryGetValue(key, out BitmapImage? logo))
             {
-                await cachedLogo.SetSourceAsync(fs.AsRandomAccessStream());
+                cachedLogo = logo; // avoids the logo flickering due to it's reference changing
+            }
+            else
+            {
+                cachedLogo = new BitmapImage();
+                sLogoCache[key] = cachedLogo;
+
+                using (MemoryStream ms = new MemoryStream(data, writable: false))
+                {
+                    await cachedLogo.SetSourceAsync(ms.AsRandomAccessStream());
+                }
             }
         }
         catch
