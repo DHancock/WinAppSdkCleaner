@@ -143,7 +143,7 @@ internal sealed class PackageItem : ItemBase
         {
             path = Package.Logo.LocalPath;
         }
-        catch (ArgumentException) // expected for VS deployed packages that have had their solution deleted
+        catch (ArgumentException) // expected for VS deployed packages that have had the solution assets deleted
         {
             path = Path.Join(AppContext.BaseDirectory, "Resources//missing.png");
         }
@@ -159,14 +159,15 @@ internal sealed class PackageItem : ItemBase
 
             if (sLogoCache.TryGetValue(key, out BitmapImage? logo))
             {
-                cachedLogo = logo; // avoids the logo flickering due to it's reference changing
+                cachedLogo = logo; // avoids the logo flickering
             }
             else
             {
                 cachedLogo = new BitmapImage();
                 sLogoCache[key] = cachedLogo;
 
-                using (MemoryStream ms = new MemoryStream(data, writable: false))
+                // setting publiclyVisible may let the stream extensions direct access to the underlying array
+                using (MemoryStream ms = new MemoryStream(data, 0, data.Length, writable: false, publiclyVisible: true))
                 {
                     await cachedLogo.SetSourceAsync(ms.AsRandomAccessStream());
                 }
