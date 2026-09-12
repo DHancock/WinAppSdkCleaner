@@ -135,7 +135,7 @@ internal sealed class PackageItem : ItemBase
 
     public override BitmapImage? Logo => cachedLogo;
 
-    private async void LoadPackageLogo()
+    private void LoadPackageLogo()
     {
         string path;
 
@@ -169,7 +169,7 @@ internal sealed class PackageItem : ItemBase
                 // setting publiclyVisible may let the stream extensions direct access to the underlying array
                 using (MemoryStream ms = new MemoryStream(data, 0, data.Length, writable: false, publiclyVisible: true))
                 {
-                    await cachedLogo.SetSourceAsync(ms.AsRandomAccessStream());
+                    cachedLogo.SetSource(ms.AsRandomAccessStream());
                 }
             }
         }
