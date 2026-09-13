@@ -4,14 +4,14 @@ namespace WinAppSdkCleaner.ViewModels;
 
 internal sealed class PackageItem : ItemBase
 {
-    private static readonly Dictionary<string, BitmapImage> sLogoCache = new();
-    private BitmapImage? cachedLogo;
+    private readonly BitmapImage cachedLogo;
     private readonly PackageData packageData;
 
     public PackageItem(PackageData packageData, ItemBase parent) : base(parent)
     {
         this.packageData = packageData;
 
+        cachedLogo = new BitmapImage();
         LoadPackageLogo();
 
         foreach (PackageData dependentPackage in packageData.Dependents)
@@ -154,23 +154,13 @@ internal sealed class PackageItem : ItemBase
 
         try
         {
+            // reading the data here avoids the image flickering when using an async file stream image source
             byte[] data = File.ReadAllBytes(path);
-            string key = Convert.ToBase64String(MD5.HashData(data));
 
-            if (sLogoCache.TryGetValue(key, out BitmapImage? logo))
+            // setting publiclyVisible may let the stream extensions direct access to the underlying array
+            using (MemoryStream ms = new MemoryStream(data, 0, data.Length, writable: false, publiclyVisible: true))
             {
-                cachedLogo = logo; // avoids the logo flickering
-            }
-            else
-            {
-                cachedLogo = new BitmapImage();
-                sLogoCache[key] = cachedLogo;
-
-                // setting publiclyVisible may let the stream extensions direct access to the underlying array
-                using (MemoryStream ms = new MemoryStream(data, 0, data.Length, writable: false, publiclyVisible: true))
-                {
-                    cachedLogo.SetSource(ms.AsRandomAccessStream());
-                }
+                cachedLogo.SetSource(ms.AsRandomAccessStream());
             }
         }
         catch
