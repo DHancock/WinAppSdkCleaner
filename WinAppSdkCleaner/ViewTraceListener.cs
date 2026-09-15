@@ -6,10 +6,10 @@ internal sealed partial class ViewTraceListener : TraceListener
 {
     private const int cMaxCapacity = 1024 * 10;
     private const int cInitialCapacity = 1024 * 2;
-
     private readonly Lock lockObject;
     private readonly StringBuilder store;
-    private TextBox? consumer;
+    private RichTextBlock? consumer;
+    private Paragraph? paragraph;
     private ScrollViewer? scrollViewer;
     private DispatcherTimer? dispatcherTimer;
 
@@ -23,40 +23,39 @@ internal sealed partial class ViewTraceListener : TraceListener
     {
         lock (lockObject)
         {
-            if ((consumer is not null) && (scrollViewer is not null))
+            Debug.Assert(consumer is not null);
+            Debug.Assert(scrollViewer is not null);
+            Debug.Assert(dispatcherTimer is not null);
+
+            if (store.Length > 0)
             {
-                if (store.Length > 0)
-                {
-                    int start = consumer.SelectionStart;
-                    int length = consumer.SelectionLength;
+                paragraph?.Inlines.Add(new Run() { Text = store.ToString() });
+                store.Clear();
+            }                                                           
 
-                    // WinUi text boxes don't have an append method
-                    consumer.Text = string.Concat(consumer.Text.AsSpan(), store.ToString().AsSpan());
-
-                    consumer.SelectionStart = start;
-                    consumer.SelectionLength = length;
-
-                    store.Clear();
-                }
-
-                if (scrollViewer.ChangeView(0.0, scrollViewer.ExtentHeight, 1.0f))
-                {
-                    dispatcherTimer?.Stop();
-                }
+            if (scrollViewer.ChangeView(0.0, scrollViewer.ExtentHeight, 1.0f))
+            {
+                // ChangeView will return false if it hasn't completed scrolling or if no scrolling is required.
+                // So until there's enough text to actually need scrolling the timer will remain running...
+                dispatcherTimer.Stop();
             }
         }
     }
 
-    public void RegisterConsumer(TextBox textBox)
+    public void RegisterConsumer(RichTextBlock textBlock, ScrollViewer textScrollViewer)
     {
         lock (lockObject)
         {
             Debug.Assert(consumer is null);
-            Debug.Assert(textBox.IsLoaded);
+            Debug.Assert(dispatcherTimer is null);
+            Debug.Assert(textBlock.IsLoaded);
 
-            consumer = textBox;
-            scrollViewer = consumer.FindChild<ScrollViewer>();
-            Debug.Assert(scrollViewer is not null);
+            consumer = textBlock;
+            scrollViewer = textScrollViewer;
+
+            // paragraphs have to be created on the ui thread
+            paragraph = new Paragraph();
+            consumer.Blocks.Add(paragraph);
 
             dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Interval = TimeSpan.FromMilliseconds(100);
@@ -69,7 +68,15 @@ internal sealed partial class ViewTraceListener : TraceListener
         }
     }
 
-    public override bool IsThreadSafe { get; } = true;
+    public void Clear()
+    {
+        lock (lockObject)
+        {
+            dispatcherTimer?.Stop();
+            store.Clear();
+            paragraph?.Inlines.Clear();
+        }
+    }
 
     private void WriteInternal(string? message)
     {
@@ -84,7 +91,10 @@ internal sealed partial class ViewTraceListener : TraceListener
                     store.Remove(0, cMaxCapacity / 2);   // very unlikely but prudent
                 }
 
-                dispatcherTimer?.Start();
+                if (dispatcherTimer?.IsEnabled == false)
+                {
+                    dispatcherTimer?.Start();
+                }
             }
             catch
             {
