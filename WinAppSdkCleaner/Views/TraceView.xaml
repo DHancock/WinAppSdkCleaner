@@ -17,9 +17,6 @@
         </Grid.RowDefinitions>
 
         <Grid.Resources>
-            <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
-            <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-            
             <Style x:Key="TextBoxBorderStyle" TargetType="Border">
                 <Setter Property="Padding" Value="4,1,1,1"/>
                 <Setter Property="Margin" Value="0"/>
@@ -31,13 +28,12 @@
         </Grid.Resources>
 
         <Border Style="{StaticResource TextBoxBorderStyle}">
-            <TextBox x:Name="TraceTextBox" AcceptsReturn="True" IsReadOnly="True" TextChanged="TextChanged"
-                     FontFamily="Consolas" MaxLength="10240" 
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+            <ScrollViewer x:Name="TraceScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <RichTextBlock x:Name="TraceTextBlock" FontFamily="Consolas" TextWrapping="NoWrap"/>
+            </ScrollViewer>
         </Border>
 
-        <Button x:Name="ClearButton" Margin="25,0,5,15" MinWidth="94.4" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{x:Bind ClearCommand}" AutomationProperties.Name="Clear">
+        <Button x:Name="ClearButton" Margin="25,0,5,15" MinWidth="94.4" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Click="ClearButton_Click" AutomationProperties.Name="Clear">
             <StackPanel Orientation="Horizontal">
                 <FontIcon Glyph="&#xE894;" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="Clear" />
