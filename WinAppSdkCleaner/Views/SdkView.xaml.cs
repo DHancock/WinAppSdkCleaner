@@ -306,30 +306,44 @@ internal sealed partial class SdkView : Page, IPageItem
         rects[3] = Utils.GetPassthroughRect(SortButton);
     }
 
-    private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    public static void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        args.CanExecute = SdkTreeView.SelectedNode is not null;
+        args.CanExecute = args.Parameter is ItemBase;
     }
 
-    private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    public static void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
-        SdkViewModel.ExecuteCopy(item);
+        SdkViewModel.ExecuteCopy((ItemBase)args.Parameter);
     }
 
-    private void InfoCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    public static void InfoCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        args.CanExecute = SdkTreeView.SelectedNode is not null;
+        args.CanExecute = args.Parameter is ItemBase;
     }
 
-    private async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    public static async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        ItemBase item = (ItemBase)SdkTreeView.SelectedNode.Content;
+        ItemBase item = (ItemBase)args.Parameter;
         await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info, item.Logo);
     }
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)SdkTreeView.ContextFlyout).Items, modifiers, key);      
+        // keyboard accelerators only work on the selected item
+        if (SdkTreeView.ContainerFromNode(SdkTreeView.SelectedNode) is TreeViewItem tvi)
+        {
+            if (tvi.Content is Grid grid)
+            {
+                if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
+                {
+                    grid.ContextFlyout.ShowAt(tvi);
+                    return true;
+                }
+
+                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+            }
+        }
+
+        return true;
     }
 }
