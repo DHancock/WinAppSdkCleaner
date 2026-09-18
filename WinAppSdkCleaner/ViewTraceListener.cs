@@ -1,6 +1,4 @@
-﻿using WinAppSdkCleaner.Utilities;
-
-namespace WinAppSdkCleaner;
+﻿namespace WinAppSdkCleaner;
 
 internal sealed partial class ViewTraceListener : TraceListener
 {
