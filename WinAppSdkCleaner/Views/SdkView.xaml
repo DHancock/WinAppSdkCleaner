@@ -64,8 +64,8 @@
 
                                 <Grid.ContextFlyout>
                                     <MenuFlyout>
-                                        <MenuFlyoutItem CommandParameter="{x:Bind (vm:ItemBase)Content, Mode=OneWay}" Command="{StaticResource CopyCommand}"/>
-                                        <MenuFlyoutItem CommandParameter="{x:Bind (vm:ItemBase)Content, Mode=OneWay}" Command="{StaticResource InfoCommand}"/>
+                                        <MenuFlyoutItem CommandParameter="{x:Bind (vm:ItemBase)Content}" Command="{StaticResource CopyCommand}"/>
+                                        <MenuFlyoutItem CommandParameter="{x:Bind (vm:ItemBase)Content}" Command="{StaticResource InfoCommand}"/>
                                     </MenuFlyout>
                                 </Grid.ContextFlyout>
                                 

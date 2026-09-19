@@ -70,33 +70,32 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
+                                    <Grid.Resources>
+                                        <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
+                                            <XamlUICommand.KeyboardAccelerators>
+                                                <KeyboardAccelerator Key="C" Modifiers="Control"/>
+                                            </XamlUICommand.KeyboardAccelerators>
+                                            <XamlUICommand.IconSource>
+                                                <SymbolIconSource Symbol="Copy"/>
+                                            </XamlUICommand.IconSource>
+                                        </XamlUICommand>
+                                    </Grid.Resources>
+                                    
+                                    <Grid.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem CommandParameter="{x:Bind}" Command="{StaticResource CopyCommand}" />
+                                        </MenuFlyout>
+                                    </Grid.ContextFlyout>
+
                                     <TextBlock Grid.Column="0" Text="{x:Bind SdkVersionStr}"/>
                                     <TextBlock Grid.Column="1" Text="{x:Bind PackageVersionStr}"/>
                                     <TextBlock Grid.Column="2" Text="{x:Bind SingletonVersionStr}"/>
-
-
                                 </Grid>
                             </DataTemplate>
                         </Setter.Value>
                     </Setter>
                 </Style>
             </ListView.Style>
-
-            <ListView.Resources>
-                <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
-                    <XamlUICommand.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="C" Modifiers="Control"/>
-                    </XamlUICommand.KeyboardAccelerators>
-                    <XamlUICommand.IconSource>
-                        <SymbolIconSource Symbol="Copy"/>
-                    </XamlUICommand.IconSource>
-                </XamlUICommand>
-            </ListView.Resources>
-            <ListView.ContextFlyout>
-                <MenuFlyout>
-                    <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
-                </MenuFlyout>
-            </ListView.ContextFlyout>
         </ListView>
     </Grid>
 </Page>
