@@ -356,15 +356,15 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private bool IsVisible(TreeViewItem tvi)
     {
-        (int top, int bottom) = GetDimensions(SdkTreeView);
+        (double top, double bottom) = GetDimensions(SdkTreeView);
         Point itemPoint = Utils.GetOffsetFromXamlRoot(tvi);
 
         return (itemPoint.Y >= top) && (itemPoint.Y <= bottom);
     }
 
-    private static (int top, int bottom) GetDimensions(UIElement e)
+    private static (double top, double bottom) GetDimensions(UIElement e)
     {
         Point location = Utils.GetOffsetFromXamlRoot(e);
-        return ((int)location.Y, (int)(location.Y + e.ActualSize.Y));
+        return (location.Y, location.Y + e.ActualSize.Y);
     }
 }
