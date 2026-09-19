@@ -336,7 +336,15 @@ internal sealed partial class SdkView : Page, IPageItem
             {
                 if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
                 {
-                    grid.ContextFlyout.ShowAt(tvi);
+                    if (IsVisible(tvi))
+                    {
+                        grid.ContextFlyout.ShowAt(tvi);
+                    }
+                    else // open at a sensible location
+                    {
+                        grid.ContextFlyout.ShowAt(SdkTreeView);
+                    }
+
                     return true;
                 }
 
@@ -345,5 +353,19 @@ internal sealed partial class SdkView : Page, IPageItem
         }
 
         return true;
+    }
+
+    private bool IsVisible(TreeViewItem tvi)
+    {
+        (int top, int bottom) = GetDimensions(SdkTreeView);
+        Point itemPoint = Utils.GetOffsetFromXamlRoot(tvi);
+
+        return (itemPoint.Y >= top) && (itemPoint.Y <= bottom);
+    }
+
+    private static (int top, int bottom) GetDimensions(UIElement e)
+    {
+        Point location = Utils.GetOffsetFromXamlRoot(e);
+        return ((int)location.Y, (int)(location.Y + e.ActualSize.Y));
     }
 }
