@@ -90,10 +90,10 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private ListViewItem? FirstVisibleElement()
     {
-        (int top, int bottom) = GetDimensions(VersionListView);
+        (double top, double bottom) = GetDimensions(VersionListView);
 
         ListViewItem? firstItem = null;
-        int verticalOffset = int.MaxValue;
+        double verticalOffset = double.MaxValue;
 
         foreach (object item in VersionListView.SelectedItems)
         {
@@ -105,7 +105,7 @@ internal sealed partial class VersionsView : Page, IPageItem
 
                 if ((itemPoint.Y >= top) && (itemPoint.Y < bottom) && (itemPoint.Y < verticalOffset))
                 {
-                    verticalOffset = (int)itemPoint.Y;
+                    verticalOffset = itemPoint.Y;
                     firstItem = lvi;
                 }
             }
@@ -114,9 +114,9 @@ internal sealed partial class VersionsView : Page, IPageItem
         return firstItem;
     }
 
-    private static (int top, int bottom) GetDimensions(UIElement e)
+    private static (double top, double bottom) GetDimensions(UIElement e)
     {
         Point location = Utils.GetOffsetFromXamlRoot(e);
-        return ((int)location.Y, (int)(location.Y + e.ActualSize.Y));
+        return (location.Y, location.Y + e.ActualSize.Y);
     }
 }
