@@ -35,16 +35,84 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        args.CanExecute = VersionListView.SelectedItems.Count > 0;
+        args.CanExecute = args.Parameter is not null;
     }
 
     private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
+        if (VersionListView.SelectedItems.Contains(args.Parameter))
+        {
+            VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
+        }
+        else
+        {
+            VersionsViewModel.ExecuteCopy([args.Parameter]);
+        }
     }
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)VersionListView.ContextFlyout).Items, modifiers, key);
+        // keyboard accelerators only work on the selected items
+        if (VersionListView.SelectedItems.Count > 0)
+        {
+            if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
+            {
+                ListViewItem? lvi = FirstVisibleElement();
+                FrameworkElement placementTarget;
+
+                if (lvi is null) // open the flyout at a sensible location
+                {
+                    placementTarget = VersionListView;
+                    lvi = VersionListView.ContainerFromItem(VersionListView.SelectedItems[0]) as ListViewItem;
+                }
+                else
+                {
+                    placementTarget = lvi;
+                }
+                    
+                if (lvi is not null)
+                {
+                    Grid grid = (Grid)lvi.ContentTemplateRoot;
+                    grid.ContextFlyout.ShowAt(placementTarget);
+                }
+
+                return true;
+            }
+            else if (VersionListView.ContainerFromItem(VersionListView.SelectedItems[0]) is ListViewItem lvi)
+            {
+                Grid grid = (Grid)lvi.ContentTemplateRoot;
+                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+            }
+        }
+
+        return true;
+    }
+
+    private ListViewItem? FirstVisibleElement()
+    {
+        (int top, int bottom) = GetDimensions(VersionListView);
+
+        foreach (object item in VersionListView.SelectedItems)
+        {
+            if (VersionListView.ContainerFromItem(item) is ListViewItem lvi)
+            {
+                // If the ListViewItem is scrolled far off the bottom of the listView, it's coordinates will go negative.
+                // The selected items are in selected time order not position in the list (vertical dimension) order.
+                Point itemPoint = Utils.GetOffsetFromXamlRoot(lvi);
+
+                if ((itemPoint.Y >= top) && (itemPoint.Y <= bottom))
+                {
+                    return lvi;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static (int top, int bottom) GetDimensions(UIElement e)
+    {
+        Point location = Utils.GetOffsetFromXamlRoot(e);
+        return ((int)location.Y, (int)(location.Y + e.ActualSize.Y));
     }
 }
