@@ -108,7 +108,7 @@ internal sealed class PackageItem : ItemBase
             info.Add(("Installed Path", GetInfo(Package, p => p.InstalledPath)));
             info.Add(("Path Exists", GetInfo(Package, p => Directory.Exists(p.InstalledPath).ToString())));
             info.Add(("Installed Date", GetInfo(Package, p => p.InstalledDate.ToString("g"))));
-            info.Add(("Version", GetInfo(Package, p => $"{p.Id.Version.Major}.{p.Id.Version.Minor}.{p.Id.Version.Build}.{p.Id.Version.Revision}")));
+            info.Add(("Package Version", GetInfo(Package, p => $"{p.Id.Version.Major}.{p.Id.Version.Minor}.{p.Id.Version.Build}.{p.Id.Version.Revision}")));
 
             return info;
 
