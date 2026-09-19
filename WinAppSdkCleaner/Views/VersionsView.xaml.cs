@@ -92,6 +92,9 @@ internal sealed partial class VersionsView : Page, IPageItem
     {
         (int top, int bottom) = GetDimensions(VersionListView);
 
+        ListViewItem? firstItem = null;
+        int verticalOffset = int.MaxValue;
+
         foreach (object item in VersionListView.SelectedItems)
         {
             if (VersionListView.ContainerFromItem(item) is ListViewItem lvi)
@@ -100,14 +103,15 @@ internal sealed partial class VersionsView : Page, IPageItem
                 // The selected items are in selected time order not position in the list (vertical dimension) order.
                 Point itemPoint = Utils.GetOffsetFromXamlRoot(lvi);
 
-                if ((itemPoint.Y >= top) && (itemPoint.Y <= bottom))
+                if ((itemPoint.Y >= top) && (itemPoint.Y < bottom) && (itemPoint.Y < verticalOffset))
                 {
-                    return lvi;
+                    verticalOffset = (int)itemPoint.Y;
+                    firstItem = lvi;
                 }
             }
         }
 
-        return null;
+        return firstItem;
     }
 
     private static (int top, int bottom) GetDimensions(UIElement e)
