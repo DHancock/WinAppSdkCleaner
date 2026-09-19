@@ -332,24 +332,23 @@ internal sealed partial class SdkView : Page, IPageItem
         // keyboard accelerators only work on the selected item
         if (SdkTreeView.ContainerFromNode(SdkTreeView.SelectedNode) is TreeViewItem tvi)
         {
-            if (tvi.Content is Grid grid)
-            {
-                if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
-                {
-                    if (IsVisible(tvi))
-                    {
-                        grid.ContextFlyout.ShowAt(tvi);
-                    }
-                    else // open at a sensible location
-                    {
-                        grid.ContextFlyout.ShowAt(SdkTreeView);
-                    }
+            Grid grid = (Grid)tvi.Content;
 
-                    return true;
+            if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
+            {
+                if (IsVisible(tvi))
+                {
+                    grid.ContextFlyout.ShowAt(tvi);
+                }
+                else // open at a sensible location
+                {
+                    grid.ContextFlyout.ShowAt(SdkTreeView);
                 }
 
-                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+                return true;
             }
+
+            return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
         }
 
         return true;
