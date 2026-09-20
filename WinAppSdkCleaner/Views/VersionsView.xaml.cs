@@ -57,7 +57,7 @@ internal sealed partial class VersionsView : Page, IPageItem
         {
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                ListViewItem? lvi = FirstVisibleElement();
+                ListViewItem? lvi = FirstSuitablePlacementTarget();
                 FrameworkElement placementTarget;
 
                 if (lvi is null) // open the flyout at a sensible location
@@ -88,7 +88,7 @@ internal sealed partial class VersionsView : Page, IPageItem
         return true;
     }
 
-    private ListViewItem? FirstVisibleElement()
+    private ListViewItem? FirstSuitablePlacementTarget()
     {
         (double top, double bottom) = GetDimensions(VersionListView);
 
@@ -103,6 +103,7 @@ internal sealed partial class VersionsView : Page, IPageItem
                 // The selected items are in selected time order not position in the list (vertical dimension) order.
                 Point itemPoint = Utils.GetOffsetFromXamlRoot(lvi);
 
+                // only check the top edge, it's where the flyout will be shown
                 if ((itemPoint.Y >= top) && (itemPoint.Y < bottom) && (itemPoint.Y < verticalOffset))
                 {
                     verticalOffset = itemPoint.Y;

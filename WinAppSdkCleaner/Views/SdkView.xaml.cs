@@ -336,7 +336,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                if (IsVisible(tvi))
+                if (IsSuitablePlacementTarget(tvi))
                 {
                     grid.ContextFlyout.ShowAt(tvi);
                 }
@@ -354,12 +354,13 @@ internal sealed partial class SdkView : Page, IPageItem
         return true;
     }
 
-    private bool IsVisible(TreeViewItem tvi)
+    private bool IsSuitablePlacementTarget(TreeViewItem tvi)
     {
         (double top, double bottom) = GetDimensions(SdkTreeView);
         Point itemPoint = Utils.GetOffsetFromXamlRoot(tvi);
 
-        return (itemPoint.Y >= top) && (itemPoint.Y <= bottom);
+        // only check the top edge, it's where the flyout will be shown
+        return (itemPoint.Y >= top) && (itemPoint.Y < bottom);
     }
 
     private static (double top, double bottom) GetDimensions(UIElement e)
