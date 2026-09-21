@@ -56,7 +56,7 @@ internal sealed class SdkItem : ItemBase
             List<(string property, string value)> info = new();
 
             info.Add(("Title", HeadingText));
-            info.Add(("Version", sdkData.Version.PackageVersionStr));
+            info.Add(("Package Version", sdkData.Version.PackageVersionStr));
 
             return info;
         }
