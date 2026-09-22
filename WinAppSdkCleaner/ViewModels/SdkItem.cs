@@ -56,7 +56,20 @@ internal sealed class SdkItem : ItemBase
             List<(string property, string value)> info = new();
 
             info.Add(("Title", HeadingText));
-            info.Add(("Package Version", sdkData.Version.PackageVersionStr));
+
+            if (sdkData.Version.IsSynthesized)
+            {
+                info.Add(("Framework Version", $"{sdkData.Version.PackageVersionStr} (synthesized)"));
+            }
+            else
+            {
+                info.Add(("Framework Version", sdkData.Version.PackageVersionStr));
+
+                if (!string.IsNullOrEmpty(sdkData.Version.SingletonVersionStr))
+                {
+                    info.Add(("Singleton Version", sdkData.Version.SingletonVersionStr));
+                }
+            }
 
             return info;
         }
