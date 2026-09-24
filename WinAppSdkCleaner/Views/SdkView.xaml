@@ -33,7 +33,7 @@
             <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" ItemInvoked="SdkTreeView_ItemInvoked">
 
                 <TreeView.Resources>
-                    <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="{x:Bind local:SdkView.CopyCommand_CanExecuteRequested}" ExecuteRequested="{x:Bind local:SdkView.CopyCommand_ExecuteRequested}">
+                    <XamlUICommand x:Name="CopyCommand" Label="Copy" ExecuteRequested="{x:Bind local:SdkView.CopyCommand_ExecuteRequested}">
                         <XamlUICommand.KeyboardAccelerators>
                             <KeyboardAccelerator Key="C" Modifiers="Control"/>
                         </XamlUICommand.KeyboardAccelerators>
@@ -42,7 +42,7 @@
                         </XamlUICommand.IconSource>
                     </XamlUICommand>
 
-                    <XamlUICommand x:Name="InfoCommand" Label="Info..." CanExecuteRequested="{x:Bind local:SdkView.InfoCommand_CanExecuteRequested}" ExecuteRequested="{x:Bind local:SdkView.InfoCommand_ExecuteRequested}">
+                    <XamlUICommand x:Name="InfoCommand" Label="Info..." ExecuteRequested="{x:Bind local:SdkView.InfoCommand_ExecuteRequested}">
                         <XamlUICommand.KeyboardAccelerators>
                             <KeyboardAccelerator Key="I" Modifiers="Control"/>
                         </XamlUICommand.KeyboardAccelerators>

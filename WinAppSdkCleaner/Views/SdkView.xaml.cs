@@ -306,19 +306,9 @@ internal sealed partial class SdkView : Page, IPageItem
         rects[3] = Utils.GetPassthroughRect(SortButton);
     }
 
-    public static void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
-    {
-        args.CanExecute = args.Parameter is ItemBase;
-    }
-
     public static void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
         SdkViewModel.ExecuteCopy((ItemBase)args.Parameter);
-    }
-
-    public static void InfoCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
-    {
-        args.CanExecute = args.Parameter is ItemBase;
     }
 
     public static async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
