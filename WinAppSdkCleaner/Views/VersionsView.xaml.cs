@@ -33,11 +33,6 @@ internal sealed partial class VersionsView : Page, IPageItem
         rects[0] = Utils.GetPassthroughRect(VersionListView);
     }
 
-    private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
-    {
-        args.CanExecute = args.Parameter is not null;
-    }
-
     private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
         if (VersionListView.SelectedItems.Contains(args.Parameter))

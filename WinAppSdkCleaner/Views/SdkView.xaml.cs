@@ -264,9 +264,9 @@ internal sealed partial class SdkView : Page, IPageItem
     {
         Debug.Assert(sender.SelectionMode == TreeViewSelectionMode.Single);
 
-        // When selecting or deselecting an item via "Ctrl + left click", this event is received before the
-        // TreeView.SelectedNode property is fully updated. Adjusting the command states assumes that it has
-        // been so need to force it here...
+        // When selecting or deselecting an item via "Ctrl + left click", when this event is received the
+        // TreeView.SelectedNode property is incorrect. Adjusting the command states assumes that it is
+        // so need to force it here...
 
         if ((e.RemovedItems.Count == 1) && (e.AddedItems.Count == 0) && (sender.SelectedNode is not null)) // deselect the currently selected item
         {
@@ -306,19 +306,9 @@ internal sealed partial class SdkView : Page, IPageItem
         rects[3] = Utils.GetPassthroughRect(SortButton);
     }
 
-    public static void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
-    {
-        args.CanExecute = args.Parameter is ItemBase;
-    }
-
     public static void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
         SdkViewModel.ExecuteCopy((ItemBase)args.Parameter);
-    }
-
-    public static void InfoCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
-    {
-        args.CanExecute = args.Parameter is ItemBase;
     }
 
     public static async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)

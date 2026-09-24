@@ -92,6 +92,46 @@ internal static class Model
         return HashCode.Combine(sdkId, version.Major, version.Minor, version.Build, version.Revision);
     }
 
+#if false
+    private static void UpdateSdkVersions(List<SdkData> sdkList)
+    {
+        foreach (SdkData sdk in sdkList)
+        {
+            if (!sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.PackageVersion), out VersionRecord? versionRecord))
+            {
+                // not in the versions file so synthesize for packages that have the same version as the frameworks
+                int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
+
+                if ((sdk.PackageVersion.Major < 1000) && (sdk.Sdk.Id == SdkId.WinAppSdk)) 
+                {
+                    // Using the new WinAppSdk's semantic versioning. Assumes that:
+                    // a) they won't be servicing WinAppSdk 1.1.n releases
+                    // b) the singleton package version will always be Major + 8000 
+                    //
+                    // While the versions file will still need updating for backwards compatibility, users
+                    // of this version going forward won't need it unless they service a non sematic sdk release
+                    
+                    PackageVersion singletonVersion = sdk.PackageVersion with { Major = (ushort)(sdk.PackageVersion.Major + 8000) }  ;
+                    string semanticStr = VersionRecord.GetVersionStr(sdk.PackageVersion);
+
+                    versionRecord = new(semanticStr, ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package), sdk.Sdk.Id, sdk.PackageVersion, singletonVersion);
+
+                    sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Singleton), versionRecord);
+                }
+                else
+                {
+                    versionRecord = new("", ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package), sdk.Sdk.Id, sdk.PackageVersion, default);
+                }
+
+                sVersionsLookUp.Add(key, versionRecord); 
+            }
+
+            sdk.Version = versionRecord;
+        }
+    }
+
+#else
+
     private static void UpdateSdkVersions(List<SdkData> sdkList)
     {
         foreach (SdkData sdk in sdkList)
@@ -102,13 +142,13 @@ internal static class Model
                 int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
                 versionRecord = new("", ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package), sdk.Sdk.Id, sdk.PackageVersion, default);
 
-                sVersionsLookUp.Add(key, versionRecord); 
+                sVersionsLookUp.Add(key, versionRecord);
             }
 
             sdk.Version = versionRecord;
         }
     }
-
+#endif
     public static string ExtractFrameworkVersionTag(Package package)
     {
         Debug.Assert(package.IsFramework);

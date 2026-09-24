@@ -55,7 +55,7 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 
                     IEnumerable<VersionRecord> query = Model.VersionsList
                                                        .Where(vr => vr.SdkId == sdk.Id && !vr.IsSynthesized)
-                                                       .Reverse();
+                                                       .OrderByDescending(vr => vr, new VersionRecordComparer());
 
                     groups.Add(new GroupInfo(sdkName, query));
                 }

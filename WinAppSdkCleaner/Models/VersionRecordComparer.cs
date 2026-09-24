@@ -1,6 +1,6 @@
 ﻿namespace WinAppSdkCleaner.Models;
 
-internal sealed class VersionRecordComparer : IComparer<VersionRecord>
+internal readonly struct VersionRecordComparer : IComparer<VersionRecord>
 {
     public int Compare(VersionRecord? a, VersionRecord? b)
     {
@@ -50,32 +50,33 @@ internal sealed class VersionRecordComparer : IComparer<VersionRecord>
         }
 
         return result;
-    }
 
-    private static int PackageVersionComparer(PackageVersion a, PackageVersion b)
-    {
-        int result = a.Major - b.Major;
 
-        if (result == 0)
+        static int PackageVersionComparer(PackageVersion a, PackageVersion b)
         {
-            result = a.Minor - b.Minor;
+            int result = a.Major - b.Major;
 
             if (result == 0)
             {
-                result = a.Build - b.Build;
+                result = a.Minor - b.Minor;
 
                 if (result == 0)
                 {
-                    result = a.Revision - b.Revision;
+                    result = a.Build - b.Build;
+
+                    if (result == 0)
+                    {
+                        result = a.Revision - b.Revision;
+                    }
                 }
             }
+
+            return result;
         }
 
-        return result;
-    }
-
-    private static int SemanticComparer(string a, string b)
-    {
-        return PInvoke.StrCmpLogical(a, b);
+        static int SemanticComparer(string a, string b)
+        {
+            return PInvoke.StrCmpLogical(a, b);
+        }
     }
 }

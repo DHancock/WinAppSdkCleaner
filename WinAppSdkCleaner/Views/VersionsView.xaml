@@ -71,7 +71,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Grid.Resources>
-                                        <XamlUICommand x:Name="CopyCommand" Label="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested">
+                                        <XamlUICommand x:Name="CopyCommand" Label="Copy" ExecuteRequested="CopyCommand_ExecuteRequested">
                                             <XamlUICommand.KeyboardAccelerators>
                                                 <KeyboardAccelerator Key="C" Modifiers="Control"/>
                                             </XamlUICommand.KeyboardAccelerators>
