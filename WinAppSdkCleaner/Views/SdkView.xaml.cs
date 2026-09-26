@@ -176,14 +176,28 @@ internal sealed partial class SdkView : Page, IPageItem
 
                 if (sdk.OtherAppsCount > 0)
                 {
-                    message = $"{sdk.HeadingText} has dependent applications.{Environment.NewLine}Are you sure that you want to remove it?";
+                    if (sdk.OtherAppsCount == 1)
+                    {
+                        message = $"{sdk.HeadingText} has one dependent application package.";
+                    }
+                    else
+                    {
+                        message = $"{sdk.HeadingText} has {sdk.OtherAppsCount} dependent application packages.";
+                    }
+
+                    message += " Are you sure that you want to remove it?";
                 }
                 else
                 {
                     message = $"Are you sure that you want to remove {sdk.HeadingText}?";
                 }
 
-                ContentDialogResult result = await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message);
+                ContentDialogResult result = ContentDialogResult.Primary;
+
+                if (App.Instance.ShowConfirmDialog)
+                {
+                    result = await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message);
+                }
 
                 if (result == ContentDialogResult.Primary)
                 {

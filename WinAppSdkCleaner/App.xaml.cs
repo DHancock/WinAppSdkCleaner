@@ -12,9 +12,9 @@ public sealed partial class App : Application
 {
     public const string cAppDisplayName = "WinAppSdk Cleaner";
     public static App Instance => (App)Current;
-
     private MainWindow? m_window;
     private Version latestVersion = new Version();
+    public bool ShowConfirmDialog { get; set; } = true;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
