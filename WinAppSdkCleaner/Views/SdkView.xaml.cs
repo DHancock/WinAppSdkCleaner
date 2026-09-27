@@ -172,41 +172,39 @@ internal sealed partial class SdkView : Page, IPageItem
         {
             try
             {
-                string message;
-
-                if (sdk.OtherAppsCount > 0)
+                if (App.Instance.ShowConfirmDialog)
                 {
-                    if (sdk.OtherAppsCount == 1)
+                    string message;
+
+                    if (sdk.OtherAppsCount > 0)
                     {
-                        message = $"{sdk.HeadingText} has one dependent application package.";
+                        if (sdk.OtherAppsCount == 1)
+                        {
+                            message = $"{sdk.HeadingText} has one dependent application package.";
+                        }
+                        else
+                        {
+                            message = $"{sdk.HeadingText} has {sdk.OtherAppsCount} dependent application packages.";
+                        }
+
+                        message += " Are you sure that you want to remove it?";
                     }
                     else
                     {
-                        message = $"{sdk.HeadingText} has {sdk.OtherAppsCount} dependent application packages.";
+                        message = $"Are you sure that you want to remove {sdk.HeadingText}?";
                     }
 
-                    message += " Are you sure that you want to remove it?";
-                }
-                else
-                {
-                    message = $"Are you sure that you want to remove {sdk.HeadingText}?";
-                }
-
-                ContentDialogResult result = ContentDialogResult.Primary;
-
-                if (App.Instance.ShowConfirmDialog)
-                {
-                    result = await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message);
+                    if (await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message) != ContentDialogResult.Primary)
+                    {
+                        return;
+                    }
                 }
 
-                if (result == ContentDialogResult.Primary)
-                {
-                    IsIdle = false;
-                    await viewModel.ExecuteSearchAsync(); // update the backing data
-                    await viewModel.ExecuteRemoveAsync(sdk);
-                    await viewModel.ExecuteSearchAsync();
-                    IsIdle = true;
-                }
+                IsIdle = false;
+                await viewModel.ExecuteSearchAsync(); // update the backing data
+                await viewModel.ExecuteRemoveAsync(sdk);
+                await viewModel.ExecuteSearchAsync();
+                IsIdle = true;
             }
             catch (Exception ex)
             {
