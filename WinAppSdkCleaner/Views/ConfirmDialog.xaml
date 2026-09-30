@@ -17,7 +17,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock x:Name="ConfirmTextBlock" IsTextSelectionEnabled="True" TextWrapping="WrapWholeWords"/>
-        <CheckBox Grid.Row="1" Margin="0,16,0,0" Content="Do not show again in this session" Click="CheckBox_Click"/>
+        <CheckBox Grid.Row="1" Margin="0,16,0,0" Content="Don't require confirmation again in this session" Click="CheckBox_Click"/>
     </Grid>
 </ContentDialog>
     
