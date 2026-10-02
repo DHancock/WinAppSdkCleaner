@@ -8,20 +8,6 @@ internal static class Model
 
     private static readonly Dictionary<int, VersionRecord> sVersionsLookUp = new();
     private static readonly Dictionary<int, VersionRecord> sSingletonLookUp = new();
-
-    public static event EventHandler? VersionsLoaded;
-    public static bool VersionListLoaded = false;
-
-    private static readonly HttpClient sHttpClient = new()
-    {
-        BaseAddress = new Uri("https://raw.githubusercontent.com"),
-    };
-
-    private static void OnVersionsLoaded(EventArgs e)
-    {
-        VersionsLoaded?.Invoke(null, e);
-    }
-
     public static IEnumerable<VersionRecord> VersionsList => sVersionsLookUp.Values;
 
     public static VersionRecord CategorizePackageVersion(SdkId sdkId, PackageVersion packageVersion, bool isSingleton)
@@ -38,7 +24,7 @@ internal static class Model
             return versionRecord;
         }
 
-        // for an sdk singleton package that has a different version to the framework and isn't in the versions file
+        // for an sdk singleton package that has a different version to the framework and isn't in the versions look up
         return new VersionRecord(string.Empty, string.Empty, sdkId, packageVersion, default);
     }
 
@@ -92,55 +78,40 @@ internal static class Model
         return HashCode.Combine(sdkId, version.Major, version.Minor, version.Build, version.Revision);
     }
 
-#if false
     private static void UpdateSdkVersions(List<SdkData> sdkList)
     {
         foreach (SdkData sdk in sdkList)
         {
-            if (!sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.PackageVersion), out VersionRecord? versionRecord))
+            int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
+
+            if (!sVersionsLookUp.TryGetValue(key, out VersionRecord? versionRecord))
             {
-                // not in the versions file so synthesize for packages that have the same version as the frameworks
-                int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
+                // Either synthesize for packages that have the same version as the frameworks
+                // or if possible infer the version record when the sdk is using semantic versioning
 
                 if ((sdk.PackageVersion.Major < 1000) && (sdk.Sdk.Id == SdkId.WinAppSdk)) 
                 {
-                    // Using the new WinAppSdk's semantic versioning. Assumes that:
-                    // a) they won't be servicing WinAppSdk 1.1.n releases
-                    // b) the singleton package version will always be Major + 8000 
+                    // Use the new WinAppSdk's semantic versioning. Assumes that:
+                    // a) they won't be servicing < WinAppSdk 1.0 releases (reasonably safe)
+                    // b) the singleton package version will always be Major + 8000 (may be ok, difficult to tell) 
                     //
                     // While the versions file will still need updating for backwards compatibility, users
                     // of this version going forward won't need it unless they service a non sematic sdk release
-                    
-                    PackageVersion singletonVersion = sdk.PackageVersion with { Major = (ushort)(sdk.PackageVersion.Major + 8000) }  ;
+
+                    PackageVersion singletonVersion = sdk.PackageVersion with { Major = (ushort)(sdk.PackageVersion.Major + 8000) };
                     string semanticStr = VersionRecord.GetVersionStr(sdk.PackageVersion);
+                    string versionTag = ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package);
 
-                    versionRecord = new(semanticStr, ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package), sdk.Sdk.Id, sdk.PackageVersion, singletonVersion);
+                    versionRecord = new(semanticStr, versionTag, sdk.Sdk.Id, sdk.PackageVersion, singletonVersion);
 
-                    sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Singleton), versionRecord);
+                    bool success = sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Singleton), versionRecord);
+                    Debug.Assert(success);
                 }
                 else
                 {
+                    Debug.Fail("failed to find non sematic sdk version in versions resource");
                     versionRecord = new("", ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package), sdk.Sdk.Id, sdk.PackageVersion, default);
                 }
-
-                sVersionsLookUp.Add(key, versionRecord); 
-            }
-
-            sdk.Version = versionRecord;
-        }
-    }
-
-#else
-
-    private static void UpdateSdkVersions(List<SdkData> sdkList)
-    {
-        foreach (SdkData sdk in sdkList)
-        {
-            if (!sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.PackageVersion), out VersionRecord? versionRecord))
-            {
-                // not in the versions file so synthesize for packages that have the same version as the frameworks
-                int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
-                versionRecord = new("", ExtractFrameworkVersionTag(sdk.FrameworkPackages[0].Package), sdk.Sdk.Id, sdk.PackageVersion, default);
 
                 sVersionsLookUp.Add(key, versionRecord);
             }
@@ -148,7 +119,7 @@ internal static class Model
             sdk.Version = versionRecord;
         }
     }
-#endif
+
     public static string ExtractFrameworkVersionTag(Package package)
     {
         Debug.Assert(package.IsFramework);
@@ -393,8 +364,6 @@ internal static class Model
         CancellationToken.None);
     }
 
-
-
     private async static Task RemoveBatchAsync(IEnumerable<Package> packages)
     {
         const int cTimeoutPerPackage = 10 * 1000; // milliseconds
@@ -440,8 +409,6 @@ internal static class Model
         Trace.WriteLine($"{nameof(RemovePackagesAsync)}, elapsed: {stopwatch.Elapsed.TotalSeconds} seconds");
     }
 
-    private enum Location { FileSystem, OnLine, Resource };
-
     private static async Task GetVersionsListAsync()
     {
         // This function is only called from code running on the ui thread. That code has a 
@@ -451,90 +418,44 @@ internal static class Model
             return;
         }
 
-        foreach (Location location in Enum.GetValues<Location>())
-        {
-            try
-            {
-                List<VersionRecord>? versions = null;
-
-                switch (location)
-                {
 #if DEBUG
-                    case Location.FileSystem: versions = await ReadFromFileSystemAsync(); break;
+        List<VersionRecord>? versions = await ReadFromFileSystemAsync() ?? await ReadEmbeddedResourceAsync();
+#else
+        List<VersionRecord>? versions = await ReadEmbeddedResourceAsync();
 #endif
-                    case Location.OnLine: versions = await ReadFromOnLineAsync(); break;
-                    case Location.Resource: versions = await ReadFromResourcesAsync(); break;
-                }
 
-                if (versions is not null)
-                {
-                    // While I could serialize a compressed json dictionary, for backward compatibility
-                    // the json array is still needed. The extra complexity isn't worth it.
-                    Debug.Assert(versions.Count > 0);
-
-                    sVersionsLookUp.EnsureCapacity(versions.Count);
-                    sSingletonLookUp.EnsureCapacity(versions.Count);
-
-                    foreach (VersionRecord versionRecord in versions)
-                    {
-                        bool success = sVersionsLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
-                        Debug.Assert(success);
-
-                        if (versionRecord.Singleton != default)
-                        {
-                            // from WinAppSdk "2.0.0 preview 2" and "2.0.0 experimental 7" the singleton package has it's own package version
-                            // presumably multiple new WinAppSdk releases will now be able to include the same singleton version
-                            sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Singleton), versionRecord);
-                        }
-                        else
-                        {
-                            sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
-                        }
-                    }
-
-                    Trace.WriteLine($"Retrieved {sVersionsLookUp.Count} version records from: {location}");
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.ToString());
-            }
-        }
-
-        if (sVersionsLookUp.Count > 0)
+        if (versions is not null)
         {
-            // used by the versions view model 
-            Interlocked.Exchange(ref VersionListLoaded, true);
+            // While I could serialize a compressed json dictionary, for backward compatibility
+            // the json array is still needed. The extra complexity isn't worth it.
+            Debug.Assert(versions.Count > 0);
+            Debug.WriteLine($"Found {versions.Count} version records");
+            
+            sVersionsLookUp.EnsureCapacity(versions.Count);
+            sSingletonLookUp.EnsureCapacity(versions.Count);
 
-            // used in a similar fashion to an INotifyPropertyChanged event
-            OnVersionsLoaded(EventArgs.Empty);
+            foreach (VersionRecord versionRecord in versions)
+            {
+                bool success = sVersionsLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
+                Debug.Assert(success);
+
+                if (versionRecord.Singleton != default)
+                {
+                    // from WinAppSdk "2.0.0 preview 2" and "2.0.0 experimental 7" the singleton package has it's own package version
+                    // presumably to avoid any package versioning problems related to the new semantic versioning scheme
+                    success = sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Singleton), versionRecord);
+                    Debug.Assert(success);
+                }
+                else
+                {
+                    success = sSingletonLookUp.TryAdd(MakeKey(versionRecord.SdkId, versionRecord.Release), versionRecord);
+                    Debug.Assert(success);
+                }
+            }
         }
     }
 
-    private static async Task<List<VersionRecord>?> ReadFromOnLineAsync()
-    {
-        try
-        {
-            const string path = "DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/versions.dat";
-
-            await using (Stream s = await sHttpClient.GetStreamAsync(path))
-            {
-                await using (DeflateStream ds = new DeflateStream(s, CompressionMode.Decompress))
-                {
-                    return await JsonSerializer.DeserializeAsync(ds, VersionRecordListJsonSerializerContext.Default.ListVersionRecord);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Trace.WriteLine(ex.ToString());
-        }
-
-        return null;
-    }
-
-    private static async Task<List<VersionRecord>?> ReadFromResourcesAsync()
+    private static async Task<List<VersionRecord>?> ReadEmbeddedResourceAsync()
     {
         try
         {
@@ -589,12 +510,14 @@ internal static class Model
 
         try
         {
-            // unfortunately the versions file contains an anonymous json array so I couldn't just add a new field
-            const string path = "DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/appversion.json";
-
-            await using (Stream s = await sHttpClient.GetStreamAsync(path))
+            using (HttpClient httpClient = new())
             {
-                release = await JsonSerializer.DeserializeAsync(s, VersionJsonSerializerContext.Default.Version);
+                const string path = "https://raw.githubusercontent.com/DHancock/WinAppSdkCleaner/main/WinAppSdkCleaner/appversion.json";
+
+                await using (Stream s = await httpClient.GetStreamAsync(path))
+                {
+                    release = await JsonSerializer.DeserializeAsync(s, VersionJsonSerializerContext.Default.Version);
+                }
             }
         }
         catch (Exception ex)

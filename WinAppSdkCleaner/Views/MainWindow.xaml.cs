@@ -107,7 +107,6 @@ internal sealed partial class MainWindow : Window
             {
                 case "SdkView": type = Type.GetType("WinAppSdkCleaner.Views.SdkView"); break;
                 case "TraceView": type = Type.GetType("WinAppSdkCleaner.Views.TraceView"); break;
-                case "VersionsView": type = Type.GetType("WinAppSdkCleaner.Views.VersionsView"); break;
                 case "AboutView": type = Type.GetType("WinAppSdkCleaner.Views.AboutView"); break;
                 default:
                     throw new InvalidOperationException();

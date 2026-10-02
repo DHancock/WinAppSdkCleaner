@@ -68,7 +68,6 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="{x:Bind local:MainWindow.SdkTabTitle}" Tag="SdkView"/>
                 <NavigationViewItem Content="Output" Tag="TraceView"/>
-                <NavigationViewItem Content="Info" Tag="VersionsView"/>
                 <NavigationViewItem Content="About" Tag="AboutView"/>
             </NavigationView.MenuItems>
 
