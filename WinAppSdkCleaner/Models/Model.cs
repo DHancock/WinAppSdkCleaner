@@ -97,20 +97,25 @@ internal static class Model
     {
         foreach (SdkData sdk in sdkList)
         {
-            if (!sVersionsLookUp.TryGetValue(MakeKey(sdk.Sdk.Id, sdk.PackageVersion), out VersionRecord? versionRecord))
+            int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
+
+            if (!sVersionsLookUp.TryGetValue(key, out VersionRecord? versionRecord))
             {
-                // not in the versions file so synthesize for packages that have the same version as the frameworks
-                int key = MakeKey(sdk.Sdk.Id, sdk.PackageVersion);
+                // not in the versions file so either synthesize using just the package version
+                // or if possible infer the remainder from the semantic versioning scheme
 
                 if ((sdk.PackageVersion.Major < 1000) && (sdk.Sdk.Id == SdkId.WinAppSdk)) 
                 {
                     // Using the new WinAppSdk's semantic versioning. Assumes that:
-                    // a) they won't be servicing WinAppSdk 1.1.n releases
-                    // b) the singleton package version will always be Major + 8000 
+                    // a) they won't be servicing < WinAppSdk 1.0 releases (probably safe)
+                    // b) the singleton package version will always be Major + 8000 (may be, difficult to say) 
                     //
                     // While the versions file will still need updating for backwards compatibility, users
-                    // of this version going forward won't need it unless they service a non sematic sdk release
-                    
+                    // of this version going forward won't need it unless they service a non sematic sdk release .
+                    // The versions look ups could be generated internally rather than downloaded after the last none 
+                    // semantic sdk has been serviced for the last time (it's difficult to guarantee when that will be).
+                    // But the Info tab won't be useful as it will only contain installed versions rather than all of them.
+
                     PackageVersion singletonVersion = sdk.PackageVersion with { Major = (ushort)(sdk.PackageVersion.Major + 8000) }  ;
                     string semanticStr = VersionRecord.GetVersionStr(sdk.PackageVersion);
 
@@ -149,6 +154,7 @@ internal static class Model
         }
     }
 #endif
+
     public static string ExtractFrameworkVersionTag(Package package)
     {
         Debug.Assert(package.IsFramework);
