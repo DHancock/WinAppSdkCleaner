@@ -63,7 +63,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Grid.ContextFlyout>
-                                    <MenuFlyout Opened="{x:Bind local:SdkView.MenuFlyout_Opened}">
+                                    <MenuFlyout>
                                         <MenuFlyoutItem CommandParameter="{x:Bind (vm:ItemBase)Content}" Command="{StaticResource CopyCommand}"/>
                                         <MenuFlyoutItem CommandParameter="{x:Bind (vm:ItemBase)Content}" Command="{StaticResource InfoCommand}"/>
                                     </MenuFlyout>

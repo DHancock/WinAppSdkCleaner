@@ -1,6 +1,8 @@
 ﻿using WinAppSdkCleaner.ViewModels;
 using WinAppSdkCleaner.Utilities;
 
+using Microsoft.UI.Content;
+
 namespace WinAppSdkCleaner.Views;
 
 /// <summary>
@@ -370,43 +372,18 @@ internal sealed partial class SdkView : Page, IPageItem
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)
-    {    
+    {
         if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
         {
             PointerPoint pointerPoint = e.GetCurrentPoint(this);
 
             if (pointerPoint.Properties.IsRightButtonPressed)
             {
-                TreeViewItem? tvi = FindParentTreeViewItem(e.OriginalSource as FrameworkElement);
-                TreeViewNode? tvn = SdkTreeView?.NodeFromContainer(tvi);
-    
+                TreeViewNode? tvn = (e.OriginalSource as FrameworkElement)?.DataContext as TreeViewNode;
                 SdkTreeView?.SelectedNode = tvn;
             }
         }
 
         base.OnPointerPressed(e);
-
-        static TreeViewItem? FindParentTreeViewItem(FrameworkElement? fe)
-        {
-            while (fe is not null)
-            {
-                if (fe is TreeViewItem tvi)
-                {
-                    return tvi;
-                }
-
-                fe = fe.Parent as FrameworkElement; // the parent in the logical tree
-            }
-
-            return null;
-        }
-    }
-
-    internal static async void MenuFlyout_Opened(object sender, object e)
-    {
-        // cancel the spinning busy cursor occasionally displayed after changing the 
-        // tree view selection and then opening the context flyout, seems focusing gets confused
-
-        await FocusManager.TryFocusAsync((DependencyObject)sender, FocusState.Programmatic);
     }
 }
