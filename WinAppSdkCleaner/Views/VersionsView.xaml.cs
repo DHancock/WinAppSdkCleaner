@@ -15,13 +15,6 @@ internal sealed partial class VersionsView : Page, IPageItem
         InitializeComponent();
 
         viewModel = new VersionsViewModel(this.DispatcherQueue);
-        Loaded += VersionsView_Loaded;
-    }
-
-    private void VersionsView_Loaded(object sender, RoutedEventArgs e)
-    {
-        // allow keyboard interaction without the need to tab into the list
-        VersionListView.Focus(FocusState.Programmatic);
     }
 
     internal VersionsViewModel ViewModel => viewModel;
@@ -114,5 +107,29 @@ internal sealed partial class VersionsView : Page, IPageItem
     {
         Point location = Utils.GetOffsetFromXamlRoot(e);
         return (location.Y, location.Y + e.ActualSize.Y);
+    }
+
+    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    {
+        if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
+        {
+            PointerPoint pointerPoint = e.GetCurrentPoint(this);
+
+            if (pointerPoint.Properties.IsRightButtonPressed)
+            {
+                object? versionRecord = (e.OriginalSource as FrameworkElement)?.DataContext;
+
+                if (VersionListView.ContainerFromItem(versionRecord) is ListViewItem lvi)
+                {
+                    if (!lvi.IsSelected)
+                    {
+                        VersionListView.SelectedItems.Clear();
+                        lvi.IsSelected = true;
+                    }
+                }
+            }
+        }
+
+        base.OnPointerPressed(e);
     }
 }

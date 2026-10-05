@@ -33,10 +33,8 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private void SdkView_Loaded(object sender, RoutedEventArgs e)
     {
+        Loaded -= SdkView_Loaded;
         RemoveIcon.Foreground = new SolidColorBrush(IntegrityLevel.IsElevated ? Colors.Crimson : Colors.Green);
-
-        // allow keyboard interaction without the need to tab into the list
-        SdkTreeView.Focus(FocusState.Programmatic);
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -369,5 +367,46 @@ internal sealed partial class SdkView : Page, IPageItem
     {
         Point location = Utils.GetOffsetFromXamlRoot(e);
         return (location.Y, location.Y + e.ActualSize.Y);
+    }
+
+    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    {    
+        if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
+        {
+            PointerPoint pointerPoint = e.GetCurrentPoint(this);
+
+            if (pointerPoint.Properties.IsRightButtonPressed)
+            {
+                TreeViewItem? tvi = FindParentTreeViewItem(e.OriginalSource as FrameworkElement);
+                TreeViewNode? tvn = SdkTreeView?.NodeFromContainer(tvi);
+    
+                SdkTreeView?.SelectedNode = tvn;
+            }
+        }
+
+        base.OnPointerPressed(e);
+
+        static TreeViewItem? FindParentTreeViewItem(FrameworkElement? fe)
+        {
+            while (fe is not null)
+            {
+                if (fe is TreeViewItem tvi)
+                {
+                    return tvi;
+                }
+
+                fe = fe.Parent as FrameworkElement; // the parent in the logical tree
+            }
+
+            return null;
+        }
+    }
+
+    internal static async void MenuFlyout_Opened(object sender, object e)
+    {
+        // cancel the spinning busy cursor occasionally displayed after changing the 
+        // tree view selection and then opening the context flyout, seems focusing gets confused
+
+        await FocusManager.TryFocusAsync((DependencyObject)sender, FocusState.Programmatic);
     }
 }
