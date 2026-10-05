@@ -13,8 +13,6 @@ internal sealed partial class SdkView : Page, IPageItem
     private RelayCommand SearchCommand { get; }
     private RelayCommand RemoveCommand { get; }
     private RelayCommand SortCommand { get; }
-
-    private DateTime lastPointerTimeStamp;
     private readonly SdkViewModel viewModel;
 
     public SdkView()
@@ -292,22 +290,6 @@ internal sealed partial class SdkView : Page, IPageItem
         AdjustCommandsState();
     }
 
-    private void SdkTreeView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
-    {
-        TimeSpan doubleClickTime = TimeSpan.FromMilliseconds(PInvoke.GetDoubleClickTime());
-        DateTime utcNow = DateTime.UtcNow;
-
-        if ((utcNow - lastPointerTimeStamp) < doubleClickTime)
-        {
-            TreeViewNode tvn = (TreeViewNode)args.InvokedItem;
-            tvn.IsExpanded = !tvn.IsExpanded;
-        }
-        else
-        {
-            lastPointerTimeStamp = utcNow;
-        }
-    }
-
     public int PassthroughCount => 4;
 
     public void AddPassthroughContent(in RectInt32[] rects)
@@ -377,13 +359,20 @@ internal sealed partial class SdkView : Page, IPageItem
         {
             PointerPoint pointerPoint = e.GetCurrentPoint(this);
 
-            if (pointerPoint.Properties.IsRightButtonPressed)
+            if (pointerPoint.Properties.IsRightButtonPressed && (e.OriginalSource is FrameworkElement fe) && (fe.DataContext is TreeViewNode tvn))
             {
-                TreeViewNode? tvn = (e.OriginalSource as FrameworkElement)?.DataContext as TreeViewNode;
-                SdkTreeView?.SelectedNode = tvn;
+                SdkTreeView.SelectedNode = tvn;
             }
         }
 
         base.OnPointerPressed(e);
+    }
+
+    private void SdkTreeView_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if ((e.OriginalSource is FrameworkElement fe) && (fe.DataContext is TreeViewNode tvn))
+        {
+            tvn.IsExpanded = !tvn.IsExpanded;
+        }
     }
 }
