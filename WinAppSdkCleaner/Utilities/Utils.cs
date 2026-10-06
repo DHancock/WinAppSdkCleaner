@@ -10,8 +10,26 @@ internal static class Utils
 
     public static Point GetOffsetFromXamlRoot(UIElement e)
     {
-        GeneralTransform gt = e.TransformToVisual(e.XamlRoot.Content);
-        return gt.TransformPoint(new Point(0f, 0f));
+        Vector3 offset = e.ActualOffset;
+
+        // FrameworkElement.Parent is the logical parent
+        DependencyObject? dependencyObject = VisualTreeHelper.GetParent(e);
+
+        while (dependencyObject is not null)
+        {
+            if (dependencyObject is UIElement uie)                       
+            {
+                offset += uie.ActualOffset;
+            }
+
+            dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
+        }
+
+        return new Point(offset.X, offset.Y);
+
+        // works around  https://github.com/microsoft/microsoft-ui-xaml/issues/12156
+        //GeneralTransform gt = e.TransformToVisual(e.XamlRoot.Content);
+        //return gt.TransformPoint(new Point(0f, 0f));
     }
 
     public static RectInt32 ScaledRect(in Point location, in Vector2 size, double scale)
