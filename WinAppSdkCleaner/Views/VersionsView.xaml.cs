@@ -89,12 +89,12 @@ internal sealed partial class VersionsView : Page, IPageItem
             {
                 // If the ListViewItem is scrolled far off the bottom of the listView, it's coordinates will go negative.
                 // The selected items are in selected time order not position in the list (vertical dimension) order.
-                Point itemPoint = Utils.GetOffsetFromXamlRoot(lvi);
+                Vector3 offset = Utils.GetOffsetFromXamlRoot(lvi);
 
                 // only check the top edge, it's where the flyout will be shown
-                if ((itemPoint.Y >= top) && (itemPoint.Y < bottom) && (itemPoint.Y < verticalOffset))
+                if ((offset.Y >= top) && (offset.Y < bottom) && (offset.Y < verticalOffset))
                 {
-                    verticalOffset = itemPoint.Y;
+                    verticalOffset = offset.Y;
                     firstItem = lvi;
                 }
             }
@@ -105,8 +105,8 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private static (double top, double bottom) GetDimensions(UIElement e)
     {
-        Point location = Utils.GetOffsetFromXamlRoot(e);
-        return (location.Y, location.Y + e.ActualSize.Y);
+        Vector3 offset = Utils.GetOffsetFromXamlRoot(e);
+        return (offset.Y, offset.Y + e.ActualSize.Y);
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)

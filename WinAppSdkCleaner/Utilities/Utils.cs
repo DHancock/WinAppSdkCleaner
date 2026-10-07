@@ -8,14 +8,14 @@ internal static class Utils
         Debug.Assert(succeeded);
     }
 
-    public static Point GetOffsetFromXamlRoot(UIElement e)
+    public static Vector3 GetOffsetFromXamlRoot(UIElement e)
     {
         Vector3 offset = e.ActualOffset;
 
         // FrameworkElement.Parent is the logical parent
         DependencyObject? dependencyObject = VisualTreeHelper.GetParent(e);
 
-        while (dependencyObject is not null)
+        while (dependencyObject != e.XamlRoot.Content)
         {
             if (dependencyObject is UIElement uie)                       
             {
@@ -25,14 +25,10 @@ internal static class Utils
             dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
         }
 
-        return new Point(offset.X, offset.Y);
-
-        // works around  https://github.com/microsoft/microsoft-ui-xaml/issues/12156
-        //GeneralTransform gt = e.TransformToVisual(e.XamlRoot.Content);
-        //return gt.TransformPoint(new Point(0f, 0f));
+        return offset;
     }
 
-    public static RectInt32 ScaledRect(in Point location, in Vector2 size, double scale)
+    public static RectInt32 ScaledRect(in Vector3 location, in Vector2 size, double scale)
     {
         Debug.Assert(location.X >= 0.0);
         Debug.Assert(location.Y >= 0.0);
