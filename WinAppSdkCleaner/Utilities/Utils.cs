@@ -28,22 +28,22 @@ internal static class Utils
         return offset;
     }
 
-    public static RectInt32 ScaledRect(in Vector3 location, in Vector2 size, double scale)
+    public static RectInt32 ScaledRect(in Vector3 location, in Vector2 size, in float scale)
     {
-        Debug.Assert(location.X >= 0.0);
-        Debug.Assert(location.Y >= 0.0);
+        Debug.Assert(location.X >= 0f);
+        Debug.Assert(location.Y >= 0f);
         Debug.Assert(size.X >= 0f);
         Debug.Assert(size.Y >= 0f);
 
-        return new RectInt32((int)Math.FusedMultiplyAdd(location.X, scale, 0.5),
-                             (int)Math.FusedMultiplyAdd(location.Y, scale, 0.5),
-                             (int)Math.FusedMultiplyAdd(size.X, scale, 0.5),
-                             (int)Math.FusedMultiplyAdd(size.Y, scale, 0.5));
+        return new RectInt32((int)MathF.FusedMultiplyAdd(location.X, scale, 0.5f),
+                             (int)MathF.FusedMultiplyAdd(location.Y, scale, 0.5f),
+                             (int)MathF.FusedMultiplyAdd(size.X, scale, 0.5f),
+                             (int)MathF.FusedMultiplyAdd(size.Y, scale, 0.5f));
     }
 
     public static RectInt32 GetPassthroughRect(UIElement e)
     {
-        return ScaledRect(GetOffsetFromXamlRoot(e), e.ActualSize, e.XamlRoot.RasterizationScale);
+        return ScaledRect(GetOffsetFromXamlRoot(e), e.ActualSize, (float)e.XamlRoot.RasterizationScale);
     }
 
     public static bool InvokeMenuItemForKeyboardAccelerator(IList<MenuFlyoutItemBase> menuItems, VirtualKeyModifiers modifiers, VirtualKey key)
