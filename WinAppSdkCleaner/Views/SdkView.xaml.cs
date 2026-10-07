@@ -340,17 +340,13 @@ internal sealed partial class SdkView : Page, IPageItem
 
     private bool IsSuitablePlacementTarget(TreeViewItem tvi)
     {
-        (double top, double bottom) = GetDimensions(SdkTreeView);
+        float top = Utils.GetOffsetFromXamlRoot(SdkTreeView).Y;
+        float bottom = top + SdkTreeView.ActualSize.Y;
+
         Vector3 offset = Utils.GetOffsetFromXamlRoot(tvi);
 
         // only check the top edge, it's where the flyout will be shown
         return (offset.Y >= top) && (offset.Y < bottom);
-    }
-
-    private static (double top, double bottom) GetDimensions(UIElement e)
-    {
-        Vector3 offset = Utils.GetOffsetFromXamlRoot(e);
-        return (offset.Y, offset.Y + e.ActualSize.Y);
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)

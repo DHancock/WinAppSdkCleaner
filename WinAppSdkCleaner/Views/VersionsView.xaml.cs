@@ -28,14 +28,7 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        if (VersionListView.SelectedItems.Contains(args.Parameter))
-        {
-            VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
-        }
-        else
-        {
-            VersionsViewModel.ExecuteCopy([args.Parameter]);
-        }
+        VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
     }
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
@@ -78,10 +71,11 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private ListViewItem? FirstSuitablePlacementTarget()
     {
-        (double top, double bottom) = GetDimensions(VersionListView);
+        float top = Utils.GetOffsetFromXamlRoot(VersionListView).Y;
+        float bottom = top + VersionListView.ActualSize.Y;
 
         ListViewItem? firstItem = null;
-        double verticalOffset = double.MaxValue;
+        float verticalOffset = float.MaxValue;
 
         foreach (object item in VersionListView.SelectedItems)
         {
@@ -101,12 +95,6 @@ internal sealed partial class VersionsView : Page, IPageItem
         }
 
         return firstItem;
-    }
-
-    private static (double top, double bottom) GetDimensions(UIElement e)
-    {
-        Vector3 offset = Utils.GetOffsetFromXamlRoot(e);
-        return (offset.Y, offset.Y + e.ActualSize.Y);
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)
