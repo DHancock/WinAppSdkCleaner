@@ -15,7 +15,7 @@ internal static class Utils
         // FrameworkElement.Parent is the logical parent
         DependencyObject? dependencyObject = VisualTreeHelper.GetParent(e);
 
-        while (dependencyObject != e.XamlRoot.Content)
+        while (dependencyObject != null)
         {
             if (dependencyObject is UIElement uie)                       
             {
