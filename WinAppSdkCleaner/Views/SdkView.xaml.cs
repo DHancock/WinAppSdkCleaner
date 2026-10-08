@@ -1,8 +1,6 @@
 ﻿using WinAppSdkCleaner.ViewModels;
 using WinAppSdkCleaner.Utilities;
 
-using Microsoft.UI.Content;
-
 namespace WinAppSdkCleaner.Views;
 
 /// <summary>
@@ -320,15 +318,12 @@ internal sealed partial class SdkView : Page, IPageItem
 
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                if (IsSuitablePlacementTarget(tvi))
+                if (IsPlacementTargetVisible(tvi))
                 {
                     grid.ContextFlyout.ShowAt(tvi);
                 }
-                else // open at a sensible location
-                {
-                    grid.ContextFlyout.ShowAt(SdkTreeView);
-                }
 
+                // scrolling the tree view item in to view isn't an option
                 return true;
             }
 
@@ -336,17 +331,18 @@ internal sealed partial class SdkView : Page, IPageItem
         }
 
         return true;
-    }
 
-    private bool IsSuitablePlacementTarget(TreeViewItem tvi)
-    {
-        float top = Utils.GetOffsetFromXamlRoot(SdkTreeView).Y;
-        float bottom = top + SdkTreeView.ActualSize.Y;
 
-        Vector3 offset = Utils.GetOffsetFromXamlRoot(tvi);
+        bool IsPlacementTargetVisible(TreeViewItem tvi)
+        {
+            RectangleF list = Utils.GetDimensions(SdkTreeView);
+            RectangleF item = Utils.GetDimensions(tvi);
 
-        // only check the top edge, it's where the flyout will be shown
-        return (offset.Y >= top) && (offset.Y < bottom);
+            // shrink by 1 pixel
+            item.Inflate(0f, (float)-XamlRoot.RasterizationScale);  
+
+            return item.IntersectsWith(list);
+        }
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)

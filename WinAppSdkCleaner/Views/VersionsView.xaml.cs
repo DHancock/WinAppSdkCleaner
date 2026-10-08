@@ -38,25 +38,15 @@ internal sealed partial class VersionsView : Page, IPageItem
         {
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                ListViewItem? lvi = FirstSuitablePlacementTarget();
-                FrameworkElement placementTarget;
+                ListViewItem? lvi = FirstVisiblePlacementTarget();
 
-                if (lvi is null) // open the flyout at a sensible location
-                {
-                    placementTarget = VersionListView;
-                    lvi = VersionListView.ContainerFromItem(VersionListView.SelectedItems[0]) as ListViewItem;
-                }
-                else
-                {
-                    placementTarget = lvi;
-                }
-                    
                 if (lvi is not null)
                 {
                     Grid grid = (Grid)lvi.ContentTemplateRoot;
-                    grid.ContextFlyout.ShowAt(placementTarget);
+                    grid.ContextFlyout.ShowAt(lvi);
                 }
 
+                // scrolling the list item in to view isn't an option
                 return true;
             }
             else if (VersionListView.ContainerFromItem(VersionListView.SelectedItems[0]) is ListViewItem lvi)
@@ -67,34 +57,36 @@ internal sealed partial class VersionsView : Page, IPageItem
         }
 
         return true;
-    }
 
-    private ListViewItem? FirstSuitablePlacementTarget()
-    {
-        float top = Utils.GetOffsetFromXamlRoot(VersionListView).Y;
-        float bottom = top + VersionListView.ActualSize.Y;
 
-        ListViewItem? firstItem = null;
-        float verticalOffset = float.MaxValue;
-
-        foreach (object item in VersionListView.SelectedItems)
+        ListViewItem? FirstVisiblePlacementTarget()
         {
-            if (VersionListView.ContainerFromItem(item) is ListViewItem lvi)
-            {
-                // If the ListViewItem is scrolled far off the bottom of the listView, it's coordinates will go negative.
-                // The selected items are in selected time order not position in the list (vertical dimension) order.
-                Vector3 offset = Utils.GetOffsetFromXamlRoot(lvi);
+            RectangleF list = Utils.GetDimensions(VersionListView);
 
-                // only check the top edge, it's where the flyout will be shown
-                if ((offset.Y >= top) && (offset.Y < bottom) && (offset.Y < verticalOffset))
+            ListViewItem? firstItem = null;
+            float verticalOffset = float.MaxValue;
+
+            foreach (object item in VersionListView.SelectedItems)
+            {
+                if (VersionListView.ContainerFromItem(item) is ListViewItem lvi)
                 {
-                    verticalOffset = offset.Y;
-                    firstItem = lvi;
+                    // If the ListViewItem is scrolled far off the bottom of the listView, it's coordinates will go negative.
+                    // The selected items are in selected time order not position in the list (vertical dimension) order.
+                    RectangleF itemRect = Utils.GetDimensions(lvi);
+
+                    // shrink by 1 pixel
+                    itemRect.Inflate(0f, (float)-XamlRoot.RasterizationScale);
+
+                    if ((itemRect.Y < verticalOffset) && itemRect.IntersectsWith(list))
+                    {
+                        verticalOffset = itemRect.Y;
+                        firstItem = lvi;
+                    }
                 }
             }
-        }
 
-        return firstItem;
+            return firstItem;
+        }
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)
