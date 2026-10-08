@@ -222,7 +222,7 @@ internal sealed partial class MainWindow : Window
             p.Y = AppWindow.TitleBar.Height;
         }
 
-        systemMenu.ShowAt(null, new Point(p.X / scaleFactor, p.Y / scaleFactor));
+        systemMenu.ShowAt(null, new Windows.Foundation.Point(p.X / scaleFactor, p.Y / scaleFactor));
     }
 
     private void HideSystemMenu()
