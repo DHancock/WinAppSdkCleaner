@@ -61,6 +61,13 @@ internal sealed partial class VersionsView : Page, IPageItem
 
         ListViewItem? FirstVisiblePlacementTarget()
         {
+            Debug.Assert(VersionListView.GroupStyleSelector is null);
+            Debug.Assert(((ItemsStackPanel)VersionListView.ItemsPanelRoot).AreStickyGroupHeadersEnabled is true);
+            Debug.Assert(((ItemsStackPanel)VersionListView.ItemsPanelRoot).GroupHeaderPlacement == GroupHeaderPlacement.Top);
+
+            // ItemsStackPanel.FirstVisibleIndex and LastVisibleIndex relate to the list view items, 
+            // not their content. That could be fully occluded even if it's item is indicated to be visible.
+
             RectangleF listBounds = Utils.GetDimensions(VersionListView);
             float groupHeaderHeight = GetGroupHeaderHeight();
             RectangleF listRect = new (listBounds.X + (float)VersionListView.BorderThickness.Left, 
