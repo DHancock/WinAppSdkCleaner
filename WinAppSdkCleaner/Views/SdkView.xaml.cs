@@ -336,7 +336,7 @@ internal sealed partial class SdkView : Page, IPageItem
         bool IsPlacementTargetVisible(TreeViewItem tvi)
         {
             RectangleF list = Utils.GetDimensions(SdkTreeView);
-            RectangleF item = Utils.GetDimensions(tvi);
+            RectangleF item = Utils.GetDimensions((UIElement)tvi.Content);
 
             // shrink by 1 pixel
             item.Inflate(0f, (float)-XamlRoot.RasterizationScale);  
