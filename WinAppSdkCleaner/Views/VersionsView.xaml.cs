@@ -46,7 +46,7 @@ internal sealed partial class VersionsView : Page, IPageItem
                     grid.ContextFlyout.ShowAt(lvi);
                 }
 
-                // scrolling the list item in to view isn't an option
+                // scrolling the list item in to view isn't really an option (the sdk list doesn't support it)
                 return true;
             }
             else if (VersionListView.ContainerFromItem(VersionListView.SelectedItems[0]) is ListViewItem lvi)
@@ -61,9 +61,14 @@ internal sealed partial class VersionsView : Page, IPageItem
 
         ListViewItem? FirstVisiblePlacementTarget()
         {
-            RectangleF list = Utils.GetDimensions(VersionListView);
+            RectangleF listBounds = Utils.GetDimensions(VersionListView);
+            float groupHeaderHeight = GetGroupHeaderHeight();
+            RectangleF listRect = new (listBounds.X + (float)VersionListView.BorderThickness.Left, 
+                                       listBounds.Y + groupHeaderHeight + (float)VersionListView.BorderThickness.Top, 
+                                       listBounds.Width - (float)(VersionListView.BorderThickness.Left + VersionListView.BorderThickness.Right),
+                                       listBounds.Height - (float)(groupHeaderHeight + VersionListView.BorderThickness.Top + VersionListView.BorderThickness.Bottom));
 
-            ListViewItem? firstItem = null;
+            ListViewItem ? firstItem = null;
             float verticalOffset = float.MaxValue;
 
             foreach (object item in VersionListView.SelectedItems)
@@ -72,12 +77,12 @@ internal sealed partial class VersionsView : Page, IPageItem
                 {
                     // If the ListViewItem is scrolled far off the bottom of the listView, it's coordinates will go negative.
                     // The selected items are in selected time order not position in the list (vertical dimension) order.
-                    RectangleF itemRect = Utils.GetDimensions(lvi);
+                    RectangleF itemRect = Utils.GetDimensions(lvi.ContentTemplateRoot);
 
                     // shrink by 1 pixel
                     itemRect.Inflate(0f, (float)-XamlRoot.RasterizationScale);
 
-                    if ((itemRect.Y < verticalOffset) && itemRect.IntersectsWith(list))
+                    if ((itemRect.Y < verticalOffset) && itemRect.IntersectsWith(listRect))
                     {
                         verticalOffset = itemRect.Y;
                         firstItem = lvi;
@@ -86,6 +91,27 @@ internal sealed partial class VersionsView : Page, IPageItem
             }
 
             return firstItem;
+        }
+
+        float GetGroupHeaderHeight()
+        {
+            if (VersionListView.Items.Count > 0)
+            {
+                DependencyObject? itemContainer = VersionListView.ContainerFromItem(VersionListView.Items[0]);
+
+                if (itemContainer is not null)
+                {
+                    DependencyObject? headerContainer = VersionListView.GroupHeaderContainerFromItemContainer(itemContainer);
+
+                    if (headerContainer is UIElement uie)
+                    {
+                        return uie.ActualSize.Y;
+                    }
+                }
+            }
+
+            Debug.Fail($"{nameof(GetGroupHeaderHeight)} returning default value");
+            return 44f;
         }
     }
 
