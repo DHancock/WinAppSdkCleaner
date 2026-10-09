@@ -77,7 +77,7 @@
 
                                     <Grid.ContextFlyout>
                                         <MenuFlyout>
-                                            <MenuFlyoutItem CommandParameter="{x:Bind}" Command="{StaticResource CopyCommand}" />
+                                            <MenuFlyoutItem Command="{StaticResource CopyCommand}" />
                                         </MenuFlyout>
                                     </Grid.ContextFlyout>
 
