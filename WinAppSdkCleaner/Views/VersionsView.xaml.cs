@@ -38,7 +38,7 @@ internal sealed partial class VersionsView : Page, IPageItem
         {
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                int index = GetFirstPlacementIndex();
+                int index = VersionListView.SelectedRanges.Min(range => range.FirstIndex);
 
                 if ((index >= 0) && (index < VersionListView.Items.Count))
                 {
@@ -62,25 +62,9 @@ internal sealed partial class VersionsView : Page, IPageItem
         }
 
         return true;
-
-        int GetFirstPlacementIndex()
-        {
-            int index = int.MaxValue;
-
-            // the selected ranges do seem to be sorted but it isn't documented
-            foreach (ItemIndexRange itemIndexRange in VersionListView.SelectedRanges)
-            {
-                if (itemIndexRange.FirstIndex < index)
-                {
-                    index = itemIndexRange.FirstIndex;
-                }
-            }
-
-            return index;
-        }
     }
 
-    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    private void VersionListView_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
         {
@@ -100,7 +84,5 @@ internal sealed partial class VersionsView : Page, IPageItem
                 }
             }
         }
-
-        base.OnPointerPressed(e);
     }
 }

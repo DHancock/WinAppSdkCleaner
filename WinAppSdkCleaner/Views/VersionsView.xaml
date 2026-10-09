@@ -10,7 +10,7 @@
     <!-- left, top, right, bottom -->
 
     <Grid>
-        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}">
+        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" PointerPressed="VersionListView_PointerPressed">
             
             <ListView.Resources>
                 <StandardUICommand x:Name="CopyCommand" Kind="Copy" ExecuteRequested="CopyCommand_ExecuteRequested"/>
