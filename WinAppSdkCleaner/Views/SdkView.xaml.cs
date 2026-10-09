@@ -318,12 +318,16 @@ internal sealed partial class SdkView : Page, IPageItem
 
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                if (IsPlacementTargetVisible(tvi))
+                TreeViewList? treeViewList = SdkTreeView.FindChild<TreeViewList>();
+
+                if (treeViewList is not null)
                 {
+                    // explicitly creating TreeViewNodes allows ScrollIntoView() to work
+                    // the selected node's parents must have already been expanded
+                    treeViewList.ScrollIntoView(SdkTreeView.SelectedNode);
                     grid.ContextFlyout.ShowAt(tvi);
                 }
 
-                // scrolling the tree view item in to view isn't an option
                 return true;
             }
 
@@ -331,18 +335,6 @@ internal sealed partial class SdkView : Page, IPageItem
         }
 
         return true;
-
-
-        bool IsPlacementTargetVisible(TreeViewItem tvi)
-        {
-            RectangleF list = Utils.GetDimensions(SdkTreeView);
-            RectangleF item = Utils.GetDimensions((UIElement)tvi.Content);
-
-            // shrink by 1 pixel
-            item.Inflate(0f, (float)-XamlRoot.RasterizationScale);  
-
-            return item.IntersectsWith(list);
-        }
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)

@@ -34,23 +34,28 @@ internal sealed partial class VersionsView : Page, IPageItem
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
         // keyboard accelerators only work on the selected items
-        if (VersionListView.SelectedItems.Count > 0)
+        if (VersionListView.SelectedRanges.Count > 0)
         {
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                ListViewItem? lvi = FirstVisiblePlacementTarget();
+                int index = GetFirstPlacementIndex();
 
-                if (lvi is not null)
+                if ((index >= 0) && (index < VersionListView.Items.Count))
                 {
-                    Grid grid = (Grid)lvi.ContentTemplateRoot;
-                    grid.ContextFlyout.ShowAt(lvi);
+                    VersionListView.ScrollIntoView(VersionListView.Items[index]);
+
+                    if (VersionListView.ContainerFromIndex(index) is ListViewItem lvi)
+                    {
+                        Grid grid = (Grid)lvi.ContentTemplateRoot;
+                        grid.ContextFlyout.ShowAt(lvi);
+                    }
                 }
 
-                // scrolling the list item in to view isn't really an option (the sdk list doesn't support it)
                 return true;
             }
-            else if (VersionListView.ContainerFromItem(VersionListView.SelectedItems[0]) is ListViewItem lvi)
+            else if (VersionListView.ContainerFromIndex(((ItemsStackPanel)VersionListView.ItemsPanelRoot).FirstVisibleIndex) is ListViewItem lvi)
             {
+                // using the first visible index ensures that it's container exists, all menu items use the list view's selected items
                 Grid grid = (Grid)lvi.ContentTemplateRoot;
                 return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
             }
@@ -58,67 +63,20 @@ internal sealed partial class VersionsView : Page, IPageItem
 
         return true;
 
-
-        ListViewItem? FirstVisiblePlacementTarget()
+        int GetFirstPlacementIndex()
         {
-            Debug.Assert(VersionListView.GroupStyleSelector is null);
-            Debug.Assert(((ItemsStackPanel)VersionListView.ItemsPanelRoot).AreStickyGroupHeadersEnabled is true);
-            Debug.Assert(((ItemsStackPanel)VersionListView.ItemsPanelRoot).GroupHeaderPlacement == GroupHeaderPlacement.Top);
+            int index = int.MaxValue;
 
-            // ItemsStackPanel.FirstVisibleIndex and LastVisibleIndex relate to the list view items, 
-            // not their content. That could be fully occluded even if it's item is indicated to be visible.
-
-            RectangleF listBounds = Utils.GetDimensions(VersionListView);
-            float groupHeaderHeight = GetGroupHeaderHeight();
-            RectangleF listRect = new (listBounds.X + (float)VersionListView.BorderThickness.Left, 
-                                       listBounds.Y + groupHeaderHeight + (float)VersionListView.BorderThickness.Top, 
-                                       listBounds.Width - (float)(VersionListView.BorderThickness.Left + VersionListView.BorderThickness.Right),
-                                       listBounds.Height - (float)(groupHeaderHeight + VersionListView.BorderThickness.Top + VersionListView.BorderThickness.Bottom));
-
-            ListViewItem ? firstItem = null;
-            float verticalOffset = float.MaxValue;
-
-            foreach (object item in VersionListView.SelectedItems)
+            // the selected ranges do seem to be sorted but it isn't documented
+            foreach (ItemIndexRange itemIndexRange in VersionListView.SelectedRanges)
             {
-                if (VersionListView.ContainerFromItem(item) is ListViewItem lvi)
+                if (itemIndexRange.FirstIndex < index)
                 {
-                    // If the ListViewItem is scrolled far off the bottom of the listView, it's coordinates will go negative.
-                    // The selected items are in selected time order not position in the list (vertical dimension) order.
-                    RectangleF itemRect = Utils.GetDimensions(lvi.ContentTemplateRoot);
-
-                    // shrink by 1 pixel
-                    itemRect.Inflate(0f, (float)-XamlRoot.RasterizationScale);
-
-                    if ((itemRect.Y < verticalOffset) && itemRect.IntersectsWith(listRect))
-                    {
-                        verticalOffset = itemRect.Y;
-                        firstItem = lvi;
-                    }
+                    index = itemIndexRange.FirstIndex;
                 }
             }
 
-            return firstItem;
-        }
-
-        float GetGroupHeaderHeight()
-        {
-            if (VersionListView.Items.Count > 0)
-            {
-                DependencyObject? itemContainer = VersionListView.ContainerFromItem(VersionListView.Items[0]);
-
-                if (itemContainer is not null)
-                {
-                    DependencyObject? headerContainer = VersionListView.GroupHeaderContainerFromItemContainer(itemContainer);
-
-                    if (headerContainer is UIElement uie)
-                    {
-                        return uie.ActualSize.Y;
-                    }
-                }
-            }
-
-            Debug.Fail($"{nameof(GetGroupHeaderHeight)} returning default value");
-            return 44f;
+            return index;
         }
     }
 
