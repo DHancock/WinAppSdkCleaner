@@ -268,7 +268,7 @@ internal sealed partial class SdkView : Page, IPageItem
         SortCommand.RaiseCanExecuteChanged();
     }
 
-    private void SelectedTreeViewItemChanged(TreeView sender, TreeViewSelectionChangedEventArgs e)
+    private void SelectedTreeView_ItemChanged(TreeView sender, TreeViewSelectionChangedEventArgs e)
     {
         Debug.Assert(sender.SelectionMode == TreeViewSelectionMode.Single);
 
@@ -276,9 +276,12 @@ internal sealed partial class SdkView : Page, IPageItem
         // TreeView.SelectedNode property is incorrect. Adjusting the command states assumes that it is
         // so need to force it here...
 
-        if ((e.RemovedItems.Count == 1) && (e.AddedItems.Count == 0) && (sender.SelectedNode is not null)) // deselect the currently selected item
+        if ((e.RemovedItems.Count == 1) && (e.AddedItems.Count == 0)) // deselect the currently selected item
         {
-            sender.SelectedNode = null;
+            if (sender.SelectedNode is not null)
+            {
+                sender.SelectedNode = null;
+            }
         }
         else if ((e.AddedItems.Count == 1) && (sender.SelectedNode is null)) // change the current selection or a new selection
         {
@@ -337,7 +340,7 @@ internal sealed partial class SdkView : Page, IPageItem
         return true;
     }
 
-    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    private void SdkTreeView_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
         {
@@ -348,8 +351,6 @@ internal sealed partial class SdkView : Page, IPageItem
                 SdkTreeView.SelectedNode = tvn;
             }
         }
-
-        base.OnPointerPressed(e);
     }
 
     private void SdkTreeView_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
