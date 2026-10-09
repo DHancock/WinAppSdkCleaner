@@ -57,12 +57,6 @@ internal static class Utils
         return ScaledRect(GetOffsetFromXamlRoot(e), e.ActualSize, (float)e.XamlRoot.RasterizationScale);
     }
 
-    public static RectangleF GetDimensions(UIElement e)
-    {
-        Vector3 location = GetOffsetFromXamlRoot(e);
-        return new RectangleF(location.X, location.Y, e.ActualSize.X, e.ActualSize.Y);
-    }
-
     public static bool InvokeMenuItemForKeyboardAccelerator(IList<MenuFlyoutItemBase> menuItems, VirtualKeyModifiers modifiers, VirtualKey key)
     {
         foreach (MenuFlyoutItemBase mfib in menuItems)

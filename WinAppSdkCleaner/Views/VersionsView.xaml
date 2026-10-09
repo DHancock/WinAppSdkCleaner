@@ -11,6 +11,11 @@
 
     <Grid>
         <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}">
+            
+            <ListView.Resources>
+                <StandardUICommand x:Name="CopyCommand" Kind="Copy" ExecuteRequested="CopyCommand_ExecuteRequested"/>
+            </ListView.Resources>
+            
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderContainerStyle>
@@ -70,17 +75,6 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Grid.Resources>
-                                        <XamlUICommand x:Name="CopyCommand" Label="Copy" ExecuteRequested="CopyCommand_ExecuteRequested">
-                                            <XamlUICommand.KeyboardAccelerators>
-                                                <KeyboardAccelerator Key="C" Modifiers="Control"/>
-                                            </XamlUICommand.KeyboardAccelerators>
-                                            <XamlUICommand.IconSource>
-                                                <SymbolIconSource Symbol="Copy"/>
-                                            </XamlUICommand.IconSource>
-                                        </XamlUICommand>
-                                    </Grid.Resources>
-                                    
                                     <Grid.ContextFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem CommandParameter="{x:Bind}" Command="{StaticResource CopyCommand}" />
