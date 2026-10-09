@@ -30,7 +30,7 @@
         </Grid.Resources>
 
         <Border Style="{StaticResource TreeViewBorderStyle}">
-            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeViewItemChanged" DoubleTapped="SdkTreeView_DoubleTapped">
+            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeView_ItemChanged" PointerPressed="SdkTreeView_PointerPressed" DoubleTapped="SdkTreeView_DoubleTapped">
 
                 <TreeView.Resources>
                     <StandardUICommand x:Name="CopyCommand" Kind="Copy" ExecuteRequested="{x:Bind local:SdkView.CopyCommand_ExecuteRequested}"/>
