@@ -6,15 +6,15 @@ internal sealed partial class GroupInfo : List<VersionRecord>
 {
     public GroupInfo(string sdkName, IEnumerable<VersionRecord> items) : base(items)
     {
-        Name = sdkName;
-        SingletonVersion = items.Any(vr => !string.IsNullOrWhiteSpace(vr.SingletonVersionStr)) ? "Singleton" : "";
+        SdkHeader = sdkName;
+        SingletonHeader = items.Any(vr => !string.IsNullOrWhiteSpace(vr.SingletonVersionStr)) ? "Singleton" : "";
     }
 
-    public string Name { get; }
-    public string FrameworkVersion { get; } = "Framework";
-    public string SingletonVersion { get; }
+    public string SdkHeader { get; }
+    public string FrameworkHeader { get; } = "Framework";
+    public string SingletonHeader { get; }
 
-    public override string ToString() => $"{Name} {FrameworkVersion} {SingletonVersion}" ; // the narrator uses this to read the group headers
+    public override string ToString() => $"{SdkHeader} {FrameworkHeader} {SingletonHeader}" ; // the narrator uses this to read the group headers
 }
 
 
@@ -51,34 +51,24 @@ internal sealed partial class VersionsViewModel : INotifyPropertyChanged
 
                 foreach (ISdk sdk in Model.SupportedSdk.Reverse())
                 {
-                    string sdkName = GetSdkName(sdk.Id);
-
                     IEnumerable<VersionRecord> query = Model.VersionsList
                                                        .Where(vr => vr.SdkId == sdk.Id && !vr.IsSynthesized)
-                                                       .OrderByDescending(vr => vr, new VersionRecordComparer());
+                                                       .OrderDescending(new VersionRecordComparer());
 
-                    groups.Add(new GroupInfo(sdkName, query));
+                    groups.Add(new GroupInfo(GetSdkName(sdk.Id), query));
                 }
 
                 viewSource.Source = groups;
             }
 
             return viewSource.View;
-        }
-    }
 
-    private static string GetSdkName(SdkId sdkId)
-    {
-        foreach (ISdk sdk in Model.SupportedSdk)
-        {
-            if (sdk.Id == sdkId)
+            static string GetSdkName(SdkId sdkId)
             {
-                return sdk.DisplayName;
+                ISdk? sdk = Model.SupportedSdk.FirstOrDefault(x => x.Id == sdkId);
+                return sdk?.DisplayName ?? sdkId.ToString();
             }
         }
-
-        Debug.Fail("failed to find sdk display name");
-        return sdkId.ToString();
     }
 
     public static void ExecuteCopy(IList<object> selectedItems)

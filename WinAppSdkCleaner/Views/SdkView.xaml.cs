@@ -344,7 +344,7 @@ internal sealed partial class SdkView : Page, IPageItem
     {
         if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
         {
-            PointerPoint pointerPoint = e.GetCurrentPoint(this);
+            PointerPoint pointerPoint = e.GetCurrentPoint(null);
 
             if (pointerPoint.Properties.IsRightButtonPressed && (e.OriginalSource is FrameworkElement fe) && (fe.DataContext is TreeViewNode tvn))
             {
