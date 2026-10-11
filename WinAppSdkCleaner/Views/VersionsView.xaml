@@ -40,9 +40,9 @@
                                     </Style>
                                 </Grid.Resources>
 
-                                <TextBlock Grid.Column="0" Text="{x:Bind Name}"/>
-                                <TextBlock Grid.Column="1" Text="{x:Bind FrameworkVersion}"/>
-                                <TextBlock Grid.Column="2" Text="{x:Bind SingletonVersion}"/>
+                                <TextBlock Grid.Column="0" Text="{x:Bind SdkHeader}"/>
+                                <TextBlock Grid.Column="1" Text="{x:Bind FrameworkHeader}"/>
+                                <TextBlock Grid.Column="2" Text="{x:Bind SingletonHeader}"/>
                             </Grid>
                         </DataTemplate>
                     </GroupStyle.HeaderTemplate>

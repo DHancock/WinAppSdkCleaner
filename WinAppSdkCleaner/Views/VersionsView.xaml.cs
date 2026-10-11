@@ -68,7 +68,7 @@ internal sealed partial class VersionsView : Page, IPageItem
     {
         if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
         {
-            PointerPoint pointerPoint = e.GetCurrentPoint(this);
+            PointerPoint pointerPoint = e.GetCurrentPoint(null);
 
             if (pointerPoint.Properties.IsRightButtonPressed)
             {
@@ -78,7 +78,7 @@ internal sealed partial class VersionsView : Page, IPageItem
                 {
                     if (!lvi.IsSelected)
                     {
-                        VersionListView.SelectedItems.Clear();
+                        VersionListView.DeselectRange(new ItemIndexRange(0, (uint)VersionListView.Items.Count));
                         lvi.IsSelected = true;
                     }
                 }
