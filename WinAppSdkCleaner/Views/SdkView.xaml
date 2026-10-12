@@ -47,7 +47,7 @@
 
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="TreeViewNode">
-                        <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}">
+                        <TreeViewItem AutomationProperties.Name="{x:Bind ((vm:ItemBase)Content).AutomationName}" Margin="0,0,14,0">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>

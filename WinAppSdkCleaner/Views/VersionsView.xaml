@@ -52,7 +52,7 @@
             <ListView.Style>
                 <Style TargetType="ListView">
                     <Setter Property="SelectionMode" Value="Extended"/>
-                    <Setter Property="Padding" Value="0,0,0,0"/>
+                    <Setter Property="Padding" Value="0,0,14,0"/>
                     <Setter Property="Margin" Value="15,0,15,15"/>
                     <Setter Property="CornerRadius" Value="6"/>
                     <Setter Property="Background" Value="{ThemeResource ControlFillColorDefaultBrush}"/>
@@ -68,7 +68,7 @@
                     <Setter Property="ItemTemplate" >
                         <Setter.Value>
                             <DataTemplate x:DataType="m:VersionRecord">
-                                <Grid AutomationProperties.Name="{x:Bind AutomationName}">
+                                <Grid AutomationProperties.Name="{x:Bind AutomationName}" Padding="0,3,0,3">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
