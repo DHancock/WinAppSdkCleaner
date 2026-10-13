@@ -301,15 +301,34 @@ internal sealed partial class SdkView : Page, IPageItem
         rects[3] = Utils.GetPassthroughRect(SortButton);
     }
 
-    public static void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        SdkViewModel.ExecuteCopy((ItemBase)args.Parameter);
+        // this shouldn't be necessary but after deselecting the node using Control+left click
+        // the context menu can still be opened via Shift+F10 or this command invoked using Control+C
+        args.CanExecute = SdkTreeView.SelectedNode is not null;
     }
 
-    public static async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    public void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        ItemBase item = (ItemBase)args.Parameter;
-        await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info, item.Logo);
+        if (SdkTreeView.SelectedNode?.Content is ItemBase item)
+        {
+            SdkViewModel.ExecuteCopy(item);
+        }
+    }
+
+    private void InfoCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    {
+        // this shouldn't be necessary but after deselecting the node using Control+left click
+        // the context menu can still be opened via Shift+F10 or this command invoked using Control+A
+        args.CanExecute = SdkTreeView.SelectedNode is not null;
+    }
+
+    public async void InfoCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    {
+        if (SdkTreeView.SelectedNode?.Content is ItemBase item)
+        {
+            await App.MainWindow.ContentDialogHelper.ShowInfoDialogAsync(item.Info, item.Logo);
+        }
     }
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
@@ -317,8 +336,6 @@ internal sealed partial class SdkView : Page, IPageItem
         // keyboard accelerators only work on the selected item
         if (SdkTreeView.ContainerFromNode(SdkTreeView.SelectedNode) is TreeViewItem tvi)
         {
-            Grid grid = (Grid)tvi.Content;
-
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
                 TreeViewList? treeViewList = SdkTreeView.FindChild<TreeViewList>();
@@ -328,16 +345,18 @@ internal sealed partial class SdkView : Page, IPageItem
                     // explicitly creating TreeViewNodes allows ScrollIntoView() to work
                     // the selected node's parents must have already been expanded
                     treeViewList.ScrollIntoView(SdkTreeView.SelectedNode);
-                    grid.ContextFlyout.ShowAt(tvi);
+                    tvi.ContextFlyout.ShowAt(tvi);
+                    return true;
                 }
-
-                return true;
             }
-
-            return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+            else if (!ReferenceEquals(FocusManager.GetFocusedElement(XamlRoot), tvi))
+            {
+                // treat as a global hot key, but avoid a double invoke
+                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)tvi.ContextFlyout).Items, modifiers, key);
+            }
         }
 
-        return true;
+        return false;
     }
 
     private void SdkTreeView_PointerPressed(object sender, PointerRoutedEventArgs e)

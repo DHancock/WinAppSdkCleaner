@@ -31,6 +31,16 @@ internal sealed partial class VersionsView : Page, IPageItem
         VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
     }
 
+    private void SelectAllCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    {
+        args.CanExecute = VersionListView.SelectedRanges.Sum(range => range.Length) != VersionListView.Items.Count;
+    }
+
+    private void SelectAllCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    {
+        VersionListView.SelectRange(new ItemIndexRange(0, (uint)VersionListView.Items.Count));
+    }
+
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
         // keyboard accelerators only work on the selected items
@@ -46,22 +56,21 @@ internal sealed partial class VersionsView : Page, IPageItem
 
                     if (VersionListView.ContainerFromIndex(index) is ListViewItem lvi)
                     {
-                        Grid grid = (Grid)lvi.ContentTemplateRoot;
-                        grid.ContextFlyout.ShowAt(lvi);
+                        lvi.ContextFlyout.ShowAt(lvi);
+                        return true;
                     }
                 }
-
-                return true;
             }
-            else if (VersionListView.ContainerFromIndex(((ItemsStackPanel)VersionListView.ItemsPanelRoot).FirstVisibleIndex) is ListViewItem lvi)
+            else if (FocusManager.GetFocusedElement(XamlRoot).GetType() != typeof(ListViewItem)
+                    && VersionListView.ContainerFromIndex(((ItemsStackPanel)VersionListView.ItemsPanelRoot).FirstVisibleIndex) is ListViewItem lvi)
             {
+                // treat as a global hot key, but avoid a double invoke 
                 // using the first visible index ensures that it's container exists, all menu items use the list view's selected items
-                Grid grid = (Grid)lvi.ContentTemplateRoot;
-                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)lvi.ContextFlyout).Items, modifiers, key);
             }
         }
 
-        return true;
+        return false;
     }
 
     private void VersionListView_PointerPressed(object sender, PointerRoutedEventArgs e)
