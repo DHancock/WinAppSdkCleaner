@@ -8,46 +8,20 @@ internal static class Utils
         Debug.Assert(succeeded);
     }
 
-    public static Vector3 GetOffsetFromXamlRoot(UIElement e)
+    private static Point GetOffsetFromXamlRoot(UIElement e)
     {
-        Vector3 offset = e.ActualOffset;
-
-        // FrameworkElement.Parent is the logical parent
-        DependencyObject? dependencyObject = VisualTreeHelper.GetParent(e);
-
-        while (dependencyObject != null)
-        {
-            if (dependencyObject is UIElement uie)
-            {
-                offset += uie.ActualOffset;
-
-                if (uie is ScrollView sv)
-                {
-                    offset.X -= (float)sv.HorizontalOffset;
-                    offset.Y -= (float)sv.VerticalOffset;
-                }
-                else if (uie is ScrollViewer svr)
-                {
-                    offset.X -= (float)svr.HorizontalOffset;
-                    offset.Y -= (float)svr.VerticalOffset;
-                }
-            }
-
-            dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
-        }
-
-        return offset;
+        return e.TransformToVisual(e.XamlRoot.Content).TransformPoint(default);
     }
 
-    public static RectInt32 ScaledRect(in Vector3 location, in Vector2 size, in float scale)
+    private static RectInt32 ScaledRect(in Point location, in Vector2 size, in float scale)
     {
-        Debug.Assert(location.X >= 0f);
-        Debug.Assert(location.Y >= 0f);
+        Debug.Assert(location.X >= 0.0);
+        Debug.Assert(location.Y >= 0.0);
         Debug.Assert(size.X >= 0f);
         Debug.Assert(size.Y >= 0f);
 
-        return new RectInt32((int)MathF.FusedMultiplyAdd(location.X, scale, 0.5f),
-                             (int)MathF.FusedMultiplyAdd(location.Y, scale, 0.5f),
+        return new RectInt32((int)MathF.FusedMultiplyAdd((float)location.X, scale, 0.5f),
+                             (int)MathF.FusedMultiplyAdd((float)location.Y, scale, 0.5f),
                              (int)MathF.FusedMultiplyAdd(size.X, scale, 0.5f),
                              (int)MathF.FusedMultiplyAdd(size.Y, scale, 0.5f));
     }
