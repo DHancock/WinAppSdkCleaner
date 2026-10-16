@@ -26,6 +26,11 @@ internal sealed partial class VersionsView : Page, IPageItem
         rects[0] = Utils.GetPassthroughRect(VersionListView);
     }
 
+    private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    {
+         args.CanExecute = VersionListView.SelectedRanges.Count > 0;
+    }
+
     private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
         VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
@@ -65,9 +70,9 @@ internal sealed partial class VersionsView : Page, IPageItem
         }
         else if (VersionListView.ContainerFromIndex(((ItemsStackPanel)VersionListView.ItemsPanelRoot).FirstVisibleIndex) is ListViewItem lvi)
         {
-            // using the first visible index ensures that it's container exists, none of the menu item commands are item specific
-            Grid grid = (Grid)lvi.ContentTemplateRoot;
-            return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+            // treat as global hot keys
+            // using the first visible index ensures that it's container exists, none of the menu commands are item specific
+            return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)lvi.ContextFlyout).Items, modifiers, key);
         }
 
         return false;

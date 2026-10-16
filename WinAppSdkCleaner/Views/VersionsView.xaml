@@ -13,7 +13,7 @@
         <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" PointerPressed="VersionListView_PointerPressed">
             
             <ListView.Resources>
-                <StandardUICommand x:Name="CopyCommand" Kind="Copy" ExecuteRequested="CopyCommand_ExecuteRequested"/>
+                <StandardUICommand x:Name="CopyCommand" Kind="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested"/>
                 <StandardUICommand x:Name="SelectAllCommand" Kind="SelectAll" CanExecuteRequested="SelectAllCommand_CanExecuteRequested" ExecuteRequested="SelectAllCommand_ExecuteRequested"/>
 
                 <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
