@@ -14,6 +14,18 @@
             
             <ListView.Resources>
                 <StandardUICommand x:Name="CopyCommand" Kind="Copy" ExecuteRequested="CopyCommand_ExecuteRequested"/>
+                <StandardUICommand x:Name="SelectAllCommand" Kind="SelectAll" CanExecuteRequested="SelectAllCommand_CanExecuteRequested" ExecuteRequested="SelectAllCommand_ExecuteRequested"/>
+
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                    <Setter Property="ContextFlyout">
+                        <Setter.Value>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
+                                <MenuFlyoutItem Command="{StaticResource SelectAllCommand}"/>
+                            </MenuFlyout>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
             </ListView.Resources>
             
             <ListView.GroupStyle>
@@ -52,7 +64,7 @@
             <ListView.Style>
                 <Style TargetType="ListView">
                     <Setter Property="SelectionMode" Value="Extended"/>
-                    <Setter Property="Padding" Value="0,0,0,0"/>
+                    <Setter Property="Padding" Value="0,0,14,0"/>
                     <Setter Property="Margin" Value="15,0,15,15"/>
                     <Setter Property="CornerRadius" Value="6"/>
                     <Setter Property="Background" Value="{ThemeResource ControlFillColorDefaultBrush}"/>
@@ -74,13 +86,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <Grid.ContextFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem Command="{StaticResource CopyCommand}" />
-                                        </MenuFlyout>
-                                    </Grid.ContextFlyout>
-
+                                    
                                     <TextBlock Grid.Column="0" Text="{x:Bind SdkVersionStr}"/>
                                     <TextBlock Grid.Column="1" Text="{x:Bind PackageVersionStr}"/>
                                     <TextBlock Grid.Column="2" Text="{x:Bind SingletonVersionStr}"/>

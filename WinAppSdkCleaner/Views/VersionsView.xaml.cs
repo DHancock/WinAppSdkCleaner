@@ -31,6 +31,16 @@ internal sealed partial class VersionsView : Page, IPageItem
         VersionsViewModel.ExecuteCopy(VersionListView.SelectedItems);
     }
 
+    private void SelectAllCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
+    {
+        args.CanExecute = VersionListView.SelectedRanges.Sum(range => range.Length) != VersionListView.Items.Count;
+    }
+
+    private void SelectAllCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    {
+        VersionListView.SelectRange(new ItemIndexRange(0, (uint)VersionListView.Items.Count));
+    }
+
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
         if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
@@ -45,8 +55,8 @@ internal sealed partial class VersionsView : Page, IPageItem
 
                     if (VersionListView.ContainerFromIndex(index) is ListViewItem lvi)
                     {
-                        Grid grid = (Grid)lvi.ContentTemplateRoot;
-                        grid.ContextFlyout.ShowAt(lvi);
+                        lvi.ContextFlyout.ShowAt(lvi);
+                        return true;
                     }
                 }
             }
