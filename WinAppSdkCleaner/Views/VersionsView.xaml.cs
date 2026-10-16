@@ -33,12 +33,11 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        // keyboard accelerators only work on the selected items
-        if (VersionListView.SelectedRanges.Count > 0)
+        if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
         {
-            if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
+            if (VersionListView.SelectedRanges.Count > 0)
             {
-                int index = VersionListView.SelectedRanges.Min(range => range.FirstIndex);
+                int index = FindSuitablePlacementIndex();
 
                 if ((index >= 0) && (index < VersionListView.Items.Count))
                 {
@@ -50,18 +49,58 @@ internal sealed partial class VersionsView : Page, IPageItem
                         grid.ContextFlyout.ShowAt(lvi);
                     }
                 }
-
-                return true;
             }
-            else if (VersionListView.ContainerFromIndex(((ItemsStackPanel)VersionListView.ItemsPanelRoot).FirstVisibleIndex) is ListViewItem lvi)
+
+            return true;
+        }
+        else if (VersionListView.ContainerFromIndex(((ItemsStackPanel)VersionListView.ItemsPanelRoot).FirstVisibleIndex) is ListViewItem lvi)
+        {
+            // using the first visible index ensures that it's container exists, none of the menu item commands are item specific
+            Grid grid = (Grid)lvi.ContentTemplateRoot;
+            return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+        }
+
+        return false;
+    }
+
+    private int FindSuitablePlacementIndex()
+    {
+        Debug.Assert(VersionListView.SelectedRanges.Count > 0);
+
+        if ((FocusManager.GetFocusedElement(XamlRoot) is ListViewItem lvi) && lvi.IsSelected)
+        {
+            int index = VersionListView.IndexFromContainer(lvi);
+
+            if (index > -1)
             {
-                // using the first visible index ensures that it's container exists, all menu items use the list view's selected items
-                Grid grid = (Grid)lvi.ContentTemplateRoot;
-                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)grid.ContextFlyout).Items, modifiers, key);
+                return index;
             }
         }
 
-        return true;
+        ItemsStackPanel isp = (ItemsStackPanel)VersionListView.ItemsPanelRoot;
+        int firstVisibleIndex = isp.FirstVisibleIndex + 1;
+        int lastVisibleIndex = isp.LastVisibleIndex - 1;
+
+        foreach (ItemIndexRange iir in VersionListView.SelectedRanges)
+        {
+            if ((iir.FirstIndex > firstVisibleIndex) && (iir.FirstIndex < lastVisibleIndex))
+            {
+                return iir.FirstIndex;
+            }
+
+            if ((iir.LastIndex > firstVisibleIndex) && (iir.LastIndex < lastVisibleIndex))
+            {
+                return firstVisibleIndex;
+            }
+
+            if ((iir.FirstIndex < firstVisibleIndex) && (iir.LastIndex > lastVisibleIndex))
+            {
+                return firstVisibleIndex;
+            }
+        }
+
+        // no obvious overlapps
+        return VersionListView.SelectedRanges[0].FirstIndex;
     }
 
     private void VersionListView_PointerPressed(object sender, PointerRoutedEventArgs e)
