@@ -346,8 +346,9 @@ internal sealed partial class SdkView : Page, IPageItem
                     // the selected node's parents must have already been expanded
                     treeViewList.ScrollIntoView(SdkTreeView.SelectedNode);
                     tvi.ContextFlyout.ShowAt(tvi);
-                    return true;
                 }
+
+                return true;
             }
             else if (!ReferenceEquals(FocusManager.GetFocusedElement(XamlRoot), tvi))
             {

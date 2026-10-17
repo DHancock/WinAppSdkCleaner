@@ -43,7 +43,7 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private void SelectAllCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        VersionListView.SelectRange(new ItemIndexRange(0, (uint)VersionListView.Items.Count));
+        VersionListView.SelectAll();
     }
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
@@ -52,7 +52,7 @@ internal sealed partial class VersionsView : Page, IPageItem
         {
             if (VersionListView.SelectedRanges.Count > 0)
             {
-                int index = FindSuitablePlacementIndex();
+                int index = Utils.FindSuitablePlacementIndex(VersionListView);
 
                 if ((index >= 0) && (index < VersionListView.Items.Count))
                 {
@@ -61,7 +61,6 @@ internal sealed partial class VersionsView : Page, IPageItem
                     if (VersionListView.ContainerFromIndex(index) is ListViewItem lvi)
                     {
                         lvi.ContextFlyout.ShowAt(lvi);
-                        return true;
                     }
                 }
             }
@@ -76,46 +75,6 @@ internal sealed partial class VersionsView : Page, IPageItem
         }
 
         return false;
-    }
-
-    private int FindSuitablePlacementIndex()
-    {
-        Debug.Assert(VersionListView.SelectedRanges.Count > 0);
-
-        if ((FocusManager.GetFocusedElement(XamlRoot) is ListViewItem lvi) && lvi.IsSelected)
-        {
-            int index = VersionListView.IndexFromContainer(lvi);
-
-            if (index > -1)
-            {
-                return index;
-            }
-        }
-
-        ItemsStackPanel isp = (ItemsStackPanel)VersionListView.ItemsPanelRoot;
-        int firstVisibleIndex = isp.FirstVisibleIndex + 1;
-        int lastVisibleIndex = isp.LastVisibleIndex - 1;
-
-        foreach (ItemIndexRange iir in VersionListView.SelectedRanges)
-        {
-            if ((iir.FirstIndex > firstVisibleIndex) && (iir.FirstIndex < lastVisibleIndex))
-            {
-                return iir.FirstIndex;
-            }
-
-            if ((iir.LastIndex > firstVisibleIndex) && (iir.LastIndex < lastVisibleIndex))
-            {
-                return firstVisibleIndex;
-            }
-
-            if ((iir.FirstIndex < firstVisibleIndex) && (iir.LastIndex > lastVisibleIndex))
-            {
-                return firstVisibleIndex;
-            }
-        }
-
-        // no obvious overlapps
-        return VersionListView.SelectedRanges[0].FirstIndex;
     }
 
     private void VersionListView_PointerPressed(object sender, PointerRoutedEventArgs e)
