@@ -57,15 +57,15 @@ internal static class Utils
                             if (mfi.Command.CanExecute(mfi.CommandParameter))
                             {
                                 mfi.Command.Execute(mfi.CommandParameter);
-                                return true;
                             }
+
+                            return true;
                         }
                         else if (mfi.IsEnabled)
                         {
                             // the menu item has a click event handler, it's enabled state would be adjusted in code when required
                             AutomationPeer? ap = FrameworkElementAutomationPeer.FromElement(mfi);
                             MenuFlyoutItemAutomationPeer? ip = ap?.GetPattern(PatternInterface.Invoke) as MenuFlyoutItemAutomationPeer;
-
                             ip?.Invoke();
                             return true;
                         }
@@ -75,5 +75,46 @@ internal static class Utils
         }
 
         return false;
+    }
+
+    public static int FindSuitablePlacementIndex(ListView list)
+    {
+        Debug.Assert(list.SelectedRanges.Count > 0);
+        Debug.Assert(list.SelectionMode is ListViewSelectionMode.Extended);
+
+        if ((FocusManager.GetFocusedElement(list.XamlRoot) is ListViewItem lvi) && lvi.IsSelected)
+        {
+            int index = list.IndexFromContainer(lvi);
+
+            if (index > -1) // could be more than one list
+            {
+                return index;
+            }
+        }
+
+        ItemsStackPanel isp = (ItemsStackPanel)list.ItemsPanelRoot;
+        int firstVisibleIndex = isp.FirstVisibleIndex + 1;
+        int lastVisibleIndex = isp.LastVisibleIndex - 1;
+
+        foreach (ItemIndexRange iir in list.SelectedRanges)
+        {
+            if ((iir.FirstIndex > firstVisibleIndex) && (iir.FirstIndex < lastVisibleIndex))
+            {
+                return iir.FirstIndex;
+            }
+
+            if ((iir.LastIndex > firstVisibleIndex) && (iir.LastIndex < lastVisibleIndex))
+            {
+                return firstVisibleIndex;
+            }
+
+            if ((iir.FirstIndex < firstVisibleIndex) && (iir.LastIndex > lastVisibleIndex))
+            {
+                return firstVisibleIndex;
+            }
+        }
+
+        // no obvious overlapps
+        return list.SelectedRanges[0].FirstIndex;
     }
 }
