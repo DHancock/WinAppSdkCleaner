@@ -79,21 +79,18 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private void VersionListView_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        if (e.Pointer.PointerDeviceType == PointerDeviceType.Mouse)
+        PointerPoint pointerPoint = e.GetCurrentPoint(null);
+
+        if (pointerPoint.Properties.IsRightButtonPressed)
         {
-            PointerPoint pointerPoint = e.GetCurrentPoint(null);
+            object? versionRecord = (e.OriginalSource as FrameworkElement)?.DataContext;
 
-            if (pointerPoint.Properties.IsRightButtonPressed)
+            if (VersionListView.ContainerFromItem(versionRecord) is ListViewItem lvi)
             {
-                object? versionRecord = (e.OriginalSource as FrameworkElement)?.DataContext;
-
-                if (VersionListView.ContainerFromItem(versionRecord) is ListViewItem lvi)
+                if (!lvi.IsSelected)
                 {
-                    if (!lvi.IsSelected)
-                    {
-                        VersionListView.DeselectRange(new ItemIndexRange(0, (uint)VersionListView.Items.Count));
-                        lvi.IsSelected = true;
-                    }
+                    VersionListView.DeselectRange(new ItemIndexRange(0, (uint)VersionListView.Items.Count));
+                    lvi.IsSelected = true;
                 }
             }
         }
