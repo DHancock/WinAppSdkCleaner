@@ -9,7 +9,6 @@ PostMessage
 GetCursorPos
 ScreenToClient
 WM_SYSCOMMAND
-GetDoubleClickTime
 RemoveWindowSubclass
 SetWindowsHookEx
 CallNextHookEx
