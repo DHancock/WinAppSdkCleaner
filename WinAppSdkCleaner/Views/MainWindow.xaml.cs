@@ -8,7 +8,6 @@ namespace WinAppSdkCleaner.Views;
 /// </summary>
 internal sealed partial class MainWindow : Window
 {
-    private DateTime lastPointerTimeStamp;
     private SdkView? sdkViewPage;
 
     private readonly FrameNavigationOptions frameNavigationOptions = new FrameNavigationOptions()
@@ -28,6 +27,7 @@ internal sealed partial class MainWindow : Window
         customTitleBar.UpdateThemeAndTransparency(LayoutRoot.ActualTheme);
         customTitleBar.Title = title;
         customTitleBar.WindowIconArea.PointerPressed += WindowIconArea_PointerPressed;
+        customTitleBar.WindowIconArea.DoubleTapped += WindowIconArea_DoubleTapped;
         Activated += customTitleBar.ParentWindow_Activated;
 
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
@@ -172,18 +172,12 @@ internal sealed partial class MainWindow : Window
     private void WindowIconArea_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         ShowSystemMenu(viaKeyboard: true); // open at keyboard location as not to obscure double clicks
+    }
 
-        TimeSpan doubleClickTime = TimeSpan.FromMilliseconds(PInvoke.GetDoubleClickTime());
-        DateTime utcNow = DateTime.UtcNow;
-
-        if ((utcNow - lastPointerTimeStamp) < doubleClickTime)
-        {
-            PostCloseMessage();
-        }
-        else
-        {
-            lastPointerTimeStamp = utcNow;
-        }
+    private void WindowIconArea_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        PostCloseMessage();
+        e.Handled = true;
     }
 
     private void LayoutRoot_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -208,7 +202,3 @@ internal sealed partial class MainWindow : Window
         args.Handled = ((IPageItem)ContentFrame.Content).InvokeKeyboardAccelerator(args.Modifiers, args.Key);
     }
 }
-
-
-
-
