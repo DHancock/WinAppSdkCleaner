@@ -93,24 +93,22 @@ internal static class Utils
         }
 
         ItemsStackPanel isp = (ItemsStackPanel)list.ItemsPanelRoot;
-        int firstVisibleIndex = isp.FirstVisibleIndex + 1;
-        int lastVisibleIndex = isp.LastVisibleIndex - 1;
 
         foreach (ItemIndexRange iir in list.SelectedRanges)
         {
-            if ((iir.FirstIndex > firstVisibleIndex) && (iir.FirstIndex < lastVisibleIndex))
+            if ((iir.FirstIndex >= isp.FirstVisibleIndex) && (iir.FirstIndex <= isp.LastVisibleIndex))
             {
                 return iir.FirstIndex;
             }
 
-            if ((iir.LastIndex > firstVisibleIndex) && (iir.LastIndex < lastVisibleIndex))
+            if ((iir.LastIndex >= isp.FirstVisibleIndex) && (iir.LastIndex <= isp.LastVisibleIndex))
             {
-                return firstVisibleIndex;
+                return isp.FirstVisibleIndex;
             }
 
-            if ((iir.FirstIndex < firstVisibleIndex) && (iir.LastIndex > lastVisibleIndex))
+            if ((iir.FirstIndex <= isp.FirstVisibleIndex) && (iir.LastIndex >= isp.LastVisibleIndex))
             {
-                return firstVisibleIndex;
+                return isp.FirstVisibleIndex;
             }
         }
 
