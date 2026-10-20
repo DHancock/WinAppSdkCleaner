@@ -28,7 +28,7 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private void CopyCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-         args.CanExecute = VersionListView.SelectedRanges.Count > 0;
+         args.CanExecute = VersionListView.IsAnySelected;
     }
 
     private void CopyCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
@@ -38,19 +38,35 @@ internal sealed partial class VersionsView : Page, IPageItem
 
     private void SelectAllCommand_CanExecuteRequested(XamlUICommand sender, CanExecuteRequestedEventArgs args)
     {
-        args.CanExecute = VersionListView.SelectedRanges.Sum(range => range.Length) != VersionListView.Items.Count;
+        if (VersionListView.IsAllSelected)
+        {                                                  
+            sender.Label = "Deselect All";
+            sender.Description = "Deselects all content";       
+        }
+        else
+        {
+            sender.Label = "Select All";
+            sender.Description = "Selects all content"; 
+        }
     }
 
     private void SelectAllCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-        VersionListView.SelectAll();
+        if (VersionListView.IsAllSelected)
+        {
+            VersionListView.DeselectAll();
+        }
+        else
+        {
+            VersionListView.SelectAll();
+        }
     }
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
         if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
         {
-            if (VersionListView.SelectedRanges.Count > 0)
+            if (VersionListView.IsAnySelected)
             {
                 int index = Utils.FindSuitablePlacementIndex(VersionListView);
 
@@ -89,7 +105,7 @@ internal sealed partial class VersionsView : Page, IPageItem
             {
                 if (!lvi.IsSelected)
                 {
-                    VersionListView.DeselectRange(new ItemIndexRange(0, (uint)VersionListView.Items.Count));
+                    VersionListView.DeselectAll();
                     lvi.IsSelected = true;
                 }
             }

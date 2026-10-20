@@ -17,7 +17,12 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Version>1.12.2</Version>
 	</PropertyGroup>
-
+	
+	<ItemGroup>
+		<!-- https://github.com/dotnet/runtime/issues/129191 -->
+		<RuntimeHostConfigurationOption Include="System.Diagnostics.Debugger.IsSupported" Value="false" Trim="true" />
+	</ItemGroup>
+	
 	<ItemGroup>
 	  <EmbeddedResource Include="versions.dat">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>

@@ -31,4 +31,15 @@ internal static class Extensions
 
         return null;
     }
+
+    extension(ListView listView)
+    {
+        public bool IsAnySelected => listView.SelectedRanges.Count > 0;
+        public bool IsAllSelected => listView.SelectedRanges.Sum(range => range.Length) == listView.Items.Count;
+    }
+
+    public static void DeselectAll(this ListView listView)
+    {
+        listView.DeselectRange(new ItemIndexRange(0, (uint)listView.Items.Count));
+    }
 }
