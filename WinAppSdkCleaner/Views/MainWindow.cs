@@ -164,7 +164,7 @@ internal sealed partial class MainWindow : Window
                         case SC.MINIMIZE:
                         {
                             // work around for https://github.com/microsoft/microsoft-ui-xaml/issues/11068
-                            CloseMenuPopups(window.Content.XamlRoot);
+                            Utils.CloseMenuPopups(window.Content.XamlRoot);
                             break;
                         }
                     }
@@ -193,17 +193,6 @@ internal sealed partial class MainWindow : Window
         }
 
         return PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
-    }
-
-    private static void CloseMenuPopups(XamlRoot xamlRoot)
-    {
-        foreach (Popup popup in VisualTreeHelper.GetOpenPopupsForXamlRoot(xamlRoot))
-        {
-            if (popup.Child is MenuFlyoutPresenter) // avoid content dialogs
-            {
-                popup.IsOpen = false;
-            }
-        }
     }
 
     private void PostSysCommandMessage(SC command)

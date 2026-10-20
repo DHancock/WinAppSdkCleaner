@@ -1,4 +1,6 @@
-﻿namespace WinAppSdkCleaner.Utilities;
+﻿using Microsoft.UI.Xaml.Controls.Primitives;
+
+namespace WinAppSdkCleaner.Utilities;
 
 internal static class Utils
 {
@@ -114,5 +116,16 @@ internal static class Utils
 
         // no obvious overlapps
         return list.SelectedRanges[0].FirstIndex;
+    }
+
+    public static void CloseMenuPopups(XamlRoot xamlRoot)
+    {
+        foreach (Popup popup in VisualTreeHelper.GetOpenPopupsForXamlRoot(xamlRoot))
+        {
+            if (popup.Child is MenuFlyoutPresenter) // avoid content dialogs
+            {
+                popup.IsOpen = false;
+            }
+        }
     }
 }
