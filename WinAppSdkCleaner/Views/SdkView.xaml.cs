@@ -333,7 +333,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        // keyboard accelerators only work on the selected item
+        // these keyboard accelerators only work on the selected item
         if (SdkTreeView.ContainerFromNode(SdkTreeView.SelectedNode) is TreeViewItem tvi)
         {
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
@@ -350,9 +350,9 @@ internal sealed partial class SdkView : Page, IPageItem
 
                 return true;
             }
-            else if (!ReferenceEquals(FocusManager.GetFocusedElement(XamlRoot), tvi))
+            else
             {
-                // treat as a global hot key, but avoid a double invoke
+                // treat as a global hot key
                 return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)tvi.ContextFlyout).Items, modifiers, key);
             }
         }

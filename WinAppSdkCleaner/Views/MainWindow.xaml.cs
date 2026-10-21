@@ -199,6 +199,17 @@ internal sealed partial class MainWindow : Window
     {
         // The lists context menu item keyboard accelerators only seem to be active after the menu has been shown.
         // Invoke here instead, the accelerators are in known positions in the visual tree
-        args.Handled = ((IPageItem)ContentFrame.Content).InvokeKeyboardAccelerator(args.Modifiers, args.Key);
+
+        if (((IPageItem)ContentFrame.Content).InvokeKeyboardAccelerator(args.Modifiers, args.Key))
+        {
+            if (!((args.Modifiers == VirtualKeyModifiers.Shift) && (args.Key == VirtualKey.F10)))
+            {
+                // if a context menu was open when the key accelerator was invoked, it needs to be closed
+                // (unless the the invoke causes one to be opened) 
+                CloseMenuPopups(Content.XamlRoot);
+            }
+
+            args.Handled = true;
+        }
     }
 }
