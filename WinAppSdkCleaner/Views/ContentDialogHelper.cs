@@ -1,6 +1,4 @@
-﻿using WinAppSdkCleaner.Utilities;
-
-namespace WinAppSdkCleaner.Views;
+﻿namespace WinAppSdkCleaner.Views;
 
 internal sealed class ContentDialogHelper
 {
@@ -35,10 +33,6 @@ internal sealed class ContentDialogHelper
             Debug.Fail("canceling request for a second content dialog");
             return ContentDialogResult.None;
         }
-
-        // if a command that opens this content dialog has been invoked via the keyboard while it's containing
-        // context menu is open, the menu would otherwise remain open in front of the content dialog, but unresponsive
-        Utils.CloseMenuPopups(parentWindow.Content.XamlRoot);
 
         currentDialog = dialog;
         currentDialog.Opened += ContentDialog_Opened;
