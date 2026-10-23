@@ -32,14 +32,30 @@ internal static class Extensions
         return null;
     }
 
-    extension(ListView listView)
+    extension(ListViewBase list)
     {
-        public bool IsAnySelected => listView.SelectedRanges.Count > 0;
-        public bool IsAllSelected => listView.SelectedRanges.Sum(range => range.Length) == listView.Items.Count;
+        public bool IsAnySelected => list.SelectedCount > 0;
+        public bool IsAllSelected => (list.Items.Count > 0) && (list.SelectedCount == list.Items.Count);
+
+        private long SelectedCount
+        {
+            get
+            {
+                if (list.SelectionMode is not ListViewSelectionMode.None)
+                {
+                    return list.SelectedRanges.Sum(range => range.Length);
+                }
+
+                return 0;
+            }
+        }
     }
 
-    public static void DeselectAll(this ListView listView)
+    public static void DeselectAll(this ListViewBase list)
     {
-        listView.DeselectRange(new ItemIndexRange(0, (uint)listView.Items.Count));
+        if (list.SelectionMode is not ListViewSelectionMode.None)
+        {
+            list.DeselectRange(new ItemIndexRange(0, (uint)list.Items.Count));
+        }
     }
 }
