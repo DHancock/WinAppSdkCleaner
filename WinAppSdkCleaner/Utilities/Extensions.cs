@@ -34,21 +34,12 @@ internal static class Extensions
 
     extension(ListViewBase list)
     {
-        public bool IsAnySelected => list.SelectedCount > 0;
-        public bool IsAllSelected => (list.Items.Count > 0) && (list.SelectedCount == list.Items.Count);
+        public bool IsAnySelected => list.SelectionMode is not ListViewSelectionMode.None && 
+                                     list.SelectedRanges.Any(range => range.Length > 0);
 
-        private long SelectedCount
-        {
-            get
-            {
-                if (list.SelectionMode is not ListViewSelectionMode.None)
-                {
-                    return list.SelectedRanges.Sum(range => range.Length);
-                }
-
-                return 0;
-            }
-        }
+        public bool IsAllSelected => list.SelectionMode is not ListViewSelectionMode.None && 
+                                     list.Items.Count > 0 &&
+                                     list.SelectedRanges.Sum(range => range.Length) == list.Items.Count;
     }
 
     public static void DeselectAll(this ListViewBase list)
