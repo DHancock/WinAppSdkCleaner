@@ -192,6 +192,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
                     if (await App.MainWindow.ContentDialogHelper.ShowConfirmDialogAsync(message) != ContentDialogResult.Primary)
                     {
+                        App.Instance.ShowConfirmDialog = true;
                         return;
                     }
                 }
