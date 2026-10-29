@@ -6,7 +6,7 @@
 [assembly: GeneratedWinRTExposedExternalType(typeof(AppBarButton))]
 [assembly: GeneratedWinRTExposedExternalType(typeof(TextCommandBarFlyout))]
 [assembly: GeneratedWinRTExposedExternalType(typeof(MenuFlyoutPresenter))]
-[assembly: GeneratedWinRTExposedExternalType(typeof(TreeViewList))]
+[assembly: GeneratedWinRTExposedExternalType(typeof(ItemsStackPanel))]
 
 namespace WinAppSdkCleaner;
 
