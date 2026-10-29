@@ -334,26 +334,24 @@ internal sealed partial class SdkView : Page, IPageItem
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        // these keyboard accelerators only work on the selected item
-        if (SdkTreeView.ContainerFromNode(SdkTreeView.SelectedNode) is TreeViewItem tvi)
+        TreeViewList? treeViewList = SdkTreeView.FindChild(typeof(TreeViewList)) as TreeViewList;
+
+        if (treeViewList is not null)
         {
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
-                TreeViewList? treeViewList = SdkTreeView.FindChild<TreeViewList>();
+                treeViewList.ScrollIntoView(SdkTreeView.SelectedNode);
 
-                if (treeViewList is not null)
+                if (SdkTreeView.ContainerFromNode(SdkTreeView.SelectedNode) is TreeViewItem tvi)
                 {
-                    // explicitly creating TreeViewNodes allows ScrollIntoView() to work
-                    // the selected node's parents must have already been expanded
-                    treeViewList.ScrollIntoView(SdkTreeView.SelectedNode);
                     tvi.ContextFlyout.ShowAt(tvi);
                 }
 
                 return true;
             }
-            else
+            else if (treeViewList.ContainerFromIndex(((ItemsStackPanel)treeViewList.ItemsPanelRoot).FirstVisibleIndex) is TreeViewItem tvi)
             {
-                // treat as a global hot key
+                // using the first visible index ensures that it's container exists, the menu commands only access the selected node
                 return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)tvi.ContextFlyout).Items, modifiers, key);
             }
         }
