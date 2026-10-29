@@ -334,9 +334,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        TreeViewList? treeViewList = SdkTreeView.FindChild(typeof(TreeViewList)) as TreeViewList;
-
-        if (treeViewList is not null)
+        if (SdkTreeView.FindChild(typeof(TreeViewList)) is TreeViewList treeViewList)
         {
             if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
             {
