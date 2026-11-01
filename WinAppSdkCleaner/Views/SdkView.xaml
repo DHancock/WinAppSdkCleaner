@@ -28,7 +28,7 @@
         </Grid.Resources>
 
         <Border Style="{StaticResource TreeViewBorderStyle}">
-            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeView_ItemChanged" PointerPressed="SdkTreeView_PointerPressed" DoubleTapped="SdkTreeView_DoubleTapped">
+            <TreeView x:Name="SdkTreeView" CanReorderItems="False" CanDrag="False" CanDragItems="False" SelectionChanged="SelectedTreeView_ItemChanged" PointerPressed="SdkTreeView_PointerPressed" DoubleTapped="SdkTreeView_DoubleTapped" RightTapped="SdkTreeView_RightTapped">
 
                 <TreeView.Resources>
                     <StandardUICommand x:Name="CopyCommand" Kind="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="{x:Bind CopyCommand_ExecuteRequested}"/>
@@ -42,15 +42,12 @@
                         </XamlUICommand.IconSource>
                     </XamlUICommand>
 
+                    <MenuFlyout x:Name="ItemContextMenu">
+                        <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
+                        <MenuFlyoutItem Command="{StaticResource InfoCommand}"/>
+                    </MenuFlyout>
+
                     <Style TargetType="TreeViewItem">
-                        <Setter Property="ContextFlyout">
-                            <Setter.Value>
-                                <MenuFlyout>
-                                    <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
-                                    <MenuFlyoutItem Command="{StaticResource InfoCommand}"/>
-                                </MenuFlyout>
-                            </Setter.Value>
-                        </Setter>
                         <Setter Property="Margin" Value="5,0,14,0"/>
                         <Setter Property="FocusVisualMargin" Value="-3,-1,0,-1"/>
                     </Style>

@@ -76,7 +76,7 @@ internal sealed partial class VersionsView : Page, IPageItem
 
                     if (VersionListView.ContainerFromIndex(index) is ListViewItem lvi)
                     {
-                        lvi.ContextFlyout.ShowAt(lvi);
+                        ItemContextMenu.ShowAt(lvi);
                     }
                 }
             }
@@ -110,5 +110,10 @@ internal sealed partial class VersionsView : Page, IPageItem
                 }
             }
         }
+    }
+
+    private void VersionListView_RightTapped(object sender, RightTappedRoutedEventArgs e)
+    {
+        ItemContextMenu.ShowAt(null, e.GetPosition(null));
     }
 }
