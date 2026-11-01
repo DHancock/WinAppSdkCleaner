@@ -212,4 +212,9 @@ internal sealed partial class MainWindow : Window
             args.Handled = true;
         }
     }
+
+    private void ProcessContextMenuMessage()
+    {
+        ((IPageItem)ContentFrame.Content).InvokeKeyboardAccelerator(VirtualKeyModifiers.Shift, VirtualKey.F10);
+    }
 }

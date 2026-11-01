@@ -342,7 +342,7 @@ internal sealed partial class SdkView : Page, IPageItem
 
                 if (SdkTreeView.ContainerFromNode(SdkTreeView.SelectedNode) is TreeViewItem tvi)
                 {
-                    tvi.ContextFlyout.ShowAt(tvi);
+                    ItemContextMenu.ShowAt(tvi);
                 }
 
                 return true;
@@ -373,5 +373,10 @@ internal sealed partial class SdkView : Page, IPageItem
         {
             tvn.IsExpanded = !tvn.IsExpanded;
         }
+    }
+
+    private void SdkTreeView_RightTapped(object sender, RightTappedRoutedEventArgs e)
+    {
+        ItemContextMenu.ShowAt(null, e.GetPosition(null));
     }
 }

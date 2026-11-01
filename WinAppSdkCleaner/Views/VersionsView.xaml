@@ -10,22 +10,16 @@
     <!-- left, top, right, bottom -->
 
     <Grid>
-        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" PointerPressed="VersionListView_PointerPressed">
+        <ListView x:Name="VersionListView" ItemsSource="{x:Bind ViewModel.VersionsView, Mode=OneWay}" PointerPressed="VersionListView_PointerPressed" RightTapped="VersionListView_RightTapped">
             
             <ListView.Resources>
                 <StandardUICommand x:Name="CopyCommand" Kind="Copy" CanExecuteRequested="CopyCommand_CanExecuteRequested" ExecuteRequested="CopyCommand_ExecuteRequested"/>
                 <StandardUICommand x:Name="SelectAllCommand" Kind="SelectAll" CanExecuteRequested="SelectAllCommand_CanExecuteRequested" ExecuteRequested="SelectAllCommand_ExecuteRequested"/>
 
-                <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
-                    <Setter Property="ContextFlyout">
-                        <Setter.Value>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
-                                <MenuFlyoutItem Command="{StaticResource SelectAllCommand}"/>
-                            </MenuFlyout>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
+                <MenuFlyout x:Name="ItemContextMenu">
+                    <MenuFlyoutItem Command="{StaticResource CopyCommand}"/>
+                    <MenuFlyoutItem Command="{StaticResource SelectAllCommand}"/>
+                </MenuFlyout>
             </ListView.Resources>
             
             <ListView.GroupStyle>
