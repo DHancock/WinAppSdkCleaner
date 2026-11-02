@@ -197,15 +197,14 @@ internal sealed partial class MainWindow : Window
 
     private void LayoutRoot_ProcessKeyboardAccelerators(UIElement sender, ProcessKeyboardAcceleratorEventArgs args)
     {
-        // The lists context menu item keyboard accelerators only seem to be active after the menu has been shown.
-        // Invoke here instead, the accelerators are in known positions in the visual tree
-
+        // A list item's context menu keyboard accelerators only seem to be active after the menu has been shown
+        // and when opened won't scroll the selected item in to view. Having a seperate menu flyout treated as if  
+        // it is the context menu allows both problems to be worked arround.
         if (((IPageItem)ContentFrame.Content).InvokeKeyboardAccelerator(args.Modifiers, args.Key))
         {
             if (!((args.Modifiers == VirtualKeyModifiers.Shift) && (args.Key == VirtualKey.F10)))
             {
-                // if a context menu was open when the key accelerator was invoked, it needs to be closed
-                // (unless the the invoke causes one to be opened) 
+                // guarentee the context menu is closed, unless the the invoke causes one to be opened 
                 CloseMenuPopups(Content.XamlRoot);
             }
 
