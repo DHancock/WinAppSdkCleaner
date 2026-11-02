@@ -334,9 +334,9 @@ internal sealed partial class SdkView : Page, IPageItem
 
     public bool InvokeKeyboardAccelerator(VirtualKeyModifiers modifiers, VirtualKey key)
     {
-        if (SdkTreeView.FindChild(typeof(TreeViewList)) is TreeViewList treeViewList)
+        if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
         {
-            if ((modifiers == VirtualKeyModifiers.Shift) && (key == VirtualKey.F10))
+            if (SdkTreeView.FindChild(typeof(TreeViewList)) is TreeViewList treeViewList)
             {
                 treeViewList.ScrollIntoView(SdkTreeView.SelectedNode);
 
@@ -344,17 +344,13 @@ internal sealed partial class SdkView : Page, IPageItem
                 {
                     ItemContextMenu.ShowAt(tvi);
                 }
+            }
 
-                return true;
-            }
-            else if (treeViewList.ContainerFromIndex(((ItemsStackPanel)treeViewList.ItemsPanelRoot).FirstVisibleIndex) is TreeViewItem tvi)
-            {
-                // using the first visible index ensures that it's container exists, the menu commands only access the selected node
-                return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)tvi.ContextFlyout).Items, modifiers, key);
-            }
+            return true;
         }
-
-        return false;
+            
+        // the menu commands only access the selected node
+        return Utils.InvokeMenuItemForKeyboardAccelerator(ItemContextMenu.Items, modifiers, key);
     }
 
     private void SdkTreeView_PointerPressed(object sender, PointerRoutedEventArgs e)

@@ -83,14 +83,10 @@ internal sealed partial class VersionsView : Page, IPageItem
 
             return true;
         }
-        else if (VersionListView.ContainerFromIndex(((ItemsStackPanel)VersionListView.ItemsPanelRoot).FirstVisibleIndex) is ListViewItem lvi)
-        {
-            // treat as global hot keys
-            // using the first visible index ensures that it's container exists, none of the menu commands are item specific
-            return Utils.InvokeMenuItemForKeyboardAccelerator(((MenuFlyout)lvi.ContextFlyout).Items, modifiers, key);
-        }
 
-        return false;
+        // treat as global hot keys
+        // the menu commands only access the selected node
+        return Utils.InvokeMenuItemForKeyboardAccelerator(ItemContextMenu.Items, modifiers, key);
     }
 
     private void VersionListView_PointerPressed(object sender, PointerRoutedEventArgs e)
