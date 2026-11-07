@@ -1550,5 +1550,20 @@
       "Minor": 6,
       "Build": 5
     }
+  },
+  {
+    "SemanticVersion": "2.6.6",
+    "VersionTag": "experimental 0",
+    "SdkId": 1,
+    "Release": {
+      "Major": 2,
+      "Minor": 6,
+      "Build": 6
+    },
+    "Singleton": {
+      "Major": 8002,
+      "Minor": 6,
+      "Build": 6
+    }
   }
 ]
